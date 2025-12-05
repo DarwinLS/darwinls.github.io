@@ -1,0 +1,221 @@
+/* --- RESET & VARIABLES --- */
+:root {
+    --bg-color: #f8f9fa;
+    --text-color: #212529;
+    --accent-color: #0056b3;
+    --secondary-text: #6c757d;
+    --white: #ffffff;
+    --nav-height: 70px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensures footer sits at bottom */
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: 0.3s;
+}
+
+/* --- HEADER & NAVBAR --- */
+.site-header {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    background-color: var(--white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5%;
+    height: var(--nav-height);
+}
+
+.logo a {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--accent-color);
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    color: var(--accent-color);
+}
+
+/* --- MAIN & HERO SECTION --- */
+main {
+    padding-top: var(--nav-height); /* Offset for fixed header */
+    flex: 1; /* Pushes footer down */
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10%;
+    min-height: calc(100vh - var(--nav-height)); /* Full height minus header */
+}
+
+.hero-text-container {
+    max-width: 600px;
+}
+
+.greeting {
+    color: var(--accent-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.name {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    color: #111;
+}
+
+.tagline {
+    font-size: 2rem;
+    color: var(--secondary-text);
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+}
+
+.bio {
+    font-size: 1.1rem;
+    color: var(--secondary-text);
+    margin-bottom: 2.5rem;
+    max-width: 480px;
+}
+
+/* --- BUTTONS --- */
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.8rem 1.8rem;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-block;
+}
+
+.primary-btn {
+    background-color: var(--accent-color);
+    color: var(--white);
+    border: 2px solid var(--accent-color);
+}
+
+.primary-btn:hover {
+    background-color: transparent;
+    color: var(--accent-color);
+}
+
+.secondary-btn {
+    border: 2px solid var(--text-color);
+    color: var(--text-color);
+}
+
+.secondary-btn:hover {
+    background-color: var(--text-color);
+    color: var(--white);
+}
+
+/* --- FIGURE & IMAGE --- */
+.hero-image {
+    margin: 0; /* Figures have default browser margin, remove it */
+}
+
+.hero-image img {
+    width: 350px;
+    height: 350px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--white);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    display: block; /* Removes tiny gap at bottom of inline images */
+}
+
+/* --- FOOTER --- */
+.site-footer {
+    text-align: center;
+    padding: 2rem;
+    background-color: var(--white);
+    margin-top: 2rem;
+    color: var(--secondary-text);
+}
+
+.socials {
+    margin: 10px 0;
+    font-style: normal; /* Address tag defaults to italic */
+}
+
+.socials a {
+    margin: 0 10px;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+    .hero {
+        flex-direction: column-reverse;
+        justify-content: center;
+        text-align: center;
+        padding: 60px 5%;
+    }
+
+    .hero-text-container {
+        margin-top: 2rem;
+    }
+
+    .name {
+        font-size: 2.5rem;
+    }
+
+    .tagline {
+        font-size: 1.5rem;
+    }
+
+    .cta-buttons {
+        justify-content: center;
+    }
+
+    .hero-image img {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .navbar {
+        padding: 0 1rem;
+    }
+}
