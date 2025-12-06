@@ -1,4 +1,4 @@
-/* --- RESET & VARIABLES --- */
+/* RESET & VARIABLES */
 :root {
     --bg-color: #f8f9fa;
     --text-color: #212529;
@@ -21,7 +21,7 @@ body {
     line-height: 1.6;
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Ensures footer sits at bottom */
+    min-height: 100vh;
 }
 
 a {
@@ -30,7 +30,7 @@ a {
     transition: 0.3s;
 }
 
-/* --- HEADER & NAVBAR --- */
+/* HEADER & NAVBAR */
 .site-header {
     position: fixed;
     width: 100%;
@@ -69,10 +69,10 @@ a {
     color: var(--accent-color);
 }
 
-/* --- MAIN & HERO SECTION --- */
+/* MAIN & HERO SECTION */
 main {
-    padding-top: var(--nav-height); /* Offset for fixed header */
-    flex: 1; /* Pushes footer down */
+    padding-top: var(--nav-height);
+    flex: 1;
 }
 
 .hero {
@@ -80,7 +80,7 @@ main {
     align-items: center;
     justify-content: space-between;
     padding: 0 10%;
-    min-height: calc(100vh - var(--nav-height)); /* Full height minus header */
+    min-height: calc(100vh - var(--nav-height));
 }
 
 .hero-text-container {
@@ -115,7 +115,7 @@ main {
     max-width: 480px;
 }
 
-/* --- BUTTONS --- */
+/* BUTTONS */
 .cta-buttons {
     display: flex;
     gap: 1rem;
@@ -150,9 +150,9 @@ main {
     color: var(--white);
 }
 
-/* --- FIGURE & IMAGE --- */
+/* FIGURE & IMAGE */
 .hero-image {
-    margin: 0; /* Figures have default browser margin, remove it */
+    margin: 0;
 }
 
 .hero-image img {
@@ -162,10 +162,10 @@ main {
     border-radius: 50%;
     border: 4px solid var(--white);
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    display: block; /* Removes tiny gap at bottom of inline images */
+    display: block;
 }
 
-/* --- FOOTER --- */
+/* FOOTER */
 .site-footer {
     text-align: center;
     padding: 2rem;
@@ -176,7 +176,7 @@ main {
 
 .socials {
     margin: 10px 0;
-    font-style: normal; /* Address tag defaults to italic */
+    font-style: normal;
 }
 
 .socials a {
@@ -185,7 +185,7 @@ main {
     color: var(--accent-color);
 }
 
-/* --- MOBILE RESPONSIVENESS --- */
+/* MOBILE RESPONSIVENESS */
 @media (max-width: 768px) {
     .hero {
         flex-direction: column-reverse;
@@ -226,7 +226,7 @@ main {
 
 
 
-/* --- PROJECTS PAGE STYLES --- */
+/* PROJECTS PAGE STYLES */
 
 .projects-container {
     padding: 2rem 10%;
@@ -250,8 +250,7 @@ main {
     font-size: 1.1rem;
 }
 
-/* --- PROJECT CARD BASE --- */
-/* This class should be applied to the <article> tag */
+/* PROJECT CARD BASE */
 .project-card {
     display: flex;
     align-items: center;
@@ -274,13 +273,12 @@ main {
     flex: 1;
 }
 
-/* UPDATED: Handle <figure> defaults */
 .project-media {
     flex: 1.2;
-    margin: 0; /* IMPORTANT: Removes default browser margin from <figure> tag */
+    margin: 0;
 }
 
-/* --- TYPOGRAPHY WITHIN CARDS --- */
+/* TYPOGRAPHY WITHIN CARDS */
 .project-tag {
     text-transform: uppercase;
     font-size: 0.8rem;
@@ -304,10 +302,10 @@ main {
     font-size: 1.05rem;
 }
 
-/* --- TECH STACK PILLS --- */
+/* TECH STACK PILLS */
 .tech-stack {
     list-style: none;
-    padding: 0; /* IMPORTANT: Removes default <ul> padding */
+    padding: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 0.8rem;
@@ -333,7 +331,7 @@ main {
     font-size: 0.9rem;
 }
 
-/* --- MEDIA PLACEHOLDERS --- */
+/* MEDIA PLACEHOLDERS */
 .media-placeholder {
     width: 100%;
     height: 350px;
@@ -349,14 +347,14 @@ main {
 
 .project-media img, 
 .project-media video {
-    display: block; /* IMPORTANT: Removes tiny gap below images */
+    display: block;
     width: 100%;
     height: auto;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-/* --- MOBILE RESPONSIVENESS FOR PROJECTS --- */
+/* MOBILE RESPONSIVENESS FOR PROJECTS */
 @media (max-width: 900px) {
     .project-card, 
     .project-card:nth-child(even) {
