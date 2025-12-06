@@ -219,3 +219,160 @@ main {
         padding: 0 1rem;
     }
 }
+
+
+
+
+
+
+
+/* --- PROJECTS PAGE STYLES --- */
+
+.projects-container {
+    padding: 2rem 10%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-title {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.page-title h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #111;
+}
+
+.page-title p {
+    color: var(--secondary-text);
+    font-size: 1.1rem;
+}
+
+/* --- PROJECT CARD BASE --- */
+/* This class should be applied to the <article> tag */
+.project-card {
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+    margin-bottom: 6rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid #eee;
+}
+
+.project-card:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.project-card:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+.project-content {
+    flex: 1;
+}
+
+/* UPDATED: Handle <figure> defaults */
+.project-media {
+    flex: 1.2;
+    margin: 0; /* IMPORTANT: Removes default browser margin from <figure> tag */
+}
+
+/* --- TYPOGRAPHY WITHIN CARDS --- */
+.project-tag {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.project-card h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #111;
+    line-height: 1.2;
+}
+
+.project-description {
+    color: var(--secondary-text);
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+}
+
+/* --- TECH STACK PILLS --- */
+.tech-stack {
+    list-style: none;
+    padding: 0; /* IMPORTANT: Removes default <ul> padding */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+}
+
+.tech-stack li {
+    background-color: #f1f3f5;
+    color: #495057;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.project-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.project-links .btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+/* --- MEDIA PLACEHOLDERS --- */
+.media-placeholder {
+    width: 100%;
+    height: 350px;
+    background-color: #e9ecef;
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #adb5bd;
+    font-weight: 600;
+}
+
+.project-media img, 
+.project-media video {
+    display: block; /* IMPORTANT: Removes tiny gap below images */
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* --- MOBILE RESPONSIVENESS FOR PROJECTS --- */
+@media (max-width: 900px) {
+    .project-card, 
+    .project-card:nth-child(even) {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .project-media {
+        width: 100%;
+    }
+
+    .media-placeholder {
+        height: 250px;
+    }
+
+    .project-card h2 { 
+        font-size: 1.8rem;
+    }
+}

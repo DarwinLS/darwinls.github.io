@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darwin Smith | Projects</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <nav class="navbar" aria-label="Main Navigation">
+            <div class="logo">
+                <a href="index.html">Darwin Smith.</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="projects.html" class="active" aria-current="page">Projects</a></li>
+                <li><a href="resume.pdf" target="_blank">Resume</a></li>
+                <li><a href="mailto:darwinllss321@gmail.com">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="projects-container" aria-labelledby="page-heading">
+            
+            <div class="page-title">
+                <h1 id="page-heading">Selected Works</h1>
+                <p>A mix of Systems Architecture, Full-Stack Automation, and Data Analysis.</p>
+            </div>
+
+            <article class="project-card technical-card">
+                <div class="project-content">
+                    <small class="project-tag">System Architecture / AI Pipeline</small>
+                    <h2>Clinical Evidence Synthesis Engine</h2>
+                    <p class="project-description">
+                        While in progress, contains a comprehensive architectural blueprint for a RAG pipeline designed to aggregate live clinical trials. 
+                        The system design features a unique <strong>Worker/Writer LLM workflow</strong> that strictly isolates demographic data to generate hallucination-free, citation-backed summaries.
+                    </p>
+                    <ul class="tech-stack" aria-label="Technologies used">
+                        <li>FastAPI</li>
+                        <li>OpenAI API</li>
+                        <li>BioPython</li>
+                    </ul>
+                    <div class="project-links">
+                        <a href="https://github.com/DarwinLS/clinical-evidence-synthesis-engine" target="_blank" rel="noopener noreferrer" class="btn secondary-btn">
+                            <i class="fab fa-github" aria-hidden="true"></i> View Architecture
+                        </a>
+                    </div>
+                </div>
+                
+                <figure class="project-media">
+                    <img src="assets/images/ClinicalEngineSnake.jpg" alt="System architecture diagram of the synthesis engine" class="media-image">
+                </figure>
+            </article>
+
+            <article class="project-card visual-card">
+                <div class="project-content">
+                    <small class="project-tag">Full-Stack / CI/CD</small>
+                    <h2>Club Triton</h2>
+                    <p class="project-description">
+                        Engineered the core game logic, handling complex state management and dynamic routing. 
+                        To ensure stability, I architected a <strong>CI/CD pipeline</strong> (using Jest & Playwright) that automated regression testing and enforced code quality standards on every deployment.
+                    </p>
+                    <ul class="tech-stack" aria-label="Technologies used">
+                        <li>JavaScript (ES6+)</li>
+                        <li>IndexedDB</li>
+                        <li>GitHub Actions</li>
+                    </ul>
+                    <div class="project-links">
+                        <a href="https://cse110-sp25-group13.github.io/The_club_triton/pages/home-page.html" target="_blank" rel="noopener noreferrer" class="btn primary-btn">
+                            <i class="fas fa-play" aria-hidden="true"></i> Play Live
+                        </a>
+                        <a href="https://github.com/cse110-sp25-group13/The_club_triton" target="_blank" rel="noopener noreferrer" class="btn secondary-btn">
+                            <i class="fab fa-github" aria-hidden="true"></i> Source
+                        </a>
+                    </div>
+                </div>
+
+                <figure class="project-media">
+                    <div class="media-placeholder video-placeholder" role="img" aria-label="Gameplay video loop of Club Triton">
+                        <span>[Demo Video Coming Soon]</span>
+                    </div>
+                </figure>
+            </article>
+
+            <article class="project-card analytical-card">
+                <div class="project-content">
+                    <small class="project-tag">Data Science / Quant Analysis</small>
+                    <h2>Global Conflict & Defense Stocks</h2>
+                    <p class="project-description">
+                        Analyzed 20+ years of conflict data vs. defense contractor stock performance.
+                        Identified a correlation (r = 0.67) after statistically isolating confounders like the 2008 recession.
+                    </p>
+                    <ul class="tech-stack" aria-label="Technologies used">
+                        <li>Python (Pandas)</li>
+                        <li>Seaborn</li>
+                        <li>Statistical Analysis</li>
+                    </ul>
+                    <div class="project-links">
+                        <a href="#" class="btn secondary-btn"><i class="fas fa-book" aria-hidden="true"></i> Notebook Not Yet Public</a>
+                    </div>
+                </div>
+
+                <figure class="project-media">
+                    <div class="media-placeholder chart-placeholder" role="img" aria-label="Seaborn correlation plot showing conflict vs defense stocks">
+                         <span>[Plots Not Yet Public]</span>
+                    </div>
+                </figure>
+            </article>
+
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Connect with me:</p>
+        <address class="socials">
+            <a href="https://github.com/DarwinLS" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com/in/darwin-smith-5a56531b7/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </address>
+        <p class="copyright"><small>&copy; 2025 Darwin Smith</small></p>
+    </footer>
+
+</body>
+</html>
