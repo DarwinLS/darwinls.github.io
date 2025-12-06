@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darwin Smith | Contact</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <nav class="navbar" aria-label="Main Navigation">
+            <div class="logo">
+                <a href="index.html">Darwin Smith.</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="projects.html">Projects</a></li>
+                <li><a href="assets/pdfs/Darwin_Smith_Resume.pdf" target="_blank">Resume</a></li>
+                <li><a href="contact.html" class="active" aria-current="page">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        <section class="contact-section" aria-labelledby="contact-heading">
+            <div class="page-title">
+                <h1 id="contact-heading">Get in Touch</h1>
+                <p>Have a project in mind or just want to say hi?</p>
+            </div>
+
+            <div class="contact-layout">
+                <address class="contact-info">
+                    <h3>Let's Chat</h3>
+                    <p>
+                        I'm currently open to new opportunities in <strong>Backend Engineering</strong> and <strong>Data Analysis</strong>. 
+                        Whether you have a question about my research, want to collaborate on a project, or just want to connect, feel free to reach out.
+                    </p>
+
+                    <div class="info-item">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        <a href="mailto:darwinllss321@gmail.com">darwinllss321@gmail.com</a>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        <span>San Diego & Los Angeles, CA (Open to Remote)</span>
+                    </div>
+
+                    <div class="social-links-large">
+                        <a href="https://github.com/DarwinLS" target="_blank" rel="noopener noreferrer" aria-label="Visit my GitHub Profile">
+                            <i class="fab fa-github" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/darwin-smith-5a56531b7/" target="_blank" rel="noopener noreferrer" aria-label="Visit my LinkedIn Profile">
+                            <i class="fab fa-linkedin" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </address>
+
+                <form id="contactForm" class="contact-form" novalidate>
+                    
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Bob Joe" autocomplete="name" required aria-describedby="name-error">
+                        <span id="name-error" class="error-msg" role="alert">Please enter your name</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="bob@example.com" autocomplete="email" required aria-describedby="email-error">
+                        <span id="email-error" class="error-msg" role="alert">Please enter a valid email address</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <div class="select-wrapper">
+                            <select id="subject" name="subject" required>
+                                <option value="General Inquiry">General Inquiry</option>
+                                <option value="Hiring / Opportunity">Hiring / Opportunity</option>
+                                <option value="Project Collaboration">Project Collaboration</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" placeholder="How can I help you?" required aria-describedby="message-error"></textarea>
+                        <span id="message-error" class="error-msg" role="alert">Please enter a message</span>
+                    </div>
+
+                    <button type="submit" class="btn primary-btn submit-btn">
+                        <span>Send Message</span>
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                    </button>
+                    
+                    <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
+                </form>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Connect with me:</p>
+        <div class="socials">
+            <a href="https://github.com/DarwinLS" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com/in/darwin-smith-5a56531b7/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+        <p class="copyright"><small>&copy; 2025 Darwin Smith</small></p>
+    </footer>
+
+    <script src="contact.js"></script>
+</body>
+</html>

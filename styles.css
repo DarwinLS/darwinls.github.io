@@ -81,6 +81,8 @@ main {
     justify-content: space-between;
     padding: 0 10%;
     min-height: calc(100vh - var(--nav-height));
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .hero-text-container {
@@ -127,6 +129,8 @@ main {
     font-weight: 600;
     font-size: 1rem;
     display: inline-block;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
 .primary-btn {
@@ -216,7 +220,13 @@ main {
     }
     
     .navbar {
-        padding: 0 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10%;
+        height: var(--nav-height);
+        max-width: 1200px;
+        margin: 0 auto;
     }
 }
 
@@ -372,5 +382,187 @@ main {
 
     .project-card h2 { 
         font-size: 1.8rem;
+    }
+}
+
+
+
+
+
+
+/* --- CONTACT PAGE STYLES --- */
+
+/* 1. Layout Container */
+.contact-section {
+    padding: 2rem 10%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.contact-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr; /* Info takes less space, Form takes more */
+    gap: 4rem;
+    margin-top: 2rem;
+    background: var(--white);
+    
+    /* The "Card" Look */
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* 2. Left Column: Contact Info */
+.contact-info {
+    font-style: normal;
+}
+
+.contact-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #111;
+}
+
+.contact-info p {
+    color: var(--secondary-text);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.info-item i {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    width: 20px; /* Fixed width prevents text misalignment */
+    text-align: center;
+}
+
+.info-item a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+}
+
+.social-links-large {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.social-links-large a {
+    color: var(--secondary-text);
+    font-size: 1.8rem;
+}
+
+.social-links-large a:hover {
+    color: var(--accent-color);
+    transform: translateY(-3px); /* Subtle lift effect */
+}
+
+/* 3. Right Column: Form Styling */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 5px; /* Matches your .btn border-radius */
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    background-color: #f8f9fa; /* Matches your var(--bg-color) */
+    transition: 0.3s;
+    width: 100%;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background-color: var(--white);
+    box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.1); /* Subtle focus ring using accent color */
+}
+
+/* Error States */
+.form-group.invalid input,
+.form-group.invalid textarea {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+.error-msg {
+    font-size: 0.85rem;
+    color: #dc3545;
+    display: none;
+    margin-top: -0.3rem; /* Tucks it closer to the input */
+}
+
+.form-group.invalid .error-msg {
+    display: block;
+}
+
+/* 4. The Button Fix */
+.submit-btn {
+    /* Inherits .btn and .primary-btn styles automatically */
+    cursor: pointer; /* <button> tags need this explicit setting */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    align-self: flex-start; /* Prevents button from stretching full width */
+    font-size: 1rem; /* Keeps it readable */
+}
+
+.submit-btn i {
+    transition: transform 0.3s ease;
+}
+
+.submit-btn:hover i {
+    transform: translateX(4px); /* Moves arrow to right on hover */
+}
+
+.form-status {
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-height: 1.5rem;
+}
+
+.form-status.success { color: #28a745; }
+.form-status.error { color: #dc3545; }
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 900px) {
+    .contact-layout {
+        grid-template-columns: 1fr;
+        padding: 2rem;
+        gap: 3rem;
+    }
+    
+    .submit-btn {
+        width: 100%; /* Full width on mobile is better for thumbs */
     }
 }
