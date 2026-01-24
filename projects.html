@@ -37,17 +37,21 @@
                     <small class="project-tag">System Architecture / AI Pipeline</small>
                     <h2>Clinical Evidence Synthesis Engine</h2>
                     <p class="project-description">
-                        While in development, contains a comprehensive architectural blueprint for a <strong>RAG pipeline</strong> designed to aggregate live clinical trials. 
-                        The system design features a unique <strong>Worker/Writer LLM workflow</strong> that strictly isolates demographic data to generate hallucination-free, citation-backed summaries.
+                        A live <strong>Real-Time RAG Pipeline</strong> that aggregates and synthesizes clinical trials on demand. 
+                        Unlike generic chatbots, this engine uses a two-stage <strong>"Curator-Synthesizer" architecture</strong>: first performing semantic filtering to reject irrelevant studies, then using lazy evaluation to extract high-fidelity dosage and safety protocols from raw text.
                     </p>
                     <ul class="tech-stack" aria-label="Technologies used">
                         <li>FastAPI</li>
-                        <li>OpenAI API</li>
-                        <li>BioPython</li>
+                        <li>OpenAI (GPT-4o)</li>
+                        <li>BioPython (PubMed)</li>
+                        <li>Jinja2</li>
                     </ul>
                     <div class="project-links">
+                        <a href="https://clinical-evidence-synthesis-engine.onrender.com/" target="_blank" rel="noopener noreferrer" class="btn primary-btn">
+                            <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Demo
+                        </a>
                         <a href="https://github.com/DarwinLS/clinical-evidence-synthesis-engine" target="_blank" rel="noopener noreferrer" class="btn secondary-btn">
-                            <i class="fab fa-github" aria-hidden="true"></i> View Architecture
+                            <i class="fab fa-github" aria-hidden="true"></i> View Code
                         </a>
                     </div>
                 </div>
