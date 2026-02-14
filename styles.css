@@ -392,7 +392,7 @@ main {
 
 /* --- CONTACT PAGE STYLES --- */
 
-/* 1. Layout Container */
+/* Layout Container */
 .contact-section {
     padding: 2rem 10%;
     max-width: 1200px;
@@ -412,7 +412,7 @@ main {
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
-/* 2. Left Column: Contact Info */
+/* Contact Info */
 .contact-info {
     font-style: normal;
 }
@@ -525,7 +525,6 @@ main {
     display: block;
 }
 
-/* 4. The Button Fix */
 .submit-btn {
     /* Inherits .btn and .primary-btn styles automatically */
     cursor: pointer; /* <button> tags need this explicit setting */
