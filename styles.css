@@ -1,19 +1,24 @@
-/* RESET & VARIABLES */
+/* GLOBAL SETTINGS */
+/* These are the main colors and fonts used everywhere. 
+   Change these here to update the whole site at once. */
 :root {
-    --bg-color: #f8f9fa;
-    --text-color: #212529;
-    --accent-color: #0056b3;
-    --secondary-text: #6c757d;
+    --bg-color: #dbdeeb;      /* Main background color (light gray/blue) */
+    --text-color: #1a202c;    /* Standard dark text color */
+    --accent-color: #2c3e50;  /* Main color (navy) */
+    --secondary-text: #64748b; /* Less important text (gray) */
     --white: #ffffff;
     --nav-height: 70px;
 }
 
+/* Removes the weird default spacing that browsers add 
+   so we can style things from scratch. */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Sets the font and background for the entire page */
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
@@ -24,20 +29,28 @@ body {
     min-height: 100vh;
 }
 
+/* Base style for all links so they don't look like default blue web links */
 a {
     text-decoration: none;
     color: inherit;
     transition: 0.3s;
 }
 
-/* HEADER & NAVBAR */
+/* TOP NAVIGATION BAR */
+/* Stays stuck at top even when you scroll down. */
 .site-header {
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
-    background-color: var(--white);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    background-color: var(--bg-color);
+    box-shadow: none;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+
+    /* Adds that blurry "frosted glass" effect behind the nav */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-color: rgba(248, 249, 250, 0.85);
 }
 
 .navbar {
@@ -48,33 +61,76 @@ a {
     height: var(--nav-height);
 }
 
+/* Logo text style */
 .logo a {
     font-weight: 700;
     font-size: 1.2rem;
     color: var(--accent-color);
 }
 
+/* NAVIGATION LINKS & ANIMATIONS */
+/* The container for the menu links (Home, Projects, etc.) */
 .nav-links {
     list-style: none;
     display: flex;
     gap: 2rem;
 }
 
+/* Individual link text */
 .nav-links a {
-    font-weight: 500;
+    font-weight: 600; 
     font-size: 0.95rem;
+    color: var(--text-color); 
+    position: relative; 
+    padding-bottom: 5px; 
 }
 
-.nav-links a:hover, .nav-links a.active {
-    color: var(--accent-color);
+/* The invisible green line that sits under the links. 
+   Appears on hover. */
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #0f9b0f; /* Forest Green underline */
+    
+    /* Hides the line by squishing it to 0 width */
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease-out;
 }
 
-/* MAIN & HERO SECTION */
+/* Turns the text green when you hover */
+.nav-links a:hover {
+    color: #0f9b0f;
+}
+
+/* Expands the green line to 100% width when you hover */
+.nav-links a:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+/* Keeps the link green if it is the current page */
+.nav-links a.active {
+    color: #0f9b0f;
+}
+
+.nav-links a.active::after {
+    transform: scaleX(1);
+}
+
+/* HERO SECTION (INTRO) */
+/* Pushes the content down so it doesn't get hidden behind the fixed navbar */
 main {
     padding-top: var(--nav-height);
     flex: 1;
 }
 
+/* Big intro area with the name and photo. 
+   Centers everything vertically and puts name left, photo right. */
 .hero {
     display: flex;
     align-items: center;
@@ -85,10 +141,12 @@ main {
     margin: 0 auto;
 }
 
+/* Container for all the text on the left side */
 .hero-text-container {
     max-width: 600px;
 }
 
+/* Small "Hi, I am..." text above the name */
 .greeting {
     color: var(--accent-color);
     font-weight: 600;
@@ -96,6 +154,7 @@ main {
     display: block;
 }
 
+/* Big main name text */
 .name {
     font-size: 3.5rem;
     line-height: 1.1;
@@ -103,6 +162,7 @@ main {
     color: #111;
 }
 
+/* Subtitle/role description */
 .tagline {
     font-size: 2rem;
     color: var(--secondary-text);
@@ -110,6 +170,7 @@ main {
     font-weight: 400;
 }
 
+/* Paragraph describing what I do */
 .bio {
     font-size: 1.1rem;
     color: var(--secondary-text);
@@ -117,12 +178,14 @@ main {
     max-width: 480px;
 }
 
-/* BUTTONS */
+/* ACTION BUTTONS */
+/* Holds the two buttons side-by-side */
 .cta-buttons {
     display: flex;
     gap: 1rem;
 }
 
+/* Shared styles for both buttons (shape, font, size) */
 .btn {
     padding: 0.8rem 1.8rem;
     border-radius: 5px;
@@ -133,6 +196,7 @@ main {
     transition: 0.3s;
 }
 
+/* Solid colored buttons (Primary) */
 .primary-btn {
     background-color: var(--accent-color);
     color: var(--white);
@@ -144,6 +208,7 @@ main {
     color: var(--accent-color);
 }
 
+/* Outline buttons (Secondary) */
 .secondary-btn {
     border: 2px solid var(--text-color);
     color: var(--text-color);
@@ -154,7 +219,7 @@ main {
     color: var(--white);
 }
 
-/* FIGURE & IMAGE */
+/* PROFILE PHOTO */
 .hero-image {
     margin: 0;
 }
@@ -163,21 +228,22 @@ main {
     width: 350px;
     height: 350px;
     object-fit: cover;
-    border-radius: 50%;
+    border-radius: 50%; /* Makes it a circle */
     border: 4px solid var(--white);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* Adds a soft shadow */
     display: block;
 }
 
-/* FOOTER */
+/* BOTTOM FOOTER */
 .site-footer {
     text-align: center;
     padding: 2rem;
-    background-color: var(--white);
+    background-color: #1a1a1a;
     margin-top: 2rem;
     color: var(--secondary-text);
 }
 
+/* Social link icons in the footer */
 .socials {
     margin: 10px 0;
     font-style: normal;
@@ -186,11 +252,24 @@ main {
 .socials a {
     margin: 0 10px;
     font-weight: 600;
-    color: var(--accent-color);
+    color: #008a00;
+    
+    /* Smooths out the animation so it doesn't snap */
+    transition: all 0.3s ease;
+    display: inline-block; /* Required for the lift animation to work on text */
 }
 
-/* MOBILE RESPONSIVENESS */
+/* Lifts the link up and brightens it into a neon green when hovered */
+.socials a:hover {
+    color: #2ecc71; /* Shifts to a brighter, readable electric green */
+    transform: translateY(-3px);
+    text-shadow: 0 4px 10px rgba(46, 204, 113, 0.4); /* Adds a soft green light behind the text */
+}
+
+/* MOBILE ADJUSTMENTS */
+/* Changes the layout when viewed on a phone or tablet (screens smaller than 768px) */
 @media (max-width: 768px) {
+    /* Stacks the text and image vertically instead of side-by-side */
     .hero {
         flex-direction: column-reverse;
         justify-content: center;
@@ -198,10 +277,12 @@ main {
         padding: 60px 5%;
     }
 
+    /* Adds space between the photo and the text */
     .hero-text-container {
         margin-top: 2rem;
     }
 
+    /* Shrinks the text sizes slightly to fit better */
     .name {
         font-size: 2.5rem;
     }
@@ -210,15 +291,18 @@ main {
         font-size: 1.5rem;
     }
 
+    /* Centers the buttons */
     .cta-buttons {
         justify-content: center;
     }
 
+    /* Shrinks the profile photo */
     .hero-image img {
         width: 200px;
         height: 200px;
     }
     
+    /* Adjusts the navbar padding for smaller screens */
     .navbar {
         display: flex;
         justify-content: space-between;
@@ -238,12 +322,14 @@ main {
 
 /* PROJECTS PAGE STYLES */
 
+/* Wrapper for the whole section. Keeps content centered and stops it from getting too wide on big screens */
 .projects-container {
     padding: 2rem 10%;
     max-width: 1200px;
     margin: 0 auto;
 }
 
+/* Centers the "Selected Works" heading at the top */
 .page-title {
     text-align: center;
     margin-bottom: 4rem;
@@ -261,24 +347,73 @@ main {
 }
 
 /* PROJECT CARD BASE */
+/* Individual box for each project. Sets white background, spacing, and the default thin gray border */
 .project-card {
     display: flex;
     align-items: center;
     gap: 4rem;
-    margin-bottom: 6rem;
-    padding-bottom: 3rem;
-    border-bottom: 1px solid #eee;
+    padding: 2.5rem; 
+    margin-bottom: 4rem;
+    position: relative; 
+    z-index: 1;
+    border-radius: 12px;
+    background-color: var(--white); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    /* Subtle shadow and gray border for the default state */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    border: 1px solid #eee;
 }
 
+/* HOVER STATE */
+/* Lifts the card up and adds a deeper shadow when you mouse over it */
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    border-color: transparent; /* Hides gray border so the gradient takes over */
+}
+
+/* FOREST GREEN GRADIENT BORDER */
+/* Invisible gradient layer sitting on top of the card. Waits for hover to appear */
+.project-card::before {
+    content: '';
+    position: absolute;
+    inset: -3px; /* Pushes it onto card border */
+    border-radius: 12px;
+    padding: 6px; /* Thickness of the gradient border */
+    
+    /* Gradient colors: Dark Green -> Leafy Green -> Dark Green */
+    background: linear-gradient(135deg, #0f9b0f, #006400);
+    
+    /* Cuts out the center so we can see the text, leaving only the border */
+    -webkit-mask: 
+       linear-gradient(#fff 0 0) content-box, 
+       linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    
+    /* Starts hidden */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+/* Shows the gradient border when hovering the card */
+.project-card:hover::before {
+    opacity: 1;
+}
+
+/* Removes extra margin from the very last project so page bottom looks clean */
 .project-card:last-of-type {
-    border-bottom: none;
     margin-bottom: 0;
 }
 
+/* Reverses layout for every second card (Text-Image -> Image-Text) */
 .project-card:nth-child(even) {
     flex-direction: row-reverse;
 }
 
+/* Controls width of the text area vs the image area */
 .project-content {
     flex: 1;
 }
@@ -289,12 +424,13 @@ main {
 }
 
 /* TYPOGRAPHY WITHIN CARDS */
+/* Small uppercase category label above the project title (e.g. "FULL STACK") */
 .project-tag {
     text-transform: uppercase;
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 1px;
-    color: var(--accent-color);
+    color: var(--accent-color); 
     margin-bottom: 0.5rem;
     display: block;
 }
@@ -313,6 +449,7 @@ main {
 }
 
 /* TECH STACK PILLS */
+/* Container for the list of tools used (Python, React, etc) */
 .tech-stack {
     list-style: none;
     padding: 0;
@@ -322,6 +459,7 @@ main {
     margin-bottom: 2rem;
 }
 
+/* Individual pill style for each technology */
 .tech-stack li {
     background-color: #f1f3f5;
     color: #495057;
@@ -331,6 +469,7 @@ main {
     font-weight: 600;
 }
 
+/* Container for the "Live Demo" and "View Code" buttons */
 .project-links {
     display: flex;
     gap: 1rem;
@@ -342,6 +481,7 @@ main {
 }
 
 /* MEDIA PLACEHOLDERS */
+/* Gray dashed box that shows up if I haven't added a screenshot yet */
 .media-placeholder {
     width: 100%;
     height: 350px;
@@ -355,6 +495,7 @@ main {
     font-weight: 600;
 }
 
+/* Actual project screenshots or videos */
 .project-media img, 
 .project-media video {
     display: block;
@@ -365,6 +506,7 @@ main {
 }
 
 /* MOBILE RESPONSIVENESS FOR PROJECTS */
+/* Stacks project cards vertically on phones so text sits on top of image */
 @media (max-width: 900px) {
     .project-card, 
     .project-card:nth-child(even) {
@@ -392,27 +534,28 @@ main {
 
 /* --- CONTACT PAGE STYLES --- */
 
-/* Layout Container */
+/* Main wrapper that centers the contact content on the page */
 .contact-section {
     padding: 2rem 10%;
     max-width: 1200px;
     margin: 0 auto;
 }
 
+/* The big white box that holds both the info and the form side-by-side */
 .contact-layout {
     display: grid;
-    grid-template-columns: 1fr 1.5fr; /* Info takes less space, Form takes more */
+    grid-template-columns: 1fr 1.5fr; /* Splits the box so the form gets more space than the contact info */
     gap: 4rem;
     margin-top: 2rem;
     background: var(--white);
     
-    /* The "Card" Look */
+    /* Makes it look like a floating card */
     padding: 3rem;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
-/* Contact Info */
+/* Left side container for email, social links, etc */
 .contact-info {
     font-style: normal;
 }
@@ -429,6 +572,7 @@ main {
     line-height: 1.6;
 }
 
+/* Wrapper for each individual contact detail like email or phone */
 .info-item {
     display: flex;
     align-items: center;
@@ -438,10 +582,11 @@ main {
     font-weight: 500;
 }
 
+/* Styles the little icons next to the text */
 .info-item i {
     color: var(--accent-color);
     font-size: 1.2rem;
-    width: 20px; /* Fixed width prevents text misalignment */
+    width: 20px; /* Keeps icons aligned even if they have different shapes */
     text-align: center;
 }
 
@@ -450,6 +595,7 @@ main {
     text-decoration: underline;
 }
 
+/* Container for the big social icons at the bottom */
 .social-links-large {
     display: flex;
     gap: 1.5rem;
@@ -461,18 +607,20 @@ main {
     font-size: 1.8rem;
 }
 
+/* Lifts the icon up slightly when you mouse over it */
 .social-links-large a:hover {
     color: var(--accent-color);
-    transform: translateY(-3px); /* Subtle lift effect */
+    transform: translateY(-3px); 
 }
 
-/* 3. Right Column: Form Styling */
+/* Right side container that holds all the input fields */
 .contact-form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
+/* Wraps the label and input together so they stack vertically */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -485,65 +633,71 @@ main {
     color: var(--text-color);
 }
 
+/* Styles the actual text boxes where users type */
 .form-group input,
 .form-group textarea,
 .form-group select {
     padding: 0.8rem;
     border: 1px solid #ddd;
-    border-radius: 5px; /* Matches your .btn border-radius */
+    border-radius: 5px; 
     font-family: 'Inter', sans-serif;
     font-size: 1rem;
-    background-color: #f8f9fa; /* Matches your var(--bg-color) */
+    background-color: #f8f9fa; 
     transition: 0.3s;
     width: 100%;
 }
 
+/* Highlights the box with the accent color when the user clicks inside to type */
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
     border-color: var(--accent-color);
     background-color: var(--white);
-    box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.1); /* Subtle focus ring using accent color */
+    box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.1); /* Adds a soft glow ring */
 }
 
-/* Error States */
+/* Turns the border red if they typed something wrong */
 .form-group.invalid input,
 .form-group.invalid textarea {
     border-color: #dc3545;
     background-color: #fff8f8;
 }
 
+/* Error text that appears below the input */
 .error-msg {
     font-size: 0.85rem;
     color: #dc3545;
     display: none;
-    margin-top: -0.3rem; /* Tucks it closer to the input */
+    margin-top: -0.3rem; 
 }
 
+/* Only shows the error message if the parent has the invalid class */
 .form-group.invalid .error-msg {
     display: block;
 }
 
+/* The button to send the message */
 .submit-btn {
-    /* Inherits .btn and .primary-btn styles automatically */
-    cursor: pointer; /* <button> tags need this explicit setting */
+    cursor: pointer; 
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.8rem;
-    align-self: flex-start; /* Prevents button from stretching full width */
-    font-size: 1rem; /* Keeps it readable */
+    align-self: flex-start; /* Aligns it to the left so it doesn't stretch across the whole page */
+    font-size: 1rem; 
 }
 
 .submit-btn i {
     transition: transform 0.3s ease;
 }
 
+/* Moves the little arrow icon to the right when hovering */
 .submit-btn:hover i {
-    transform: translateX(4px); /* Moves arrow to right on hover */
+    transform: translateX(4px); 
 }
 
+/* Area to show success or failure messages after sending */
 .form-status {
     font-size: 0.9rem;
     font-weight: 600;
@@ -553,7 +707,7 @@ main {
 .form-status.success { color: #28a745; }
 .form-status.error { color: #dc3545; }
 
-/* MOBILE RESPONSIVENESS */
+/* Stacks the info and form on top of each other for smaller screens */
 @media (max-width: 900px) {
     .contact-layout {
         grid-template-columns: 1fr;
@@ -561,7 +715,8 @@ main {
         gap: 3rem;
     }
     
+    /* Makes the button full width on mobile so it's easier to tap */
     .submit-btn {
-        width: 100%; /* Full width on mobile is better for thumbs */
+        width: 100%; 
     }
 }
