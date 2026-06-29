@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darwin Smith | Veraflux Case Study</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <nav class="navbar" aria-label="Main Navigation">
+            <div class="logo">
+                <a href="index.html">Darwin Smith.</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="projects.html">Projects</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="assets/pdfs/Darwin_Smith_Resume.pdf" target="_blank">Resume</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <article class="content-page">
+
+            <!-- OVERVIEW / INTRO -->
+            <header class="cs-intro">
+                <small class="project-tag">Production Platform / Applied AI</small>
+                <h1>Veraflux</h1>
+                <p class="cs-lead">
+                    A production platform that pulls live clinical research from PubMed and turns it into evidence-based, fully-cited supplement reports personalized to age, sex, and goal.
+                </p>
+                <p class="cs-status">Designed, built, shipped, and operated solo. Live in production.</p>
+                <div class="project-links cs-links">
+                    <a href="https://veraflux.org" target="_blank" rel="noopener noreferrer" class="btn primary-btn">
+                        <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Site
+                    </a>
+                    <a href="projects.html" class="btn secondary-btn">
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i> Back to Projects
+                    </a>
+                </div>
+            </header>
+
+            <figure class="cs-demo">
+                <img src="assets/images/verafluxdemogif.gif" alt="Animated demo of the Veraflux platform generating a cited supplement report">
+            </figure>
+
+            <!-- WHAT IT IS -->
+            <section class="cs-section">
+                <h2>What it is</h2>
+                <p>
+                    Veraflux turns any supplement name plus a user's age, sex, and goal into a cited, evidence-graded clinical research report. It runs a roughly ten-stage LLM pipeline across two model vendors plus live PubMed retrieval to produce grounded synthesis where every claim links to a study you can open, then renders it through a sophisticated React reading experience, monetized with Stripe subscriptions and surfaced to search through a hand-built technical-SEO stack.
+                </p>
+                <p>
+                    Three services, a React/TypeScript single-page app, an Express/TypeScript API, and a Python/FastAPI pipeline, ship as one Docker unit on Railway. The product is informational throughout. It reports what the evidence says, lets people compare options, and flags interactions to check, rather than telling anyone what to take.
+                </p>
+            </section>
+
+            <!-- AT A GLANCE -->
+            <section class="cs-section">
+                <h2>At a glance</h2>
+                <ul class="stat-strip">
+                    <li><strong>3 services, 1 deploy unit</strong><span>React SPA, Express API, FastAPI pipeline in one Docker image on Railway</span></li>
+                    <li><strong>~10 LLM stages</strong><span>across 2 model vendors and 4 model tiers, assigned by task</span></li>
+                    <li><strong>~237 pages</strong><span>programmatically generated, 45 routes prerendered for search</span></li>
+                    <li><strong>16-page BI suite</strong><span>backed by ~31 endpoints, a from-scratch analytics layer with no third-party processor</span></li>
+                    <li><strong>~26 custom icons</strong><span>hand-drawn marks that fully replaced an off-the-shelf icon library</span></li>
+                </ul>
+            </section>
+
+            <!-- CASE STUDY 1 -->
+            <section class="cs-section">
+                <small class="cs-tag">Retrieval Engineering</small>
+                <h2>Beating PubMed's volume bias</h2>
+                <p>
+                    <strong>The problem.</strong> The studies that matter for a goal get buried, because PubMed ranks by how much gets published, not by relevance. Minority-topic evidence, like erectile-dysfunction data for citrulline, dies under a dominant research area like exercise performance.
+                </p>
+                <p>
+                    <strong>The insight.</strong> Retrieval is the real product, not the model. Most of the build is the part you do not see: categorizing each supplement, then running faceted searches that surface 150+ candidate studies and narrow them to the ~50 that actually hold up.
+                </p>
+                <p>
+                    <strong>The build.</strong> Split goal-filtered and unfiltered PubMed searches, selector floors paired with ceilings so the model cannot dump its budget into the easiest category, a forced multi-pass selection algorithm, and a Jaccard-overlap saturation diagnostic that flags gaps in the faceted-search design.
+                </p>
+                <p>
+                    <strong>The tradeoff.</strong> Precision against recall: cut noise aggressively without dropping the one rare study that matters.
+                </p>
+            </section>
+
+            <!-- CASE STUDY 2 -->
+            <section class="cs-section">
+                <small class="cs-tag">Correctness Engineering</small>
+                <h2>Keeping a non-deterministic model honest</h2>
+                <p>
+                    <strong>The problem.</strong> An LLM will confidently cite studies it never saw. On health content, that is the failure that ends trust.
+                </p>
+                <p>
+                    <strong>The build.</strong> Paragraph-level citation IDs instead of inline markers, a procedural coverage-verification algorithm that beat the declarative version, code-side guards that reject hallucinated or year-shaped IDs and merge only IDs that exist in the source map, literature-scoped absence claims ("none of the available studies" rather than "no evidence exists"), and a separately calibrated evidence-rater that removes the synthesizer's self-assessment bias.
+                </p>
+                <p>
+                    <strong>The theme.</strong> The promise is enforced in code at multiple layers, not in marketing copy.
+                </p>
+            </section>
+
+            <!-- CASE STUDY 3 -->
+            <section class="cs-section">
+                <small class="cs-tag">Product &amp; Visual Design</small>
+                <h2>The report as a delivered artifact</h2>
+                <p>
+                    <strong>The problem.</strong> AI content reads as a template, the wall of accordion cards or a bare Notion page.
+                </p>
+                <p>
+                    <strong>The insight.</strong> Design the report like a lab-result printout or a premium analytics export, a thing that was delivered to you.
+                </p>
+                <p>
+                    <strong>The build.</strong> A positional section-color system, where color is assigned by position so every report reads the same flow of tones regardless of topic, one dominant frame wrapping subordinate tiles, a hand-drawn icon set that fully replaced an off-the-shelf library, and an explicit anti-template philosophy with a forbidden vocabulary, executed against a Stripe, Linear, and Vercel aesthetic target across both web and print.
+                </p>
+            </section>
+
+            <!-- CASE STUDY 4 -->
+            <section class="cs-section">
+                <small class="cs-tag">Systems Design &amp; FinOps</small>
+                <h2>A report that stays current without re-spending</h2>
+                <p>
+                    <strong>The problem.</strong> Clinical evidence changes, but regenerating every report from scratch on a schedule is expensive and wasteful.
+                </p>
+                <p>
+                    <strong>The build.</strong> A surveillance engine watches PubMed per supplement for new and retracted studies, a cohort-delta refresh re-synthesizes only when new evidence materially changes the findings and skips the expensive selection pass, six independent drift ceilings bound how far a cached report can wander, and per-supplement cost circuit-breakers cap runaway spend.
+                </p>
+                <p>
+                    <strong>The theme.</strong> An architecture shaped by its economics, where the report behaves like a living research file rather than a one-time generation.
+                </p>
+            </section>
+
+            <!-- CASE STUDY 5 -->
+            <section class="cs-section">
+                <small class="cs-tag">Data &amp; Platform</small>
+                <h2>Building my own analytics and BI layer</h2>
+                <p>
+                    <strong>The problem.</strong> A solo founder needs product analytics and business intelligence without paying for or trusting a third-party processor.
+                </p>
+                <p>
+                    <strong>The build.</strong> A six-layer self-hosted observability stack living in the project's own Postgres, a governed event schema with server-side identity so clients cannot spoof it, hand-written funnel and weekly-retention-cohort SQL, two-grain cost attribution that ties spend back to each user-facing report, and a 16-page dashboard with click-through drill-downs that explain why any given report cost what it cost.
+                </p>
+            </section>
+
+            <!-- SYSTEM OVERVIEW -->
+            <section class="cs-section">
+                <h2>How it is built</h2>
+                <p>The breadth behind the deep dives above, kept short:</p>
+                <ul class="cs-list">
+                    <li><strong>Architecture.</strong> A three-service, single-deploy-unit topology on Railway, with FastAPI bound to loopback and Express as the only public surface. Deterministic code owns data flow and validation; the LLM subsystem is treated as untrusted and re-validated at the server boundary.</li>
+                    <li><strong>Frontend.</strong> A text-enrichment engine that parses synthesized prose and injects accessible, interactive citation superscripts and glossary popovers, with a 16-pattern statistical-notation parser and hand-rolled floating-UI positioning.</li>
+                    <li><strong>SEO.</strong> A full technical-SEO stack hand-built for a client-rendered app: build-time headless-Chromium prerendering, a dynamic sitemap, structured data, and a careful YMYL and E-E-A-T story for health content.</li>
+                    <li><strong>Billing.</strong> Production Stripe depth: three-tier pricing, an in-app plan-swap flow with proration preview and live price-drift protection, and full webhook coverage with idempotency.</li>
+                    <li><strong>Security.</strong> Defense-in-depth on a real public surface: Cloudflare Turnstile against rotating-proxy botnets, double opt-in on the capture flow, and a Stripe webhook identity cross-check.</li>
+                    <li><strong>Email.</strong> A full email architecture designed end to end (provider cost-modeling, SPF/DKIM/DMARC, key rotation). Auth email is live; the lifecycle senders are built and ready to wire.</li>
+                </ul>
+            </section>
+
+            <!-- CLOSING -->
+            <section class="cs-section">
+                <h2>What I owned end to end</h2>
+                <p>
+                    I owned the full arc solo: product strategy, positioning, and pricing, through design and engineering, to deployment and operations. The from-scratch work that holds up under scrutiny is the pipeline, the design system, the SEO stack, the analytics layer, the billing logic, and the security hardening.
+                </p>
+                <p>
+                    Solo is accurate for the design and engineering. The platform stands on managed services for leverage, Supabase for auth and Postgres, Stripe for payments, Railway for hosting, and the model vendors, which is the point of building lean.
+                </p>
+                <div class="project-links cs-links">
+                    <a href="contact.html" class="btn primary-btn">Get In Touch</a>
+                    <a href="projects.html" class="btn secondary-btn">All Projects</a>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <p>Connect with me:</p>
+        <address class="socials">
+            <a href="https://github.com/DarwinLS" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com/in/darwin-smith/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </address>
+        <p class="copyright"><small>&copy; 2026 Darwin Smith</small></p>
+    </footer>
+
+</body>
+</html>

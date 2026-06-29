@@ -18,6 +18,7 @@
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="projects.html" class="active" aria-current="page">Projects</a></li>
+                <li><a href="about.html">About</a></li>
                 <li><a href="assets/pdfs/Darwin_Smith_Resume.pdf" target="_blank">Resume</a></li>
                 <li><a href="contact.html">Contact</a></li>
             </ul>
@@ -29,35 +30,37 @@
             
             <div class="page-title">
                 <h1 id="page-heading">Selected Works</h1>
-                <p>A mix of Systems Architecture, Full-Stack Automation, and Data Analysis.</p>
+                <p>A production platform, full-stack automation, and data analysis.</p>
             </div>
 
-            <article class="project-card data-vine-border">
+            <article class="project-card flagship-card">
                 <div class="project-content">
-                    <small class="project-tag">System Architecture / AI Pipeline</small>
-                    <h2>Clinical Evidence Synthesis Engine</h2>
+                    <small class="project-tag">Production Platform / Applied AI</small>
+                    <h2>Veraflux</h2>
                     <p class="project-description">
-                        A live <strong>Real-Time RAG Pipeline</strong> that aggregates and synthesizes clinical trials on demand. 
-                        Unlike generic chatbots, this engine uses a two-stage <strong>"Curator-Synthesizer" architecture</strong>: first performing semantic filtering to reject irrelevant studies, then using lazy evaluation to extract high-fidelity dosage and safety protocols from raw text.
+                        A production platform that pulls live clinical research from PubMed and turns it into <strong>evidence-based, fully-cited supplement reports</strong> personalized to age, sex, and goal. A roughly ten-stage LLM pipeline across two model vendors produces grounded synthesis where every claim links to a study you can open, rendered through a sophisticated React reading experience. Designed, built, shipped, and operated solo, front end to infrastructure.
                     </p>
                     <ul class="tech-stack" aria-label="Technologies used">
-                        <li>FastAPI</li>
-                        <li>OpenAI (GPT-4o)</li>
-                        <li>BioPython (PubMed)</li>
-                        <li>Jinja2</li>
+                        <li>React / TypeScript</li>
+                        <li>Node / Express</li>
+                        <li>Python / FastAPI</li>
+                        <li>PostgreSQL</li>
+                        <li>LLM orchestration (Gemini + Claude)</li>
+                        <li>Docker / Railway</li>
+                        <li>Stripe</li>
                     </ul>
                     <div class="project-links">
-                        <a href="https://clinical-evidence-synthesis-engine.onrender.com/" target="_blank" rel="noopener noreferrer" class="btn primary-btn">
-                            <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Demo
+                        <a href="veraflux.html" class="btn primary-btn">
+                            <i class="fas fa-book-open" aria-hidden="true"></i> Read the Case Study
                         </a>
-                        <a href="https://github.com/DarwinLS/clinical-evidence-synthesis-engine" target="_blank" rel="noopener noreferrer" class="btn secondary-btn">
-                            <i class="fab fa-github" aria-hidden="true"></i> View Code
+                        <a href="https://veraflux.org" target="_blank" rel="noopener noreferrer" class="btn secondary-btn">
+                            <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Site
                         </a>
                     </div>
                 </div>
-                
+
                 <figure class="project-media">
-                    <img src="assets/images/CliniSynthDiagram.png" alt="System architecture diagram of the synthesis engine" class="media-image">
+                    <img src="assets/images/verafluxdemogif.gif" alt="Animated demo of the Veraflux platform generating a cited supplement report" class="media-image">
                 </figure>
             </article>
 
@@ -125,7 +128,7 @@
             <a href="https://github.com/DarwinLS" target="_blank" rel="noopener noreferrer">GitHub</a>
             <a href="https://www.linkedin.com/in/darwin-smith/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
         </address>
-        <p class="copyright"><small>&copy; 2025 Darwin Smith</small></p>
+        <p class="copyright"><small>&copy; 2026 Darwin Smith</small></p>
     </footer>
 
 </body>

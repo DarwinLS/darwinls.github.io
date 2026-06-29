@@ -714,9 +714,356 @@ main {
         padding: 2rem;
         gap: 3rem;
     }
-    
+
     /* Makes the button full width on mobile so it's easier to tap */
     .submit-btn {
-        width: 100%; 
+        width: 100%;
+    }
+}
+
+
+
+
+
+
+/* CONTENT OVERHAUL STYLES */
+/* Structural-only styles for the home featured band, the Veraflux case study,
+   and the About page. Reuses the existing colors, cards, and pills.
+   A separate visual redesign will refine these later. */
+
+/* HOME: FEATURED PROJECT BAND */
+/* Sits under the hero and points to the Veraflux case study */
+.featured {
+    padding: 4rem 10% 5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.featured-inner {
+    background-color: var(--white);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 3rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.featured-inner h2 {
+    font-size: 2.2rem;
+    color: #111;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.featured-lead {
+    color: var(--secondary-text);
+    font-size: 1.15rem;
+    max-width: 640px;
+    margin-bottom: 1.5rem;
+}
+
+/* The short bullet list of product differentiators */
+.feature-points {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 2rem;
+    margin-bottom: 2rem;
+}
+
+.feature-points li {
+    position: relative;
+    padding-left: 1.5rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+/* Small green check mark before each differentiator */
+.feature-points li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
+    color: #0f9b0f;
+    font-weight: 700;
+}
+
+/* SHARED: narrow wrapper for text-heavy pages (case study + about) */
+.content-page {
+    padding: 2rem 10%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* VERAFLUX CASE STUDY */
+/* Centered intro block at the top of the page */
+.cs-intro {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.cs-intro h1 {
+    font-size: 3rem;
+    color: #111;
+    margin: 0.5rem 0 1rem;
+    line-height: 1.1;
+}
+
+.cs-lead {
+    font-size: 1.25rem;
+    color: var(--secondary-text);
+    max-width: 720px;
+    margin: 0 auto 1rem;
+}
+
+.cs-status {
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 1.5rem;
+}
+
+/* Centers the intro buttons */
+.cs-links {
+    justify-content: center;
+}
+
+/* Demo gif / hero visual under the case-study intro */
+.cs-demo {
+    margin: 0 0 2rem;
+}
+
+.cs-demo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* Each major section is a white card so the long page stays scannable */
+.cs-section {
+    background-color: var(--white);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.cs-section h2 {
+    font-size: 1.6rem;
+    color: #111;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.cs-section p {
+    color: var(--secondary-text);
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+}
+
+.cs-section p:last-child {
+    margin-bottom: 0;
+}
+
+/* Small uppercase discipline label above a case-study heading */
+.cs-tag {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #0f9b0f;
+    margin-bottom: 0.4rem;
+    display: block;
+}
+
+/* "At a glance" stat strip */
+.stat-strip {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-strip li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.stat-strip li strong {
+    font-size: 1.1rem;
+    color: #111;
+}
+
+.stat-strip li span {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+}
+
+/* Bulleted system-overview / closing lists inside a case-study card */
+.cs-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+}
+
+.cs-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--secondary-text);
+    font-size: 1.05rem;
+}
+
+.cs-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #0f9b0f;
+}
+
+.cs-list li strong {
+    color: var(--text-color);
+}
+
+/* ABOUT PAGE */
+.section-block {
+    margin-bottom: 3.5rem;
+}
+
+/* Section heading (Experience, Education, Skills) */
+.block-heading {
+    font-size: 1.8rem;
+    color: #111;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid #eee;
+}
+
+/* Intro biography paragraphs */
+.about-bio p {
+    color: var(--secondary-text);
+    font-size: 1.15rem;
+    margin-bottom: 1.2rem;
+    max-width: 760px;
+}
+
+/* Experience / education entry card */
+.exp-item {
+    background-color: var(--white);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+/* Top row: role/org on the left, dates on the right */
+.exp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.exp-role {
+    font-size: 1.25rem;
+    color: #111;
+    margin-bottom: 0.2rem;
+}
+
+.exp-org {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.exp-dates {
+    color: var(--secondary-text);
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.exp-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.exp-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.8rem;
+    color: var(--secondary-text);
+}
+
+.exp-list li:last-child {
+    margin-bottom: 0;
+}
+
+.exp-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #0f9b0f;
+}
+
+/* Skill discipline groups */
+.skill-group {
+    margin-bottom: 1.8rem;
+}
+
+.skill-group h3 {
+    font-size: 1.1rem;
+    color: #111;
+    margin-bottom: 0.8rem;
+}
+
+/* Centers the closing call-to-action buttons on the About page */
+.about-cta {
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+/* MOBILE ADJUSTMENTS FOR NEW PAGES */
+@media (max-width: 768px) {
+    .featured {
+        padding: 3rem 5% 4rem;
+    }
+
+    .featured-inner,
+    .cs-section,
+    .exp-item {
+        padding: 1.8rem;
+    }
+
+    .cs-intro h1 {
+        font-size: 2.3rem;
+    }
+
+    .cs-lead {
+        font-size: 1.1rem;
+    }
+
+    .cs-links {
+        flex-direction: column;
+    }
+
+    .exp-head {
+        flex-direction: column;
+        gap: 0.3rem;
     }
 }
