@@ -19,6 +19,68 @@
         });
     }
 
+    /* --- Ambient intensity dial (Calm / Balanced / Immersive) ---
+       The user picks a preference; the device caps how far it can go.
+       This scaffold sets [data-intensity] (effective) + [data-pref]
+       (chosen) on <html> so later phases can gate ambient + motion.
+       Pairs with the no-FOUC inline script that sets both before paint. */
+    (function () {
+        var LEVELS = ["calm", "balanced", "immersive"];
+        var LABELS = { calm: "Calm", balanced: "Balanced", immersive: "Immersive" };
+
+        // Highest level this device should ever run (independent of choice).
+        function ceiling() {
+            var conn = navigator.connection || {};
+            var cores = navigator.hardwareConcurrency || 8;
+            var mem = navigator.deviceMemory || 8;
+            if (matchMedia("(prefers-reduced-motion: reduce)").matches ||
+                conn.saveData || cores <= 2 || mem <= 2) return "calm";
+            if (matchMedia("(pointer: coarse)").matches) return "balanced"; // phones: Balanced-lite
+            return "immersive";
+        }
+        function clamp(pref) {
+            return LEVELS[Math.min(LEVELS.indexOf(pref), LEVELS.indexOf(ceiling()))];
+        }
+        function readPref() {
+            var p = root.dataset.pref;
+            if (LEVELS.indexOf(p) < 0) { try { p = localStorage.getItem("intensity"); } catch (e) {} }
+            return LEVELS.indexOf(p) < 0 ? "balanced" : p;
+        }
+
+        var btn = document.getElementById("intensity-toggle");
+
+        function apply(pref) {
+            var eff = clamp(pref);
+            root.dataset.pref = pref;
+            root.dataset.intensity = eff;
+            if (btn) {
+                var msg = "Ambient motion: " + LABELS[pref];
+                if (eff !== pref) msg += " (limited to " + LABELS[eff] + " on this device)";
+                btn.setAttribute("aria-label", msg + ". Click to change.");
+                btn.setAttribute("title", msg);
+            }
+        }
+
+        apply(readPref());
+
+        if (btn) {
+            btn.addEventListener("click", function () {
+                var next = LEVELS[(LEVELS.indexOf(readPref()) + 1) % LEVELS.length];
+                try { localStorage.setItem("intensity", next); } catch (e) {}
+                apply(next);
+            });
+        }
+
+        // Re-clamp live when the environment changes (OS reduced-motion, etc.)
+        // so an accessibility toggle applies without a reload.
+        ["(prefers-reduced-motion: reduce)", "(pointer: coarse)"].forEach(function (q) {
+            var m = matchMedia(q);
+            var on = function () { apply(readPref()); };
+            if (m.addEventListener) m.addEventListener("change", on);
+            else if (m.addListener) m.addListener(on);
+        });
+    })();
+
     /* --- Mobile hamburger drawer --- */
     var burger = document.getElementById("nav-burger");
     if (burger) {

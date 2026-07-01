@@ -105,8 +105,14 @@
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.40);
     --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.50);
 }
-[data-theme="dark"][data-biome="about"]   { --sky-1: #161320; --sky-2: #241c2b; }
-[data-theme="dark"][data-biome="contact"] { --sky-1: #1c1810; --sky-2: #2a2316; }
+/* Night-forest per-biome sky. Theme lives on <html>, biome on <body>,
+   so match the biome as a DESCENDANT of the dark root (a compound
+   selector would look for both on one element and never match). */
+[data-theme="dark"] [data-biome="home"]     { --sky-1: #0f1620; --sky-2: #1a2230; }
+[data-theme="dark"] [data-biome="projects"] { --sky-1: #0f1a15; --sky-2: #16211b; }
+[data-theme="dark"] [data-biome="about"]    { --sky-1: #161320; --sky-2: #241c2b; }
+[data-theme="dark"] [data-biome="veraflux"] { --sky-1: #0e1512; --sky-2: #121a15; }
+[data-theme="dark"] [data-biome="contact"]  { --sky-1: #1c1810; --sky-2: #241f14; }
 
 /* Auto night-forest when the OS prefers dark (unless explicitly set light) */
 @media (prefers-color-scheme: dark) {
@@ -119,6 +125,11 @@
         --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.40);
         --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.50);
     }
+    /* Biome skies at night on the OS-auto path (mirrors the explicit-dark set) */
+    :root:not([data-theme="light"]) [data-biome="projects"] { --sky-1: #0f1a15; --sky-2: #16211b; }
+    :root:not([data-theme="light"]) [data-biome="about"]    { --sky-1: #161320; --sky-2: #241c2b; }
+    :root:not([data-theme="light"]) [data-biome="veraflux"] { --sky-1: #0e1512; --sky-2: #121a15; }
+    :root:not([data-theme="light"]) [data-biome="contact"]  { --sky-1: #1c1810; --sky-2: #241f14; }
 }
 
 /* Removes the weird default spacing that browsers add 
@@ -1423,7 +1434,7 @@ main {
 
 .nav-right { display: flex; align-items: center; gap: 1.5rem; }
 
-.theme-toggle, .nav-burger {
+.theme-toggle, .nav-burger, .intensity-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1436,9 +1447,23 @@ main {
     border-radius: var(--radius-sm);
     transition: color 0.25s ease, background-color 0.25s ease;
 }
-.theme-toggle:hover, .nav-burger:hover { color: var(--amber); background: var(--sunken); }
-.theme-toggle svg, .nav-burger svg { width: 22px; height: 22px; }
+.theme-toggle:hover, .nav-burger:hover, .intensity-toggle:hover { color: var(--amber); background: var(--sunken); }
+.theme-toggle svg, .nav-burger svg, .intensity-toggle svg { width: 22px; height: 22px; }
 .nav-burger { display: none; }                 /* shown on mobile only */
+
+/* Intensity dial: JS-only control (does nothing without the runtime).
+   The icon (cloud -> rain -> downpour) reflects the chosen preference. */
+.intensity-toggle { display: none; }
+.js .intensity-toggle { display: inline-flex; }
+.intensity-toggle svg { display: none; }
+[data-pref="calm"]      .intensity-toggle .i-calm,
+[data-pref="balanced"]  .intensity-toggle .i-balanced,
+[data-pref="immersive"] .intensity-toggle .i-immersive { display: block; }
+:root:not([data-pref]) .intensity-toggle .i-balanced { display: block; } /* pre-script fallback */
+
+/* The dial is already live: Calm stills the ambient cues. Later phases
+   read [data-intensity] to mount/skip rain, fog, parallax, and choreography. */
+[data-intensity="calm"] .scroll-cue svg { animation: none; }
 
 .theme-toggle .sun { display: none; }
 .theme-toggle .moon { display: block; }
@@ -1503,4 +1528,52 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
     .nav-links { transition: none; }
     .scroll-cue svg { animation: none; }
+}
+
+
+/* ============================================================
+   PHASE 2 — persistent biome sky + About lede portrait
+   (the shared elements the page transitions morph/cross-fade;
+   see transitions.css for the view-transition wiring)
+   ============================================================ */
+
+/* One fixed sky wash behind all content. Its --sky tokens change per
+   biome, so travelling between pages reads as the weather changing.
+   Sits above the body background but below every content layer. */
+.sky-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg,
+        var(--sky-1) 0%,
+        var(--sky-2) 34%,
+        transparent 72%);
+}
+/* Home paints its own full summit sky in the hero, so the wash only
+   needs to carry the other biomes; keep it subtle there. */
+[data-biome="home"] .sky-backdrop { opacity: 0.6; }
+
+/* About lede: bio text beside the portrait that the Home teaser
+   portrait morphs into (circle → rounded square). */
+.about-lede {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: var(--space-12);
+    align-items: start;
+}
+.about-lede-text > p:last-child { margin-bottom: 0; }
+.about-portrait { margin: 0; }
+.about-portrait img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 4px solid var(--raised);
+    box-shadow: var(--shadow-lift);
+    display: block;
+}
+@media (max-width: 720px) {
+    .about-lede { grid-template-columns: 1fr; gap: var(--space-8); }
+    .about-portrait { max-width: 200px; order: -1; }
 }

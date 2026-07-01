@@ -1,0 +1,119 @@
+/* ============================================================
+   PHASE 2 — "One continuous space": cross-document View Transitions.
+   The site is treated as one forest walked between biomes, not five
+   separate pages. A persistent shell (nav + footer) stays put, the
+   biome sky cross-fades like changing weather, and signature elements
+   (the Veraflux card, the portrait) morph across the navigation.
+
+   Progressive enhancement: browsers without View Transitions (Firefox
+   stable, older Safari) simply do a normal page load. Everything here
+   is additive — no layout depends on it.
+   ============================================================ */
+
+/* Opt every same-origin navigation into an automatic cross-document
+   transition. Must be present in BOTH the old and new document. */
+@view-transition {
+    navigation: auto;
+}
+
+/* ------------------------------------------------------------
+   Persistent shell + shared elements (the transition "cast").
+   A view-transition-name lifts an element into its own snapshot
+   so it animates independently of the page cross-fade.
+   Names must be unique within a single document.
+   ------------------------------------------------------------ */
+
+/* The frame you carry while walking: header (logo + toggle + links)
+   and the valley-floor footer persist across every navigation. */
+.site-header { view-transition-name: vt-nav; }
+.site-footer { view-transition-name: vt-footer; }
+
+/* The weather. One shared sky element cross-fades between biomes. */
+.sky-backdrop { view-transition-name: vt-sky; }
+
+/* Signature morph — the Veraflux story grows from a card into a page.
+   Source on Home (feature band) and Projects (flagship card); target
+   is the case-study hero. Same name on different documents = a morph. */
+[data-biome="home"]     .featured-inner { view-transition-name: vt-veraflux-hero; }
+[data-biome="projects"] .flagship-card  { view-transition-name: vt-veraflux-hero; }
+[data-biome="veraflux"] .cs-intro       { view-transition-name: vt-veraflux-hero; }
+
+/* Signature morph — the portrait travels from the Home teaser into
+   the About lede (circle → rounded square along the way). */
+[data-biome="home"]  .teaser-portrait img { view-transition-name: vt-about-portrait; }
+[data-biome="about"] .about-portrait img  { view-transition-name: vt-about-portrait; }
+
+/* ------------------------------------------------------------
+   Snapshot stacking. By default named groups paint above the page
+   ("root") snapshot; we keep the sky behind content, float the
+   morphing elements over it, and keep the shell on top of all.
+   ------------------------------------------------------------ */
+::view-transition-group(vt-sky)            { z-index: -1; }
+::view-transition-group(root)              { z-index: 0; }
+::view-transition-group(vt-veraflux-hero),
+::view-transition-group(vt-about-portrait) { z-index: 20; }
+::view-transition-group(vt-nav),
+::view-transition-group(vt-footer)         { z-index: 30; }
+
+/* ------------------------------------------------------------
+   Page (root) cross-fade timing. Directional variants below make
+   descending the site settle downward and back-nav rise upward;
+   these come from transitions.js tagging each navigation.
+   ------------------------------------------------------------ */
+::view-transition-old(root) {
+    animation: vt-fade-out var(--dur-page) var(--ease-exit) both;
+}
+::view-transition-new(root) {
+    animation: vt-fade-in var(--dur-page) var(--ease-settle) both;
+}
+
+/* Descending the IA (Home → Projects → Case study): arrive downward. */
+:root:active-view-transition-type(forward)::view-transition-old(root) {
+    animation-name: vt-recede-up;
+}
+:root:active-view-transition-type(forward)::view-transition-new(root) {
+    animation-name: vt-enter-down;
+}
+
+/* Ascending / back-nav: rise upward. */
+:root:active-view-transition-type(backward)::view-transition-old(root) {
+    animation-name: vt-recede-down;
+}
+:root:active-view-transition-type(backward)::view-transition-new(root) {
+    animation-name: vt-enter-up;
+}
+
+/* The sky glides between biomes rather than hard-cutting. */
+::view-transition-old(vt-sky),
+::view-transition-new(vt-sky) {
+    animation-duration: var(--dur-slow);
+    animation-timing-function: var(--ease-drift);
+}
+
+/* Morphs settle rather than snap. */
+::view-transition-group(vt-veraflux-hero),
+::view-transition-group(vt-about-portrait) {
+    animation-duration: var(--dur-page);
+    animation-timing-function: var(--ease-settle);
+}
+
+@keyframes vt-fade-out    { to   { opacity: 0; } }
+@keyframes vt-fade-in     { from { opacity: 0; } }
+@keyframes vt-enter-down  { from { opacity: 0; transform: translateY(-2.2vh); } }
+@keyframes vt-recede-up   { to   { opacity: 0; transform: translateY(2.2vh); } }
+@keyframes vt-enter-up    { from { opacity: 0; transform: translateY(2.2vh); } }
+@keyframes vt-recede-down { to   { opacity: 0; transform: translateY(-2.2vh); } }
+
+/* ------------------------------------------------------------
+   Accessibility: reduced motion collapses every transition to an
+   instant cut (WCAG-aligned). Kept near-instant rather than removed
+   so snapshots never linger as ghosts.
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0s !important;
+    }
+}

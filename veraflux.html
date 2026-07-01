@@ -4,14 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
-      (function(){document.documentElement.classList.add('js');try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){var h=new Date().getHours();t=(h<7||h>=19)?'dark':'light';}document.documentElement.dataset.theme=t;}catch(e){}})();
+      (function(){var r=document.documentElement;r.classList.add('js');try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){var h=new Date().getHours();t=(h<7||h>=19)?'dark':'light';}r.dataset.theme=t;}catch(e){}try{var L=['calm','balanced','immersive'],p=localStorage.getItem('intensity');if(L.indexOf(p)<0)p='balanced';var c=navigator.connection||{},co=navigator.hardwareConcurrency||8,me=navigator.deviceMemory||8,mm=function(q){return window.matchMedia&&matchMedia(q).matches;},cl;if(mm('(prefers-reduced-motion: reduce)')||c.saveData||co<=2||me<=2){cl='calm';}else if(mm('(pointer: coarse)')){cl='balanced';}else{cl='immersive';}r.dataset.pref=p;r.dataset.intensity=L[Math.min(L.indexOf(p),L.indexOf(cl))];}catch(e){r.dataset.pref='balanced';r.dataset.intensity='balanced';}})();
+    </script>
+    <script>
+      /* Cross-document View Transitions: tag navigation direction so pages
+         slide the right way descending vs ascending the site (Chromium;
+         ignored elsewhere). Inline so it registers before pagereveal fires. */
+      (function(){var O={'index.html':0,'':0,'projects.html':1,'veraflux.html':2,'about.html':3,'contact.html':4};function p(u){try{var n=new URL(u,location.href).pathname.split('/').pop();return n in O?O[n]:0;}catch(e){return 0;}}function d(f,t){var a=p(f),b=p(t);return b>a?'forward':b<a?'backward':'reload';}addEventListener('pageswap',function(e){if(e.viewTransition&&e.activation&&e.activation.entry){e.viewTransition.types.add(d(location.href,e.activation.entry.url));}});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;var a=(self.navigation&&navigation.activation)||null;var f=a&&a.from?a.from.url:null;e.viewTransition.types.add(f?d(f,location.href):'forward');});})();
+    </script>
+    <script type="speculationrules">
+      {"prerender":[{"where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}
     </script>
     <title>Darwin Smith | Veraflux Case Study</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="transitions.css">
     <link rel="preload" href="assets/fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 </head>
 <body data-biome="veraflux">
+    <div class="sky-backdrop" aria-hidden="true"></div>
 
     <header class="site-header">
         <nav class="navbar" aria-label="Main Navigation">
@@ -26,6 +37,11 @@
                 <li><a href="assets/pdfs/Darwin_Smith_Resume.pdf" target="_blank">Resume</a></li>
                 <li><a href="contact.html">Contact</a></li>
             </ul>
+                <button class="intensity-toggle" id="intensity-toggle" type="button" aria-label="Ambient motion level" title="Ambient motion level">
+                    <svg class="i-calm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                    <svg class="i-balanced" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg>
+                    <svg class="i-immersive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m9.2 22 3-7"/><path d="m9 13-3 7"/><path d="m17 13-3 7"/></svg>
+                </button>
                 <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme" title="Switch theme">
                     <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
                     <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
