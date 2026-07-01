@@ -3,56 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      (function(){document.documentElement.classList.add('js');try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){var h=new Date().getHours();t=(h<7||h>=19)?'dark':'light';}document.documentElement.dataset.theme=t;}catch(e){}})();
+    </script>
     <title>Darwin Smith | Portfolio</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="assets/fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 </head>
-<body>
+<body data-biome="home">
 
     <header class="site-header">
         <nav class="navbar" aria-label="Main Navigation">
             <div class="logo">
                 <a href="index.html">Darwin Smith.</a>
             </div>
-            <ul class="nav-links">
+            <div class="nav-right">
+                <ul class="nav-links" id="nav-links">
                 <li><a href="index.html" class="active" aria-current="page">Home</a></li>
                 <li><a href="projects.html">Projects</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="assets/pdfs/Darwin_Smith_Resume.pdf" target="_blank">Resume</a></li>
                 <li><a href="contact.html">Contact</a></li>
             </ul>
+                <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme" title="Switch theme">
+                    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                </button>
+                <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                </button>
+            </div>
         </nav>
     </header>
 
     <main>
-        
+
+        <!-- SUMMIT HERO -->
         <section class="hero" aria-label="Introduction">
-            
+            <div class="hero-scene" aria-hidden="true">
+                <svg class="ridgelines" viewBox="0 0 1440 380" preserveAspectRatio="xMidYMax slice" focusable="false">
+                    <path class="ridge ridge-far"  d="M0,210 L160,175 L320,205 L480,160 L640,195 L800,150 L960,190 L1120,160 L1280,200 L1440,170 L1440,380 L0,380 Z"/>
+                    <path class="ridge ridge-mid"  d="M0,260 L180,215 L360,255 L540,200 L720,250 L900,205 L1080,245 L1260,210 L1440,250 L1440,380 L0,380 Z"/>
+                    <path class="ridge ridge-near" d="M0,320 L200,270 L380,315 L560,260 L760,305 L940,255 L1120,300 L1320,265 L1440,300 L1440,380 L0,380 Z"/>
+                </svg>
+            </div>
+
             <div class="hero-text-container">
                 <span class="greeting">Hi, my name is</span>
                 <h1 class="name">Darwin Smith.</h1>
                 <h2 class="tagline">Founder, Full-Stack &amp; Applied-AI Engineer</h2>
-
-                <p class="bio">
-                    I designed, built, shipped, and operate <strong>Veraflux</strong> solo, a production research platform that turns live clinical literature into cited, evidence-graded reports. I own every layer, from the React front end through the retrieval-augmented Python pipeline to the infrastructure behind it.
-                    <br><br>
-                    It grew out of a simple habit. I read the studies myself before trying a supplement, and wanted an unbiased tool that just condensed them, so I built one.
-                    <br><br>
-                    I am graduating from <strong>UC San Diego</strong> in 2026 with a B.S. in Mathematics and Computer Science.
+                <p class="hero-hook">
+                    I design, build, ship, and operate complete products, solo, from the interface to the infrastructure under it.
                 </p>
-
                 <div class="cta-buttons">
                     <a href="veraflux.html" class="btn primary-btn">See the Build</a>
                     <a href="contact.html" class="btn secondary-btn">Get In Touch</a>
                 </div>
             </div>
-            
-            <figure class="hero-image">
-                <img src="assets/images/pfp1.jpg" alt="Portrait of Darwin Smith">
-                </figure>
 
+            <a class="scroll-cue" href="#what" aria-label="Scroll to content">
+                <span>Scroll</span>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
         </section>
 
+        <!-- WHAT I DO -->
+        <section class="what" id="what" aria-labelledby="what-heading">
+            <div class="section-inner">
+                <small class="eyebrow">What I do</small>
+                <h2 id="what-heading" class="what-statement">
+                    I build complete products end to end, the research pipeline, the interface, and the infrastructure under it.
+                </h2>
+                <ul class="pillars">
+                    <li>Applied AI / LLM</li>
+                    <li>Full-Stack Engineering</li>
+                    <li>Design Engineering</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- VERAFLUX FEATURE -->
         <section class="featured" aria-labelledby="featured-heading">
             <div class="featured-inner">
                 <small class="project-tag">Featured Project</small>
@@ -68,7 +101,46 @@
                 </ul>
                 <div class="cta-buttons">
                     <a href="veraflux.html" class="btn primary-btn">Read the Case Study</a>
-                    <a href="projects.html" class="btn secondary-btn">All Projects</a>
+                    <a href="https://veraflux.org" target="_blank" rel="noopener noreferrer" class="btn secondary-btn">Live Site</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SELECTED WORK PEEK -->
+        <section class="work-peek" aria-labelledby="peek-heading">
+            <div class="section-inner">
+                <div class="peek-head">
+                    <h2 id="peek-heading">Selected Work</h2>
+                    <a class="text-link" href="projects.html">All projects &rarr;</a>
+                </div>
+                <div class="peek-grid">
+                    <a class="peek-card" href="projects.html">
+                        <small class="project-tag">Full-Stack / CI-CD</small>
+                        <h3>Club Triton</h3>
+                        <p>Core game logic plus a Jest and Playwright CI/CD pipeline enforcing quality on every deploy.</p>
+                    </a>
+                    <a class="peek-card" href="projects.html">
+                        <small class="project-tag">Data / Quant</small>
+                        <h3>Global Conflict &amp; Defense Stocks</h3>
+                        <p>20+ years of conflict data against defense-contractor performance; a 0.67 correlation after isolating confounders.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT TEASER -->
+        <section class="about-teaser" aria-labelledby="teaser-heading">
+            <div class="section-inner teaser-inner">
+                <figure class="teaser-portrait">
+                    <img src="assets/images/pfp1.jpg" alt="Portrait of Darwin Smith">
+                </figure>
+                <div class="teaser-text">
+                    <small class="eyebrow">About</small>
+                    <h2 id="teaser-heading">A curiosity about clinical research, met by engineering.</h2>
+                    <p>
+                        I always read the studies myself before trying a supplement, and wished for an unbiased tool that just condensed them. So I built one. I am graduating from UC San Diego in 2026 with a B.S. in Mathematics and Computer Science.
+                    </p>
+                    <a class="text-link" href="about.html">More about me &rarr;</a>
                 </div>
             </div>
         </section>
@@ -84,5 +156,6 @@
         <p class="copyright"><small>&copy; 2026 Darwin Smith</small></p>
     </footer>
 
+    <script src="assets/js/site.js" defer></script>
 </body>
 </html>

@@ -3,25 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      (function(){document.documentElement.classList.add('js');try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){var h=new Date().getHours();t=(h<7||h>=19)?'dark':'light';}document.documentElement.dataset.theme=t;}catch(e){}})();
+    </script>
     <title>Darwin Smith | About</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preload" href="assets/fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 </head>
-<body>
+<body data-biome="about">
 
     <header class="site-header">
         <nav class="navbar" aria-label="Main Navigation">
             <div class="logo">
                 <a href="index.html">Darwin Smith.</a>
             </div>
-            <ul class="nav-links">
+            <div class="nav-right">
+                <ul class="nav-links" id="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="projects.html">Projects</a></li>
                 <li><a href="about.html" class="active" aria-current="page">About</a></li>
                 <li><a href="assets/pdfs/Darwin_Smith_Resume.pdf" target="_blank">Resume</a></li>
                 <li><a href="contact.html">Contact</a></li>
             </ul>
+                <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme" title="Switch theme">
+                    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                </button>
+                <button class="nav-burger" id="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                </button>
+            </div>
         </nav>
     </header>
 
@@ -46,53 +58,66 @@
                 </p>
             </section>
 
-            <!-- EXPERIENCE -->
+            <!-- THE THREAD -->
+            <blockquote class="pull-quote">
+                A genuine curiosity about clinical research, met by the engineering.
+            </blockquote>
+
+            <!-- EXPERIENCE + EDUCATION TIMELINE -->
             <section class="section-block" aria-labelledby="experience-heading">
                 <h2 id="experience-heading" class="block-heading">Experience</h2>
 
-                <div class="exp-item">
-                    <div class="exp-head">
-                        <div>
-                            <h3 class="exp-role">Founder, Full-Stack &amp; Applied-AI Engineer</h3>
-                            <p class="exp-org">Veraflux, Self-employed</p>
+                <ol class="timeline">
+                    <li class="tl-node">
+                        <span class="tl-marker" aria-hidden="true"></span>
+                        <div class="tl-content">
+                            <div class="exp-head">
+                                <div>
+                                    <h3 class="exp-role">Founder, Full-Stack &amp; Applied-AI Engineer</h3>
+                                    <p class="exp-org">Veraflux, Self-employed</p>
+                                </div>
+                                <span class="exp-dates">Feb 2026 &ndash; Present</span>
+                            </div>
+                            <ul class="exp-list">
+                                <li>Solo-designed, built, shipped, and operate a production three-service web platform (React/TypeScript SPA, Node/Express API, Python/FastAPI research pipeline) that turns live clinical literature into cited, evidence-graded reports personalized to age, sex, and goal.</li>
+                                <li>Designed a roughly ten-stage LLM pipeline across two model vendors with strict citation grounding, plus a self-improving prompt-iteration harness that tests, root-causes, and fixes prompt regressions with checkpointed keep or revert verdicts.</li>
+                                <li>Architected a single-Docker-unit deploy on Railway with cross-service request tracing, graceful shutdown, incremental cohort-delta report refresh, and per-supplement cost circuit-breakers.</li>
+                                <li>Hand-built a full technical-SEO stack for a client-rendered app and a self-hosted analytics and BI layer, with no third-party processor.</li>
+                                <li>Owned product strategy, positioning, pricing, and Stripe billing, alongside the design system and security hardening.</li>
+                            </ul>
                         </div>
-                        <span class="exp-dates">Feb 2026 &ndash; Present</span>
-                    </div>
-                    <ul class="exp-list">
-                        <li>Solo-designed, built, shipped, and operate a production three-service web platform (React/TypeScript SPA, Node/Express API, Python/FastAPI research pipeline) that turns live clinical literature into cited, evidence-graded reports personalized to age, sex, and goal.</li>
-                        <li>Designed a roughly ten-stage LLM pipeline across two model vendors with strict citation grounding, plus a self-improving prompt-iteration harness that tests, root-causes, and fixes prompt regressions with checkpointed keep or revert verdicts.</li>
-                        <li>Architected a single-Docker-unit deploy on Railway with cross-service request tracing, graceful shutdown, incremental cohort-delta report refresh, and per-supplement cost circuit-breakers.</li>
-                        <li>Hand-built a full technical-SEO stack for a client-rendered app and a self-hosted analytics and BI layer, with no third-party processor.</li>
-                        <li>Owned product strategy, positioning, pricing, and Stripe billing, alongside the design system and security hardening.</li>
-                    </ul>
-                </div>
+                    </li>
 
-                <div class="exp-item">
-                    <div class="exp-head">
-                        <div>
-                            <h3 class="exp-role">Test Engineer</h3>
-                            <p class="exp-org">SiteHive, IoT (Australia)</p>
+                    <li class="tl-node">
+                        <span class="tl-marker" aria-hidden="true"></span>
+                        <div class="tl-content">
+                            <div class="exp-head">
+                                <div>
+                                    <h3 class="exp-role">Test Engineer</h3>
+                                    <p class="exp-org">SiteHive, IoT (Australia)</p>
+                                </div>
+                                <span class="exp-dates">Prior</span>
+                            </div>
+                            <ul class="exp-list">
+                                <li>Ran firmware updates and connectivity diagnostics on Hexanode devices, and validated each unit before shipment to customers. Working close to the hardware sharpened the reliability and QA instincts I bring to software.</li>
+                            </ul>
                         </div>
-                        <span class="exp-dates">Prior</span>
-                    </div>
-                    <ul class="exp-list">
-                        <li>Ran firmware updates and connectivity diagnostics on Hexanode devices, and validated each unit before shipment to customers. Working close to the hardware sharpened the reliability and QA instincts I bring to software.</li>
-                    </ul>
-                </div>
-            </section>
+                    </li>
 
-            <!-- EDUCATION -->
-            <section class="section-block" aria-labelledby="education-heading">
-                <h2 id="education-heading" class="block-heading">Education</h2>
-                <div class="exp-item">
-                    <div class="exp-head">
-                        <div>
-                            <h3 class="exp-role">B.S. Mathematics and Computer Science</h3>
-                            <p class="exp-org">University of California, San Diego</p>
+                    <li class="tl-node tl-edu">
+                        <span class="tl-marker" aria-hidden="true"></span>
+                        <div class="tl-content">
+                            <div class="exp-head">
+                                <div>
+                                    <h3 class="exp-role">B.S. Mathematics and Computer Science</h3>
+                                    <p class="exp-org">University of California, San Diego</p>
+                                </div>
+                                <span class="exp-dates">Expected 2026</span>
+                            </div>
+                            <p class="tl-edu-note">Education</p>
                         </div>
-                        <span class="exp-dates">Expected 2026</span>
-                    </div>
-                </div>
+                    </li>
+                </ol>
             </section>
 
             <!-- SKILLS -->
@@ -202,5 +227,6 @@
         <p class="copyright"><small>&copy; 2026 Darwin Smith</small></p>
     </footer>
 
+    <script src="assets/js/site.js" defer></script>
 </body>
 </html>
