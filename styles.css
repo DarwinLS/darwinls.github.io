@@ -1406,6 +1406,10 @@ main {
     margin: var(--space-8) 0;
     opacity: 0.85;
 }
+.foliage-divider svg {
+    width: clamp(180px, 22vw, 260px);
+    height: auto;
+}
 
 /* --- Inline line icons (Lucide), replacing Font Awesome --- */
 .icon {
@@ -1670,6 +1674,14 @@ body::after {
     pointer-events: none;
     border-radius: var(--radius);
     background: color-mix(in srgb, var(--paper) 82%, transparent);
+}
+
+/* Phones: prune composited scene layers (11 -> 8 on home; vistas
+   drop their farthest ridge) to bound GPU memory on small devices. */
+@media (max-width: 700px) {
+    .sd-2, .sd-m2, .sd-4 { display: none; }
+    .vista-projects .vl-1,
+    .vista-about .vl-1 { display: none; }
 }
 
 /* Pre-color-mix browsers: flat token fills, hide the soft extras */
