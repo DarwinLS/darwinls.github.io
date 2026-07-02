@@ -51,9 +51,9 @@ SCENES = {
             {"type": "ridge", "name": "sd-3", "seed": 103, "baseline": 470, "amp": 110, "freq": 3.0, "sharp": 1.35, "skew": 0.22, "ramp": 3, "serr": (32, 10, 7)},
             {"type": "ridge", "name": "sd-4", "seed": 104, "baseline": 550, "amp": 120, "freq": 2.8, "sharp": 1.25, "skew": 0.25, "ramp": 4, "serr": (26, 14, 8)},
             {"type": "mist",  "name": "sd-m3", "seed": 153, "yc": 800, "thick": 180, "opacity": 0.7},
-            {"type": "ridge", "name": "sd-5", "seed": 105, "baseline": 640, "amp": 120, "freq": 3.4, "sharp": 1.20, "skew": 0.28, "ramp": 5, "serr": (20, 22, 11)},
-            {"type": "ridge", "name": "sd-6", "seed": 106, "baseline": 730, "amp": 110, "freq": 4.0, "sharp": 1.15, "skew": 0.30, "ramp": 6, "serr": (16, 30, 13)},
-            {"type": "ridge", "name": "sd-7", "seed": 107, "baseline": 830, "amp": 80,  "freq": 4.6, "sharp": 1.10, "skew": 0.30, "ramp": 7, "serr": (13, 40, 15)},
+            {"type": "ridge", "name": "sd-5", "seed": 105, "baseline": 640, "amp": 120, "freq": 3.4, "sharp": 1.20, "skew": 0.28, "ramp": 5, "serr": (21, 22, 14)},
+            {"type": "ridge", "name": "sd-6", "seed": 106, "baseline": 730, "amp": 110, "freq": 4.0, "sharp": 1.15, "skew": 0.30, "ramp": 6, "serr": (17, 30, 17)},
+            {"type": "ridge", "name": "sd-7", "seed": 107, "baseline": 830, "amp": 80,  "freq": 4.6, "sharp": 1.10, "skew": 0.30, "ramp": 7, "serr": (15, 40, 20)},
         ],
     },
     # PROJECTS: rain-veiled closer forest
@@ -107,16 +107,17 @@ SCENES = {
             {"type": "ridge", "name": "vl-1", "seed": 501, "baseline": 812, "amp": 60, "freq": 1.6, "sharp": 1.55, "skew": 0.15, "ramp": 1, "serr": None},
         ],
     },
-    # FOOTER: valley-floor treelines, all pages, in-flow svg
+    # FOOTER: valley-floor treelines, all pages, in-flow svg.
+    # Two lines only (three read as clutter at 180px): a soft distant
+    # line behind a dark near one, with a whisper of pooled mist.
     "footer-valley": {
         "kind": "footer",
         "frame": (1440, 180),
         "grad_ns": "foot",
         "layers": [
-            {"type": "treeline", "name": "ft-1", "seed": 601, "baseline": 106, "amp": 26, "freq": 2.6, "sharp": 1.15, "skew": 0.25, "serr": (17, 34, 13), "skip": 0.3},
-            {"type": "treeline", "name": "ft-2", "seed": 602, "baseline": 130, "amp": 26, "freq": 3.2, "sharp": 1.10, "skew": 0.28, "serr": (15, 44, 15), "skip": 0.26},
-            {"type": "mist",     "name": "ft-m1", "seed": 651, "yc": 140, "thick": 75, "opacity": 0.32},
-            {"type": "treeline", "name": "ft-3", "seed": 603, "baseline": 154, "amp": 20, "freq": 3.8, "sharp": 1.05, "skew": 0.30, "serr": (13, 54, 18), "skip": 0.24},
+            {"type": "treeline", "name": "ft-1", "seed": 601, "baseline": 112, "amp": 22, "freq": 2.4, "sharp": 1.15, "skew": 0.25, "serr": (27, 30, 26), "skip": 0.36},
+            {"type": "mist",     "name": "ft-m1", "seed": 651, "yc": 142, "thick": 65, "opacity": 0.25},
+            {"type": "treeline", "name": "ft-3", "seed": 603, "baseline": 150, "amp": 18, "freq": 3.2, "sharp": 1.05, "skew": 0.30, "serr": (22, 42, 32), "skip": 0.3},
         ],
         "fireflies": {"seed": 691, "count": 9, "x": (70, 1380), "y": (72, 148), "r": (1.5, 2.5)},
     },
@@ -277,19 +278,22 @@ def tree_points(xc, yb, th, hw, lean):
 
 def tree_points_tiered(xc, yb, th, hw, lean, rng):
     """Alishan cryptomeria silhouette for near layers: three jittered
-    branch tiers with drooping shelf notches, narrowing to a slim
-    leaning tip. Reads as layered cedar rather than a plain spike."""
+    branch tiers with drooping shelf notches, narrowing to a leaning
+    tip. Small trees get a chunkier crown (fine tiers at small sizes
+    read as needles / stalagmites)."""
+    small = th < 55
     t1 = 0.26 + 0.07 * rng()
     t2 = 0.52 + 0.07 * rng()
     t3 = 0.77 + 0.05 * rng()
-    s1 = 0.80 + 0.12 * rng()
-    s2 = 0.56 + 0.10 * rng()
-    s3 = 0.34 + 0.08 * rng()
+    s1 = 0.82 + 0.12 * rng()
+    s2 = (0.62 if small else 0.56) + 0.10 * rng()
+    s3 = (0.46 if small else 0.34) + 0.08 * rng()
+    tip = 0.30 if small else 0.17
     profile = [
         (1.00, 0.0),
-        (0.48, t1), (s1, t1 + 0.05),
-        (0.34, t2), (s2, t2 + 0.045),
-        (0.17, t3), (s3, t3 + 0.04),
+        (0.50, t1), (s1, t1 + 0.05),
+        (0.36, t2), (s2, t2 + 0.045),
+        (tip, t3), (s3, t3 + 0.04),
     ]
     up = [(xc - hw * w + lean * h, yb - th * h) for w, h in profile]
     down = [(xc + hw * w + lean * h, yb - th * h) for w, h in reversed(profile)]
@@ -321,9 +325,9 @@ def serrated_ridge_path(layer, w, h, env, bleed=20, drop=0):
             thw = (tw * (0.7 + 0.6 * rng())) / 2
             lean = -1.5 + 5 * rng()
             if tiered:
-                if rng() < 0.08:
-                    th *= 1.5 + 0.2 * rng()   # emergent giant cedar
-                    thw *= 0.8
+                if rng() < 0.05:
+                    th *= 1.3 + 0.2 * rng()   # emergent giant cedar
+                    thw *= 0.9
                 pts.extend(tree_points_tiered(x, y(x), th, thw, lean, rng))
             else:
                 pts.extend(tree_points(x, y(x), th, thw, lean))

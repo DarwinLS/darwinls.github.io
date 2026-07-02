@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    Ambient + choreography controller (JS half).
 
    Progressive enhancement: this module only ADDS motion. Without it
@@ -9,11 +9,12 @@
    no-FOUC inline script) and mounts effects to match:
      calm       -> no rain, no cursor light, no reveals-hide
                    (atmosphere = static in-scene mist + .fx-haze)
-     balanced   -> WebGL rain (2 layers), reveals, timeline draw
-     immersive  -> WebGL rain (3 layers + splashes), cursor dew
-   Rain is WebGL-first on every capable device; a frame-time watchdog
-   demotes to a batched 2D canvas at half density if the page cannot
-   hold ~45fps, and remembers that for the session. save-data and
+     balanced   -> tiled rain (2 sheets), reveals, timeline draw
+     immersive  -> tiled rain (3 sheets), cursor dew
+   Rain streaks are drawn ONCE into small tiling textures; each depth
+   layer is then a repeating background scrolled by a CSS transform
+   animation. Zero per-frame JS, zero WebGL: the compositor moves
+   three textures, the same cost as scrolling a page. save-data and
    low-memory devices get no rain at all.
    ============================================================ */
 
@@ -24,8 +25,6 @@ const finePointer = matchMedia("(pointer: fine)");
 const level = () => root.dataset.intensity || "balanced";
 const motionOK = () => !reduce.matches;
 
-const GL_BLOCKED_KEY = "fx-gl-blocked";
-
 /* ---------- shared engine lifecycle ---------- */
 let teardown = [];
 let gen = 0;                          // bumped each boot; guards async mounts
@@ -33,20 +32,9 @@ function destroyAll() {
     teardown.forEach((fn) => { try { fn(); } catch (e) {} });
     teardown = [];
 }
-function hasWebGL2() {
-    try { return !!document.createElement("canvas").getContext("webgl2"); }
-    catch (e) { return false; }
-}
-function glBlocked() {
-    try { return sessionStorage.getItem(GL_BLOCKED_KEY) === "1"; }
-    catch (e) { return false; }
-}
-function blockGL() {
-    try { sessionStorage.setItem(GL_BLOCKED_KEY, "1"); } catch (e) {}
-}
 
 /* ============================================================
-   RAIN - WebGL2 shader first (rain-gl.js), batched 2D fallback.
+   RAIN - compositor-tiled sheets.
    ============================================================ */
 
 /* null = no rain at all (calm, reduced motion, save-data, low-end) */
@@ -59,145 +47,86 @@ function rainLevel() {
     return lvl;
 }
 
-async function mountRain() {
-    const lvl = rainLevel();
-    if (!lvl) return;
-    const myGen = gen;
-    const coarse = !finePointer.matches;
+/* Depth sheets, far -> near. Each becomes one small tiling texture
+   drawn once, then scrolled forever by the compositor. */
+const TILE_W = 512, TILE_H = 1024;
+const SHEETS = [
+    { count: 170, len: 30, w: 1.0, a: 0.20, dur: 2.6, slant: 3 },
+    { count: 100, len: 48, w: 1.4, a: 0.30, dur: 1.7, slant: 5 },
+    { count: 44,  len: 80, w: 2.0, a: 0.40, dur: 1.05, slant: 7 },
+];
 
-    if (!glBlocked() && hasWebGL2()) {
-        try {
-            const mod = await import("./rain-gl.js");
-            if (myGen !== gen) return;                       // superseded during import
-            const inst = mod.createRainGL(document.body, { level: lvl, coarse });
-            if (inst && inst.ok) {
-                if (myGen !== gen) { inst.destroy(); return; }
-                teardown.push(inst.destroy);
-                watchdog(inst, lvl, coarse, myGen);
-                return;
-            }
-        } catch (e) { /* fall through to 2D */ }
-    }
-    mount2DRain(lvl, coarse, glBlocked() ? 0.5 : 1);
+function rainRGB() {
+    return (getComputedStyle(root).getPropertyValue("--rain-color").trim() || "120 135 150")
+        .replace(/\s+/g, ",");
 }
 
-/* Frame-time watchdog: sample ~90 frames after the GL mount; if the
-   trimmed mean exceeds 22ms the device cannot hold the shader, so
-   demote to the 2D canvas at half density for the rest of the session. */
-function watchdog(inst, lvl, coarse, myGen) {
-    const samples = [];
-    let n = 0, last = performance.now(), raf = 0;
-    function tick(t) {
-        if (myGen !== gen) return;
-        const d = t - last; last = t;
-        if (d > 0 && d < 500) samples.push(d);
-        if (++n < 90) { raf = requestAnimationFrame(tick); return; }
-        samples.sort((a, b) => a - b);
-        const trimmed = samples.slice(4, -4);
-        const avg = trimmed.reduce((s, v) => s + v, 0) / (trimmed.length || 1);
-        if (avg > 22) {
-            blockGL();
-            try { inst.destroy(); } catch (e) {}
-            mount2DRain(lvl, coarse, 0.5);
-        }
-    }
-    raf = requestAnimationFrame(tick);
-    teardown.push(() => cancelAnimationFrame(raf));
-}
-
-/* Batched 2D fallback: three depth buckets, ONE path + ONE stroke per
-   bucket per frame (no per-drop style strings or beginPath churn). */
-function mount2DRain(lvl, coarse, densityMul) {
-    const canvas = document.createElement("canvas");
-    canvas.className = "fx-rain is-fixed";
-    canvas.setAttribute("aria-hidden", "true");
-    document.body.appendChild(canvas);
-
-    const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) { canvas.remove(); return; }
-
-    const dprCap = coarse ? 1.25 : 1.5;
-    let W = 0, H = 0;
-    const wind = lvl === "immersive" ? 1.1 : 0.6;
-    const speedMul = lvl === "immersive" ? 1.2 : 1;
-
-    /* depth buckets: [alpha, lineWidth, speed, length] far -> near */
-    const BUCKETS = [
-        { a: 0.14, w: 0.8, v: 2.6, len: 9 },
-        { a: 0.24, w: 1.1, v: 4.2, len: 14 },
-        { a: 0.38, w: 1.5, v: 6.0, len: 20 },
-    ];
-    let colors = [];
-    function readColors() {
-        const rgb = (getComputedStyle(root).getPropertyValue("--rain-color").trim() || "120 135 150")
-            .replace(/\s+/g, ",");
-        colors = BUCKETS.map((b) => `rgba(${rgb},${b.a})`);
-    }
-    readColors();
-
-    let drops = [[], [], []];
-    function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
-        W = window.innerWidth; H = window.innerHeight;
-        canvas.width = Math.round(W * dpr);
-        canvas.height = Math.round(H * dpr);
-        canvas.style.width = W + "px";
-        canvas.style.height = H + "px";
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const base = (lvl === "immersive" ? 1.5 : 0.8) * (coarse ? 0.5 : 1) * densityMul;
-        const total = Math.round((W * H / 10000) * base);
-        drops = BUCKETS.map((b, i) => {
-            const share = [0.45, 0.33, 0.22][i];
-            return Array.from({ length: Math.max(1, Math.round(total * share)) }, () => ({
-                x: Math.random() * (W + 120) - 60,
-                y: Math.random() * H,
-            }));
-        });
-    }
-
-    let raf = 0, last = 0, running = false;
-    function frame(t) {
-        if (!running) return;
-        const dt = Math.min(2.5, (t - last) / 16.67 || 1);
-        last = t;
-        ctx.clearRect(0, 0, W, H);
-        ctx.lineCap = "round";
-        for (let i = 0; i < BUCKETS.length; i++) {
-            const b = BUCKETS[i];
-            const v = b.v * speedMul;
-            ctx.strokeStyle = colors[i];
-            ctx.lineWidth = b.w;
+/* One tile: vertical streaks with a bright falling head fading up,
+   drawn around the vertical seam so the loop is seamless. */
+function makeRainTile(rgb, sheet, densityMul) {
+    const c = document.createElement("canvas");
+    c.width = TILE_W;
+    c.height = TILE_H;
+    const ctx = c.getContext("2d");
+    ctx.lineCap = "round";
+    const n = Math.round(sheet.count * densityMul);
+    for (let i = 0; i < n; i++) {
+        const x = Math.random() * TILE_W;
+        const y = Math.random() * TILE_H;
+        const len = sheet.len * (0.55 + 0.9 * Math.random());
+        const a = sheet.a * (0.55 + 0.9 * Math.random());
+        ctx.lineWidth = sheet.w * (0.75 + 0.5 * Math.random());
+        for (const yy of [y - TILE_H, y, y + TILE_H]) {
+            const g = ctx.createLinearGradient(x, yy - len, x, yy);
+            g.addColorStop(0, `rgba(${rgb},0)`);
+            g.addColorStop(1, `rgba(${rgb},${a})`);
+            ctx.strokeStyle = g;
             ctx.beginPath();
-            for (const d of drops[i]) {
-                d.y += v * dt;
-                d.x += wind * (v / 6) * dt;
-                if (d.y - b.len > H) { d.y = -b.len; d.x = Math.random() * (W + 120) - 60; }
-                ctx.moveTo(d.x, d.y);
-                ctx.lineTo(d.x - wind * 2.2, d.y - b.len);
-            }
+            ctx.moveTo(x, yy - len);
+            ctx.lineTo(x, yy);
             ctx.stroke();
         }
-        raf = requestAnimationFrame(frame);
     }
-    function start() { if (!running) { running = true; last = performance.now(); raf = requestAnimationFrame(frame); } }
-    function stop() { running = false; cancelAnimationFrame(raf); }
+    return c.toDataURL();
+}
 
-    const onVis = () => { document.hidden ? stop() : start(); };
-    document.addEventListener("visibilitychange", onVis);
-    const onResize = () => resize();
-    window.addEventListener("resize", onResize, { passive: true });
-    const themeObs = new MutationObserver(readColors);
+function mountRain() {
+    const lvl = rainLevel();
+    if (!lvl) return;
+    const coarse = !finePointer.matches;
+    const sheets = lvl === "immersive" ? SHEETS : SHEETS.slice(0, 2);
+    const densityMul = (coarse ? 0.6 : 1) * (lvl === "immersive" ? 1 : 0.8);
+
+    const host = document.createElement("div");
+    host.className = "fx-rain is-fixed";
+    host.setAttribute("aria-hidden", "true");
+    const movers = [];
+    for (const sheet of sheets) {
+        const slant = document.createElement("div");
+        slant.className = "fx-rain-slant";
+        slant.style.setProperty("--slant", sheet.slant + "deg");
+        const move = document.createElement("div");
+        move.className = "fx-rain-move";
+        move.style.setProperty("--dur", sheet.dur + "s");
+        move.style.backgroundImage = `url(${makeRainTile(rainRGB(), sheet, densityMul)})`;
+        slant.appendChild(move);
+        host.appendChild(slant);
+        movers.push({ move, sheet });
+    }
+    document.body.appendChild(host);
+
+    /* re-tint on theme flip (regenerating three small tiles is cheap) */
+    const themeObs = new MutationObserver(() => {
+        const rgb = rainRGB();
+        for (const m of movers) {
+            m.move.style.backgroundImage = `url(${makeRainTile(rgb, m.sheet, densityMul)})`;
+        }
+    });
     themeObs.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
-    resize();
-    start();
-
     teardown.push(() => {
-        stop();
         themeObs.disconnect();
-        document.removeEventListener("visibilitychange", onVis);
-        window.removeEventListener("resize", onResize);
-        canvas.remove();
+        host.remove();
     });
 }
 
@@ -306,7 +235,7 @@ function countUp(scope) {
 function boot() {
     gen++;
     destroyAll();
-    mountRain().catch(() => {});
+    try { mountRain(); } catch (e) {}
     try { mountCursor(); } catch (e) {}
     try { mountReveals(); } catch (e) {}
 }

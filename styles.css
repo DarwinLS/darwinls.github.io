@@ -1226,20 +1226,18 @@ main {
 .hero-text-container { position: relative; z-index: 1; max-width: 640px; }
 /* Soft scrim so the name/hook keep AA contrast over ridgelines or rain,
    in either theme (paper is light in day, near-black at night).
-   Rounded plate consistent with the veil family, with a radial
-   highlight boosting the center where the name sits. */
+   Fully feathered: the gradient dissolves to nothing well inside its
+   box, so there is no visible container edge over the scenery. */
 .hero-text-container::before {
     content: "";
     position: absolute;
-    inset: -2rem -1.75rem;
+    inset: -4.5rem -6rem;
     z-index: -1;
     pointer-events: none;
-    border-radius: calc(var(--radius) * 1.75);
-    background:
-        radial-gradient(115% 92% at 28% 44%,
-            color-mix(in srgb, var(--paper) 30%, transparent) 0%,
-            transparent 72%),
-        color-mix(in srgb, var(--paper) 42%, transparent);
+    background: radial-gradient(58% 54% at 46% 47%,
+        color-mix(in srgb, var(--paper) 64%, transparent) 0%,
+        color-mix(in srgb, var(--paper) 40%, transparent) 52%,
+        transparent 96%);
 }
 .hero-hook {
     font-size: clamp(1.05rem, 1.4vw, 1.3rem);
@@ -1261,9 +1259,10 @@ main {
     text-transform: uppercase;
     letter-spacing: 0.14em;
     color: var(--ink-2);
-    padding: 0.5rem 0.95rem;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--paper) 60%, transparent);
+    padding: 0.9rem 1.6rem;
+    background: radial-gradient(50% 60% at 50% 50%,
+        color-mix(in srgb, var(--paper) 58%, transparent) 0%,
+        transparent 92%);
 }
 .scroll-cue svg { animation: cue-bob 1.8s ease-in-out infinite; }
 @keyframes cue-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }

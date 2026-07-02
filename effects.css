@@ -23,9 +23,34 @@
     :root:not([data-theme="light"]) { --rain-color: 180 200 220; }
 }
 
-/* ---------------- RAIN CANVAS ---------------- */
-.fx-rain { pointer-events: none; display: block; }
-.fx-rain.is-fixed { position: fixed; inset: 0; z-index: -1; }
+/* ---------------- RAIN (compositor-tiled sheets) ----------------
+   ambient.js draws streak tiles once; each depth sheet is then a
+   repeating background scrolled by ONE looping transform animation.
+   No canvas, no WebGL, no per-frame JS: rain costs the compositor
+   the same as scrolling an image. */
+.fx-rain { pointer-events: none; }
+.fx-rain.is-fixed {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    contain: strict;
+}
+.fx-rain-slant {
+    position: absolute;
+    inset: -14% -10%;
+    transform: rotate(var(--slant, 4deg));
+}
+.fx-rain-move {
+    position: absolute;
+    inset: -1024px 0 0 0;
+    background-repeat: repeat;
+    background-size: 512px 1024px;
+    animation: rain-fall var(--dur, 1.6s) linear infinite;
+    will-change: transform;
+}
+/* one tile height per loop = seamless */
+@keyframes rain-fall { to { transform: translateY(1024px); } }
 
 /* ---------------- ATMOSPHERIC HAZE ----------------
    The fog replacement: pre-feathered radial gradients, pre-tinted
@@ -96,16 +121,20 @@
             animation-timeline: scroll(root block);
         }
         :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-descent {
-            & .sd-1  { animation: dsc-sd1 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
-            & .sd-2  { animation: dsc-sd2 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
+            /* GEOMETRY moves all run 0..100%: every ridge is in motion
+               from the first scrolled pixel (staged ranges made upper
+               layers move while lower ones waited, then visibly "join").
+               Only OPACITY effects (mist thinning, dusk) stay staged. */
+            & .sd-1  { animation: dsc-sd1 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
+            & .sd-2  { animation: dsc-sd2 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
             & .sd-m1 { animation: dsc-m1 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
-            & .sd-3  { animation: dsc-sd3 linear both; animation-timeline: scroll(root block); animation-range: 10vh 60%; }
-            & .sd-4  { animation: dsc-sd4 linear both; animation-timeline: scroll(root block); animation-range: 10vh 60%; }
+            & .sd-3  { animation: dsc-sd3 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
+            & .sd-4  { animation: dsc-sd4 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
             & .sd-m2 { animation: dsc-m2 linear both; animation-timeline: scroll(root block); animation-range: 10vh 60%; }
-            & .sd-5  { animation: dsc-sd5 linear both; animation-timeline: scroll(root block); animation-range: 35% 95%; }
-            & .sd-6  { animation: dsc-sd6 linear both; animation-timeline: scroll(root block); animation-range: 35% 95%; }
-            & .sd-7  { animation: dsc-sd7 linear both; animation-timeline: scroll(root block); animation-range: 50% 100%; }
-            & .sd-m3 { animation: dsc-m3 linear both; animation-timeline: scroll(root block); animation-range: 50% 100%; }
+            & .sd-5  { animation: dsc-sd5 linear both; animation-timeline: scroll(root block); animation-range: 0 90%; }
+            & .sd-6  { animation: dsc-sd6 linear both; animation-timeline: scroll(root block); animation-range: 0 92%; }
+            & .sd-7  { animation: dsc-sd7 linear both; animation-timeline: scroll(root block); animation-range: 0 95%; }
+            & .sd-m3 { animation: dsc-m3 linear both; animation-timeline: scroll(root block); animation-range: 40% 100%; }
             & .sd-dusk { animation: dsc-dusk linear both; animation-timeline: scroll(root block); animation-range: 60% 100%; }
         }
     }
@@ -122,10 +151,11 @@
 /* whole-scene scroll drift (the mountain itself moves with you) */
 @keyframes track-drift-home { to { transform: translateY(-6vh); } }
 @keyframes track-drift-vista { to { transform: translateY(-10vh); } }
-/* the valley forest rises from below to meet the footer */
-@keyframes dsc-sd5 { from { transform: translateY(22vh); } to { transform: translateY(0); } }
-@keyframes dsc-sd6 { from { transform: translateY(24vh); } to { transform: translateY(0); } }
-@keyframes dsc-sd7 { from { transform: translateY(26vh); } to { transform: translateY(0); } }
+/* the valley forest rises from below to meet the footer (gentle
+   offsets: large ones opened a visible gap against the mid ridges) */
+@keyframes dsc-sd5 { from { transform: translateY(12vh); } to { transform: translateY(0); } }
+@keyframes dsc-sd6 { from { transform: translateY(14vh); } to { transform: translateY(0); } }
+@keyframes dsc-sd7 { from { transform: translateY(16vh); } to { transform: translateY(0); } }
 /* valley mist pools and dusk gathers at the floor */
 @keyframes dsc-m3 { from { opacity: 0; } to { opacity: 0.55; } }
 @keyframes dsc-dusk { from { opacity: 0; } to { opacity: 0.8; } }
@@ -222,6 +252,7 @@
 /* ---------------- REDUCED MOTION HARD STOP ---------------- */
 @media (prefers-reduced-motion: reduce) {
     .fx-haze,
+    .fx-rain-move,
     .sd, .vl, .scene-track,
     .firefly,
     .foliage-divider path { animation: none !important; }
