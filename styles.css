@@ -1225,16 +1225,21 @@ main {
 }
 .hero-text-container { position: relative; z-index: 1; max-width: 640px; }
 /* Soft scrim so the name/hook keep AA contrast over ridgelines or rain,
-   in either theme (paper is light in day, near-black at night). */
+   in either theme (paper is light in day, near-black at night).
+   Rounded plate consistent with the veil family, with a radial
+   highlight boosting the center where the name sits. */
 .hero-text-container::before {
     content: "";
     position: absolute;
     inset: -2rem -1.75rem;
     z-index: -1;
     pointer-events: none;
-    background: radial-gradient(115% 92% at 28% 44%,
-        color-mix(in srgb, var(--paper) 62%, transparent) 0%,
-        transparent 72%);
+    border-radius: calc(var(--radius) * 1.75);
+    background:
+        radial-gradient(115% 92% at 28% 44%,
+            color-mix(in srgb, var(--paper) 30%, transparent) 0%,
+            transparent 72%),
+        color-mix(in srgb, var(--paper) 42%, transparent);
 }
 .hero-hook {
     font-size: clamp(1.05rem, 1.4vw, 1.3rem);
@@ -1255,7 +1260,10 @@ main {
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: var(--ink-3);
+    color: var(--ink-2);
+    padding: 0.5rem 0.95rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--paper) 60%, transparent);
 }
 .scroll-cue svg { animation: cue-bob 1.8s ease-in-out infinite; }
 @keyframes cue-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
@@ -1339,7 +1347,7 @@ main {
     margin-bottom: var(--space-4);
     line-height: 1.2;
 }
-.teaser-text p { color: var(--ink-2); margin-bottom: var(--space-6); max-width: 52ch; }
+.teaser-text p { color: var(--ink-2); margin-bottom: var(--space-6); }
 
 
 /* --- ABOUT: "the thread" pull-quote + drawn timeline --- */
@@ -1674,24 +1682,34 @@ body::after {
 }
 
 /* Readability veil for open text sitting directly over scenery
-   (cards already provide their own solid --raised surface). */
-.veil { position: relative; }
+   (cards already provide their own solid --raised surface).
+   A PADDED surface on the element itself: the old negative-inset
+   ::before wrapped the element box, not the content, which left
+   lopsided gaps wherever containers were wider than their text. */
+.veil {
+    position: relative;
+    background: color-mix(in srgb, var(--paper) 82%, transparent);
+    border-radius: var(--radius);
+    padding: 2rem 2.25rem;
+}
+@media (max-width: 600px) {
+    .veil { padding: 1.5rem 1.25rem; }
+}
 /* Column variant: the whole reading column floats as one translucent
    surface while the vista's high side-ridges frame it (About). */
 .veil-column {
     background: color-mix(in srgb, var(--paper) 78%, transparent);
     border-radius: var(--radius);
 }
-.veil::before {
-    content: "";
-    position: absolute;
-    inset: -2rem -1.25rem;
-    z-index: -1;
-    pointer-events: none;
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--paper) 82%, transparent);
+/* Per-block fits */
+.section-inner.veil { padding: 2.25rem 2.5rem; }  /* replaces the 8% gutters */
+.what .section-inner.veil { max-width: 860px; }   /* hugs the statement + pillars */
+.page-title.veil,
+.cs-intro.veil {
+    width: fit-content;
+    margin-inline: auto;
+    padding: 1.75rem 3rem;
 }
-
 /* Phones: prune composited scene layers (11 -> 8 on home; vistas
    drop their farthest ridge) to bound GPU memory on small devices. */
 @media (max-width: 700px) {
@@ -1705,7 +1723,7 @@ body::after {
     .sd path, .vl path { fill: var(--slate); }
     .mist, .glow { display: none; }
     .footer-scene path { fill: var(--bark-deep); }
-    .veil::before { background: var(--paper); opacity: 0.85; }
+    .veil, .veil-column { background: var(--paper); }
 }
 
 /* About lede: bio text beside the portrait that the Home teaser
