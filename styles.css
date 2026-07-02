@@ -49,6 +49,8 @@
     /* Scenery (generated SVG scenes; see tools/scene_gen.py) */
     --ridge-ink: var(--pine);                                  /* mountain ink */
     --mist-veil: color-mix(in srgb, var(--sky-2) 38%, white);  /* in-scene fog */
+    --haze-a: color-mix(in srgb, var(--sky-2) 40%, transparent); /* drifting air */
+    --haze-b: color-mix(in srgb, var(--mist) 22%, transparent);
 
     /* Semantic aliases (existing components read these) */
     --bg-color:       var(--paper);
@@ -110,6 +112,8 @@
     --sky-2:      #1a2230;
     --ridge-ink:  #0c1410;   /* night mountains: near-silhouette, not lightened pine */
     --mist-veil:  color-mix(in srgb, var(--mist) 24%, var(--sky-2)); /* moonlit, dimmer */
+    --haze-a: rgba(58, 74, 99, 0.16);
+    --haze-b: rgba(143, 163, 176, 0.10);
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.40);
     --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.50);
 }
@@ -132,6 +136,8 @@
         --sky-1: #0f1620; --sky-2: #1a2230;
         --ridge-ink: #0c1410;
         --mist-veil: color-mix(in srgb, var(--mist) 24%, var(--sky-2));
+        --haze-a: rgba(58, 74, 99, 0.16);
+        --haze-b: rgba(143, 163, 176, 0.10);
         --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.40);
         --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.50);
     }

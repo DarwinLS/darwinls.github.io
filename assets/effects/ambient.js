@@ -1,17 +1,20 @@
 /* ============================================================
-   Ambient + choreography controller (Phase 4-5, JS half).
+   Ambient + choreography controller (JS half).
 
    Progressive enhancement: this module only ADDS motion. Without it
-   the site is fully styled and readable (content is never hidden by
-   CSS unless this script is present and motion is allowed).
+   the site is fully styled and readable (scenery is static inline
+   SVG, content is never hidden by CSS unless this script runs).
 
    It reads the intensity dial ([data-intensity] on <html>, set by the
    no-FOUC inline script) and mounts effects to match:
-     calm       -> static rain frame, no drift, no reveals-hide
-     balanced   -> gentle rain, fog drift (CSS), reveals, timeline draw
-     immersive  -> denser rain, cursor dew, everything on
-   Effects pause when the tab is hidden or the canvas is offscreen,
-   cap DPR, use rAF delta timing, and animate only transform/opacity.
+     calm       -> no rain, no cursor light, no reveals-hide
+                   (atmosphere = static in-scene mist + .fx-haze)
+     balanced   -> WebGL rain (2 layers), reveals, timeline draw
+     immersive  -> WebGL rain (3 layers + splashes), cursor dew
+   Rain is WebGL-first on every capable device; a frame-time watchdog
+   demotes to a batched 2D canvas at half density if the page cannot
+   hold ~45fps, and remembers that for the session. save-data and
+   low-memory devices get no rain at all.
    ============================================================ */
 
 const root = document.documentElement;
@@ -21,7 +24,9 @@ const finePointer = matchMedia("(pointer: fine)");
 const level = () => root.dataset.intensity || "balanced";
 const motionOK = () => !reduce.matches;
 
-/* ---------- shared, throttled visibility of the whole engine ---------- */
+const GL_BLOCKED_KEY = "fx-gl-blocked";
+
+/* ---------- shared engine lifecycle ---------- */
 let teardown = [];
 let gen = 0;                          // bumped each boot; guards async mounts
 function destroyAll() {
@@ -32,129 +37,156 @@ function hasWebGL2() {
     try { return !!document.createElement("canvas").getContext("webgl2"); }
     catch (e) { return false; }
 }
+function glBlocked() {
+    try { return sessionStorage.getItem(GL_BLOCKED_KEY) === "1"; }
+    catch (e) { return false; }
+}
+function blockGL() {
+    try { sessionStorage.setItem(GL_BLOCKED_KEY, "1"); } catch (e) {}
+}
 
 /* ============================================================
-   RAIN — pooled 2D canvas, depth layers, wind, DPR-capped.
-   Mounts into .hero-scene on the home page (above the ridgelines,
-   below the text) or as a fixed layer behind content elsewhere.
+   RAIN - WebGL2 shader first (rain-gl.js), batched 2D fallback.
    ============================================================ */
-async function mountRain() {
-    const lvl = level();
-    const scene = document.querySelector(".hero-scene");
-    const host = scene || document.body;
-    const myGen = gen;
 
-    // Immersive + desktop: try the WebGL volumetric upgrade; canvas otherwise.
-    if (lvl === "immersive" && finePointer.matches && motionOK() && hasWebGL2()) {
+/* null = no rain at all (calm, reduced motion, save-data, low-end) */
+function rainLevel() {
+    const lvl = level();
+    if (lvl === "calm" || !motionOK()) return null;
+    const conn = navigator.connection;
+    if (conn && conn.saveData) return null;
+    if (navigator.deviceMemory && navigator.deviceMemory <= 2) return null;
+    return lvl;
+}
+
+async function mountRain() {
+    const lvl = rainLevel();
+    if (!lvl) return;
+    const myGen = gen;
+    const coarse = !finePointer.matches;
+
+    if (!glBlocked() && hasWebGL2()) {
         try {
             const mod = await import("./rain-gl.js");
             if (myGen !== gen) return;                       // superseded during import
-            const inst = mod.createRainGL(host, { scene: !!scene });
+            const inst = mod.createRainGL(document.body, { level: lvl, coarse });
             if (inst && inst.ok) {
                 if (myGen !== gen) { inst.destroy(); return; }
                 teardown.push(inst.destroy);
+                watchdog(inst, lvl, coarse, myGen);
                 return;
             }
-        } catch (e) { /* fall through to 2D canvas */ }
+        } catch (e) { /* fall through to 2D */ }
     }
+    mount2DRain(lvl, coarse, glBlocked() ? 0.5 : 1);
+}
 
+/* Frame-time watchdog: sample ~90 frames after the GL mount; if the
+   trimmed mean exceeds 22ms the device cannot hold the shader, so
+   demote to the 2D canvas at half density for the rest of the session. */
+function watchdog(inst, lvl, coarse, myGen) {
+    const samples = [];
+    let n = 0, last = performance.now(), raf = 0;
+    function tick(t) {
+        if (myGen !== gen) return;
+        const d = t - last; last = t;
+        if (d > 0 && d < 500) samples.push(d);
+        if (++n < 90) { raf = requestAnimationFrame(tick); return; }
+        samples.sort((a, b) => a - b);
+        const trimmed = samples.slice(4, -4);
+        const avg = trimmed.reduce((s, v) => s + v, 0) / (trimmed.length || 1);
+        if (avg > 22) {
+            blockGL();
+            try { inst.destroy(); } catch (e) {}
+            mount2DRain(lvl, coarse, 0.5);
+        }
+    }
+    raf = requestAnimationFrame(tick);
+    teardown.push(() => cancelAnimationFrame(raf));
+}
+
+/* Batched 2D fallback: three depth buckets, ONE path + ONE stroke per
+   bucket per frame (no per-drop style strings or beginPath churn). */
+function mount2DRain(lvl, coarse, densityMul) {
     const canvas = document.createElement("canvas");
-    canvas.className = "fx-rain" + (scene ? "" : " is-fixed");
+    canvas.className = "fx-rain is-fixed";
     canvas.setAttribute("aria-hidden", "true");
-    host.appendChild(canvas);
+    document.body.appendChild(canvas);
 
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) { canvas.remove(); return; }
 
-    const coarse = !finePointer.matches;
-    const dprCap = coarse ? 1.5 : 2;
-    let dpr = Math.min(window.devicePixelRatio || 1, dprCap);
-    let W = 0, H = 0, drops = [];
-    let rainColor = readRain();
+    const dprCap = coarse ? 1.25 : 1.5;
+    let W = 0, H = 0;
+    const wind = lvl === "immersive" ? 1.1 : 0.6;
+    const speedMul = lvl === "immersive" ? 1.2 : 1;
 
-    function readRain() {
-        const v = getComputedStyle(root).getPropertyValue("--rain-color").trim() || "120 135 150";
-        return v.replace(/\s+/g, ",");
+    /* depth buckets: [alpha, lineWidth, speed, length] far -> near */
+    const BUCKETS = [
+        { a: 0.14, w: 0.8, v: 2.6, len: 9 },
+        { a: 0.24, w: 1.1, v: 4.2, len: 14 },
+        { a: 0.38, w: 1.5, v: 6.0, len: 20 },
+    ];
+    let colors = [];
+    function readColors() {
+        const rgb = (getComputedStyle(root).getPropertyValue("--rain-color").trim() || "120 135 150")
+            .replace(/\s+/g, ",");
+        colors = BUCKETS.map((b) => `rgba(${rgb},${b.a})`);
     }
-    function densityFactor() {
-        // drops per 10k px^2, scaled by intensity and device
-        const base = lvl === "immersive" ? 2.6 : lvl === "calm" ? 0.5 : 1.3;
-        return coarse ? base * 0.5 : base;
-    }
-    function makeDrop(seed) {
-        const depth = Math.random();            // 0 far (slow, faint) -> 1 near
-        return {
-            x: Math.random() * (W + 120) - 60,
-            y: seed ? Math.random() * H : -20 - Math.random() * H,
-            len: 7 + depth * 15,
-            v: (2.2 + depth * 4.5) * (lvl === "immersive" ? 1.25 : 1),
-            a: 0.10 + depth * 0.28,
-            w: 0.6 + depth * 0.9,
-        };
-    }
+    readColors();
+
+    let drops = [[], [], []];
     function resize() {
-        const r = host.getBoundingClientRect();
-        W = Math.max(1, Math.round(r.width));
-        H = Math.max(1, Math.round(scene ? r.height : window.innerHeight));
-        dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+        const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+        W = window.innerWidth; H = window.innerHeight;
         canvas.width = Math.round(W * dpr);
         canvas.height = Math.round(H * dpr);
         canvas.style.width = W + "px";
         canvas.style.height = H + "px";
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const target = Math.round((W * H / 10000) * densityFactor());
-        drops = [];
-        for (let i = 0; i < target; i++) drops.push(makeDrop(true));
+        const base = (lvl === "immersive" ? 1.5 : 0.8) * (coarse ? 0.5 : 1) * densityMul;
+        const total = Math.round((W * H / 10000) * base);
+        drops = BUCKETS.map((b, i) => {
+            const share = [0.45, 0.33, 0.22][i];
+            return Array.from({ length: Math.max(1, Math.round(total * share)) }, () => ({
+                x: Math.random() * (W + 120) - 60,
+                y: Math.random() * H,
+            }));
+        });
     }
 
-    const wind = lvl === "immersive" ? 1.1 : 0.6;
-    let raf = 0, last = 0, running = false, visible = true;
-
+    let raf = 0, last = 0, running = false;
     function frame(t) {
         if (!running) return;
         const dt = Math.min(2.5, (t - last) / 16.67 || 1);
         last = t;
         ctx.clearRect(0, 0, W, H);
         ctx.lineCap = "round";
-        for (const d of drops) {
-            d.y += d.v * dt;
-            d.x += wind * (d.v / 6) * dt;
-            if (d.y - d.len > H) { Object.assign(d, makeDrop(false)); d.y = -d.len; }
-            ctx.strokeStyle = `rgba(${rainColor},${d.a})`;
-            ctx.lineWidth = d.w;
+        for (let i = 0; i < BUCKETS.length; i++) {
+            const b = BUCKETS[i];
+            const v = b.v * speedMul;
+            ctx.strokeStyle = colors[i];
+            ctx.lineWidth = b.w;
             ctx.beginPath();
-            ctx.moveTo(d.x, d.y);
-            ctx.lineTo(d.x - wind * 2.2, d.y - d.len);
+            for (const d of drops[i]) {
+                d.y += v * dt;
+                d.x += wind * (v / 6) * dt;
+                if (d.y - b.len > H) { d.y = -b.len; d.x = Math.random() * (W + 120) - 60; }
+                ctx.moveTo(d.x, d.y);
+                ctx.lineTo(d.x - wind * 2.2, d.y - b.len);
+            }
             ctx.stroke();
         }
-        // Calm: draw one static frame then stop.
-        if (lvl === "calm" || !motionOK()) { running = false; return; }
         raf = requestAnimationFrame(frame);
     }
-    function start() {
-        if (running) return;
-        running = true; last = performance.now();
-        raf = requestAnimationFrame(frame);
-    }
+    function start() { if (!running) { running = true; last = performance.now(); raf = requestAnimationFrame(frame); } }
     function stop() { running = false; cancelAnimationFrame(raf); }
 
-    // Pause offscreen (hero canvas) + when tab hidden.
-    let io;
-    if (scene && "IntersectionObserver" in window) {
-        io = new IntersectionObserver((es) => {
-            visible = es[0].isIntersecting;
-            if (visible && !document.hidden) start(); else stop();
-        }, { threshold: 0 });
-        io.observe(scene);
-    }
-    const onVis = () => { if (document.hidden || !visible) stop(); else start(); };
+    const onVis = () => { document.hidden ? stop() : start(); };
     document.addEventListener("visibilitychange", onVis);
-
-    const onResize = () => { resize(); if (lvl === "calm") { start(); } };
+    const onResize = () => resize();
     window.addEventListener("resize", onResize, { passive: true });
-
-    // Re-read rain colour when the theme flips.
-    const themeObs = new MutationObserver(() => { rainColor = readRain(); if (lvl === "calm") start(); });
+    const themeObs = new MutationObserver(readColors);
     themeObs.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
     resize();
@@ -162,7 +194,6 @@ async function mountRain() {
 
     teardown.push(() => {
         stop();
-        io && io.disconnect();
         themeObs.disconnect();
         document.removeEventListener("visibilitychange", onVis);
         window.removeEventListener("resize", onResize);
@@ -171,21 +202,8 @@ async function mountRain() {
 }
 
 /* ============================================================
-   FOG — inject the element; CSS owns the drift (gated by intensity).
-   ============================================================ */
-function mountFog() {
-    if (document.querySelector(".fx-fog")) return;
-    const fog = document.createElement("div");
-    fog.className = "fx-fog";
-    fog.setAttribute("aria-hidden", "true");
-    fog.innerHTML = "<i></i><i></i>";
-    document.body.appendChild(fog);
-    teardown.push(() => fog.remove());
-}
-
-/* ============================================================
-   CURSOR DEW — immersive + fine pointer only. A soft light that
-   follows the pointer and lifts the fog around it.
+   CURSOR DEW - immersive + fine pointer only. A soft light that
+   follows the pointer (plain alpha radial, no blend mode).
    ============================================================ */
 function mountCursor() {
     if (level() !== "immersive" || !finePointer.matches || !motionOK()) return;
@@ -206,7 +224,7 @@ function mountCursor() {
 }
 
 /* ============================================================
-   REVEALS / STAGGER / COUNT-UP / TIMELINE DRAW (Phase 5).
+   REVEALS / STAGGER / COUNT-UP / TIMELINE DRAW.
    Auto-tags a curated set of elements so no per-page HTML edits
    are needed. Nothing is hidden unless motion is allowed.
    ============================================================ */
@@ -288,7 +306,6 @@ function countUp(scope) {
 function boot() {
     gen++;
     destroyAll();
-    try { mountFog(); } catch (e) {}
     mountRain().catch(() => {});
     try { mountCursor(); } catch (e) {}
     try { mountReveals(); } catch (e) {}
@@ -303,5 +320,5 @@ new MutationObserver(() => {
     remountTimer = setTimeout(boot, 60);
 }).observe(root, { attributes: true, attributeFilter: ["data-intensity"] });
 
-// Re-evaluate cursor/reveal gating if the OS reduced-motion pref flips.
+// Re-evaluate rain/cursor/reveal gating if the OS reduced-motion pref flips.
 reduce.addEventListener?.("change", boot);
