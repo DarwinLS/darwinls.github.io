@@ -1602,6 +1602,14 @@ body::after {
     height: 100%;
     overflow: visible;
 }
+/* Dusk pools in the valley as you arrive at the page floor (opacity
+   animated by the scroll choreography; invisible when static). */
+.sd-dusk {
+    background: linear-gradient(180deg,
+        transparent 30%,
+        color-mix(in srgb, var(--bark-deep) 55%, transparent) 100%);
+    opacity: 0;
+}
 
 /* Atmospheric-perspective ink ramp: every ridge fill is a vertical
    gradient whose stops carry these classes, so the whole mountain

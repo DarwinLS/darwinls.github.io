@@ -65,6 +65,53 @@
 }
 [data-theme="dark"] .fx-dew { opacity: 0.35; }
 
+/* ---------------- THE DESCENT (home scroll choreography) ----------------
+   The page-level scene walks you down the mountain: summits recede
+   and dim, the cloud sea thins and parts, mid ridges slide apart,
+   and the valley forest rises to meet the footer while dusk pools.
+   The UNANIMATED positions form the complete static composition, so
+   Firefox / reduced-motion / calm simply hold that pose. fill-mode
+   `both` means the pre-range pose (summit view) owns the hero.
+   NOTE: percentage ranges are percent-of-total-scroll; if Home gains
+   or loses sections, re-tune the mid/late ranges below. */
+/* NOTE: each layer keeps its FULL animation declaration in one rule.
+   Splitting the shorthand and animation-name across cascade rules
+   leaves the scroll timeline unattached in Blink (the animation runs
+   as a 0s time animation instead) - verified against Edge 149. */
+@supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+        :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-descent {
+            & .sd-1  { animation: dsc-sd1 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
+            & .sd-2  { animation: dsc-sd2 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
+            & .sd-m1 { animation: dsc-m1 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
+            & .sd-3  { animation: dsc-sd3 linear both; animation-timeline: scroll(root block); animation-range: 10vh 60%; }
+            & .sd-4  { animation: dsc-sd4 linear both; animation-timeline: scroll(root block); animation-range: 10vh 60%; }
+            & .sd-m2 { animation: dsc-m2 linear both; animation-timeline: scroll(root block); animation-range: 10vh 60%; }
+            & .sd-5  { animation: dsc-sd5 linear both; animation-timeline: scroll(root block); animation-range: 35% 95%; }
+            & .sd-6  { animation: dsc-sd6 linear both; animation-timeline: scroll(root block); animation-range: 35% 95%; }
+            & .sd-7  { animation: dsc-sd7 linear both; animation-timeline: scroll(root block); animation-range: 50% 100%; }
+            & .sd-m3 { animation: dsc-m3 linear both; animation-timeline: scroll(root block); animation-range: 50% 100%; }
+            & .sd-dusk { animation: dsc-dusk linear both; animation-timeline: scroll(root block); animation-range: 60% 100%; }
+        }
+    }
+}
+/* summits recede and dim as you rise past them */
+@keyframes dsc-sd1 { to { transform: translateY(-30px); opacity: 0.55; } }
+@keyframes dsc-sd2 { to { transform: translateY(-55px); opacity: 0.6; } }
+/* the cloud sea drifts sideways and thins */
+@keyframes dsc-m1 { from { opacity: 0.85; } to { transform: translate3d(3%, -40px, 0); opacity: 0.15; } }
+@keyframes dsc-m2 { from { opacity: 0.7; } to { opacity: 0.25; } }
+/* mid ridges part around you */
+@keyframes dsc-sd3 { to { transform: translate3d(-2%, -90px, 0); } }
+@keyframes dsc-sd4 { to { transform: translate3d(2%, -140px, 0); } }
+/* the valley forest rises from below to meet the footer */
+@keyframes dsc-sd5 { from { transform: translateY(22vh); } to { transform: translateY(0); } }
+@keyframes dsc-sd6 { from { transform: translateY(24vh); } to { transform: translateY(0); } }
+@keyframes dsc-sd7 { from { transform: translateY(26vh); } to { transform: translateY(0); } }
+/* valley mist pools and dusk gathers at the floor */
+@keyframes dsc-m3 { from { opacity: 0; } to { opacity: 0.55; } }
+@keyframes dsc-dusk { from { opacity: 0; } to { opacity: 0.8; } }
+
 /* ---------------- FOLIAGE DRAW-ON-SCROLL ---------------- */
 /* Line-art dividers draw themselves as they enter view. Paths carry
    pathLength="1" so a single normalized dash animation fits every stroke.
