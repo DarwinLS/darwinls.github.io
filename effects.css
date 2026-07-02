@@ -1,0 +1,184 @@
+/* ============================================================
+   PHASE 4-5 — AMBIENT + CHOREOGRAPHY (CSS half)
+   Everything here is gated by the intensity dial ([data-intensity])
+   and prefers-reduced-motion. Calm / reduced-motion = static frames,
+   no drift. The JS half (assets/effects/ambient.js) mounts the rain
+   canvas, cursor effects, reveals, and count-ups against the same dial.
+
+   Layer stack (all fixed, pointer-events:none, behind content):
+     .sky-backdrop  z-index:-3   biome sky gradient (styles.css)
+     .fx-fog        z-index:-2   drifting fog bands
+     .fx-rain       z-index:-1   canvas rain
+     content        z-index:auto solid reading surfaces on top
+   ============================================================ */
+
+/* Sky sits at the very back so fog + rain read in front of it. */
+.sky-backdrop { z-index: -3; }
+
+/* Rain stroke colour (rgb triplet, read by ambient.js): cool slate by day,
+   silver by night. Covers the OS-auto-dark path too. */
+:root { --rain-color: 90 108 124; }
+[data-theme="dark"] { --rain-color: 180 200 220; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --rain-color: 180 200 220; }
+}
+
+/* Cursor dew (immersive, fine pointer) — a soft light that follows the pointer */
+.fx-dew {
+    position: fixed;
+    top: 0; left: 0;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    z-index: -1;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.32;
+    background: radial-gradient(circle,
+        color-mix(in srgb, var(--mist) 60%, white) 0%, transparent 65%);
+}
+[data-theme="dark"] .fx-dew { opacity: 0.2; }
+
+/* ---------------- FOG ---------------- */
+/* Two soft, blurred bands. Screen-blended so they read as luminous mist
+   (moonlit in dark mode). Injected by ambient.js as .fx-fog > i. */
+.fx-fog {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    overflow: hidden;
+    contain: strict;
+}
+.fx-fog i {
+    position: absolute;
+    left: -25%;
+    width: 150%;
+    height: 60%;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    filter: blur(48px);
+    opacity: 0.55;
+    background: radial-gradient(60% 100% at 50% 50%,
+        color-mix(in srgb, var(--mist) 70%, white) 0%,
+        transparent 70%);
+}
+.fx-fog i:nth-child(1) { top: 8%;  }
+.fx-fog i:nth-child(2) { top: 46%; opacity: 0.4; filter: blur(60px); }
+[data-theme="dark"] .fx-fog i {
+    opacity: 0.28;
+    background: radial-gradient(60% 100% at 50% 50%,
+        color-mix(in srgb, var(--mist) 55%, #3a4a63) 0%,
+        transparent 70%);
+}
+[data-intensity="calm"] .fx-fog { opacity: 0.6; }   /* present but dimmer, static */
+
+@media (prefers-reduced-motion: no-preference) {
+    :is([data-intensity="balanced"], [data-intensity="immersive"]) .fx-fog i:nth-child(1) {
+        animation: fog-drift-a 46s ease-in-out infinite alternate;
+    }
+    :is([data-intensity="balanced"], [data-intensity="immersive"]) .fx-fog i:nth-child(2) {
+        animation: fog-drift-b 58s ease-in-out infinite alternate;
+    }
+}
+@keyframes fog-drift-a { from { transform: translate3d(-4%, 0, 0); } to { transform: translate3d(6%, -2%, 0); } }
+@keyframes fog-drift-b { from { transform: translate3d(5%, 1%, 0); } to { transform: translate3d(-6%, -3%, 0); } }
+
+/* ---------------- RAIN CANVAS ---------------- */
+/* In the hero it fills the scene (above ridgelines, below text). On other
+   pages ambient.js appends a fixed one behind content. */
+.fx-rain { pointer-events: none; display: block; }
+.fx-rain.is-fixed { position: fixed; inset: 0; z-index: -1; }
+.hero-scene .fx-rain { position: absolute; inset: 0; z-index: 1; } /* above ridgelines */
+
+/* ---------------- PARALLAX RIDGELINES (scroll-driven) ---------------- */
+/* Depth: near layers travel further than far ones as the hero scrolls away.
+   Firefox (no scroll-timeline) simply keeps them static. */
+@supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+        :is([data-intensity="balanced"], [data-intensity="immersive"]) .ridge-far {
+            animation: px-ridge-far linear both;
+            animation-timeline: scroll(root block);
+            animation-range: 0 110vh;
+        }
+        :is([data-intensity="balanced"], [data-intensity="immersive"]) .ridge-mid {
+            animation: px-ridge-mid linear both;
+            animation-timeline: scroll(root block);
+            animation-range: 0 110vh;
+        }
+        :is([data-intensity="balanced"], [data-intensity="immersive"]) .ridge-near {
+            animation: px-ridge-near linear both;
+            animation-timeline: scroll(root block);
+            animation-range: 0 110vh;
+        }
+        /* Immersive pushes the depth a little further */
+        [data-intensity="immersive"] .ridge-near { animation-name: px-ridge-near-deep; }
+    }
+}
+@keyframes px-ridge-far  { to { transform: translateY(-22px); } }
+@keyframes px-ridge-mid  { to { transform: translateY(-46px); } }
+@keyframes px-ridge-near { to { transform: translateY(-80px); } }
+@keyframes px-ridge-near-deep { to { transform: translateY(-120px); } }
+
+/* ---------------- FOLIAGE DRAW-ON-SCROLL ---------------- */
+/* Line-art dividers draw themselves as they enter view. Paths carry
+   pathLength="1" so a single normalized dash animation fits every stroke.
+   Calm / reduced-motion / no view-timeline = fully drawn (static). */
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        :is([data-intensity="balanced"], [data-intensity="immersive"]) .foliage-divider path {
+            stroke-dasharray: 1;
+            stroke-dashoffset: 1;
+            animation: foliage-draw linear both;
+            animation-timeline: view();
+            animation-range: entry 5% cover 45%;
+        }
+    }
+}
+@keyframes foliage-draw { to { stroke-dashoffset: 0; } }
+
+/* ---------------- CONTENT REVEALS (Phase 5) ---------------- */
+/* ambient.js adds .fx-hidden to below-the-fold .reveal elements, then swaps
+   to .fx-in when they enter view. Above-the-fold elements are never hidden
+   (no flash), and without JS nothing is hidden at all (progressive). */
+.reveal.fx-hidden { opacity: 0; transform: translateY(1.25rem); }
+.reveal.fx-in {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.7s var(--ease-settle), transform 0.7s var(--ease-settle);
+}
+/* Staggered items (pillars, pills, feature points, peek cards) cascade in
+   by their index when the row enters together. */
+.reveal.fx-staggered.fx-in { transition-delay: calc(var(--i, 0) * 60ms); }
+
+/* Timeline trail draw-on-scroll: ambient.js sets --draw 0->1 per node.
+   Falls back to a fully drawn line when JS/scroll-timeline is absent. */
+@media (prefers-reduced-motion: no-preference) {
+    html.fx-ready:is([data-intensity="balanced"], [data-intensity="immersive"]) .tl-node:not(:last-child)::before {
+        transform: translateX(-50%) scaleY(var(--draw, 0));
+        transform-origin: top;
+        transition: transform 0.6s var(--ease-draw);
+    }
+}
+
+/* ---------------- FOCUS BLOOM (contact form) ---------------- */
+.form-group { position: relative; }
+.form-group label {
+    transition: color 0.25s var(--ease-bloom);
+}
+.form-group:focus-within label { color: var(--amber-deep); }
+[data-theme="dark"] .form-group:focus-within label { color: var(--amber); }
+/* The amber focus ring already lives in styles.css; warm it on bloom */
+@media (prefers-reduced-motion: no-preference) {
+    .form-group input,
+    .form-group textarea,
+    .form-group select { transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.35s var(--ease-bloom); }
+}
+
+/* ---------------- REDUCED MOTION HARD STOP ---------------- */
+@media (prefers-reduced-motion: reduce) {
+    .fx-fog i,
+    .ridge-far, .ridge-mid, .ridge-near,
+    .foliage-divider path { animation: none !important; }
+    .foliage-divider path { stroke-dashoffset: 0 !important; }
+    .reveal.fx-hidden { opacity: 1 !important; transform: none !important; }
+}

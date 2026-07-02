@@ -49,7 +49,8 @@
     /* Semantic aliases (existing components read these) */
     --bg-color:       var(--paper);
     --text-color:     var(--ink);
-    --accent-color:   var(--pine);     /* structural: logo, tags, primary btn */
+    --accent-color:   var(--pine);     /* structural fills: primary btn bg, focus */
+    --accent-text:    var(--pine);     /* accent TEXT (logo, tags, org) — brightens in dark */
     --secondary-text: var(--ink-2);
     --white:          var(--raised);
     --nav-height: 72px;
@@ -97,6 +98,7 @@
     --pine:       #2f5142;   /* lightened to read on dark */
     --moss:       #5e7f63;
     --fern:       #86a781;
+    --accent-text: #8fb389;  /* readable green for accent text on night bg */
     --amber:      #e0913f;   /* firelight */
     --amber-soft: #eaa862;
     --bark-deep:  #060a08;
@@ -119,7 +121,7 @@
     :root:not([data-theme="light"]) {
         --paper: #0e1512; --raised: #18211c; --sunken: #121a15;
         --ink: #e7ece4; --ink-2: #a7b3a8; --ink-3: #76847a; --line: #25312a;
-        --pine: #2f5142; --moss: #5e7f63; --fern: #86a781;
+        --pine: #2f5142; --moss: #5e7f63; --fern: #86a781; --accent-text: #8fb389;
         --amber: #e0913f; --amber-soft: #eaa862; --bark-deep: #060a08;
         --sky-1: #0f1620; --sky-2: #1a2230;
         --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.40);
@@ -199,7 +201,7 @@ a {
 .logo a {
     font-weight: 700;
     font-size: 1.2rem;
-    color: var(--accent-color);
+    color: var(--accent-text);
 }
 
 /* NAVIGATION LINKS & ANIMATIONS */
@@ -282,7 +284,7 @@ main {
 
 /* Small "Hi, I am..." text above the name */
 .greeting {
-    color: var(--accent-color);
+    color: var(--accent-text);
     font-weight: 600;
     margin-bottom: 0.5rem;
     display: block;
@@ -402,50 +404,10 @@ main {
 
 /* MOBILE ADJUSTMENTS */
 /* Changes the layout when viewed on a phone or tablet (screens smaller than 768px) */
+/* Tablet: keep the ascent hero (column, left-aligned) but ease padding/type */
 @media (max-width: 768px) {
-    /* Stacks the text and image vertically instead of side-by-side */
-    .hero {
-        flex-direction: column-reverse;
-        justify-content: center;
-        text-align: center;
-        padding: 60px 5%;
-    }
-
-    /* Adds space between the photo and the text */
-    .hero-text-container {
-        margin-top: 2rem;
-    }
-
-    /* Shrinks the text sizes slightly to fit better */
-    .name {
-        font-size: 2.5rem;
-    }
-
-    .tagline {
-        font-size: 1.5rem;
-    }
-
-    /* Centers the buttons */
-    .cta-buttons {
-        justify-content: center;
-    }
-
-    /* Shrinks the profile photo */
-    .hero-image img {
-        width: 200px;
-        height: 200px;
-    }
-    
-    /* Adjusts the navbar padding for smaller screens */
-    .navbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 10%;
-        height: var(--nav-height);
-        max-width: 1200px;
-        margin: 0 auto;
-    }
+    .tagline { font-size: 1.5rem; }
+    .hero { padding-inline: 8%; }
 }
 
 
@@ -564,7 +526,7 @@ main {
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 1px;
-    color: var(--accent-color); 
+    color: var(--accent-text);
     margin-bottom: 0.5rem;
     display: block;
 }
@@ -951,7 +913,7 @@ main {
 
 .cs-status {
     font-weight: 600;
-    color: var(--accent-color);
+    color: var(--accent-text);
     margin-bottom: 1.5rem;
 }
 
@@ -1116,7 +1078,7 @@ main {
 }
 
 .exp-org {
-    color: var(--accent-color);
+    color: var(--accent-text);
     font-weight: 600;
 }
 
@@ -1259,6 +1221,18 @@ main {
 .ridge-mid  { fill: var(--slate); opacity: 0.62; }
 .ridge-near { fill: var(--pine);  opacity: 0.92; }
 .hero-text-container { position: relative; z-index: 1; max-width: 640px; }
+/* Soft scrim so the name/hook keep AA contrast over ridgelines or rain,
+   in either theme (paper is light in day, near-black at night). */
+.hero-text-container::before {
+    content: "";
+    position: absolute;
+    inset: -2rem -1.75rem;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(115% 92% at 28% 44%,
+        color-mix(in srgb, var(--paper) 55%, transparent) 0%,
+        transparent 72%);
+}
 .hero-hook {
     font-size: clamp(1.05rem, 1.4vw, 1.3rem);
     color: var(--ink-2);
@@ -1381,19 +1355,35 @@ main {
 .timeline { list-style: none; margin: 0; padding: 0; }
 .tl-node {
     position: relative;
-    padding-left: var(--space-8);
+    padding-left: 2.5rem;
     padding-bottom: var(--space-12);
-    margin-left: 6px;
-    border-left: 2px solid var(--line);   /* the trail (static now; draws on scroll in a later phase) */
 }
-.tl-node:last-child { border-left-color: transparent; padding-bottom: 0; }
+.tl-node:last-child { padding-bottom: 0; }
+
+/* The trail: each segment runs from THIS node's marker centre to the next
+   node's marker centre (height:100% of the node spans exactly that gap),
+   so the line connects the first dot to the last with no over/undershoot.
+   The last node draws no segment. Becomes a draw-on-scroll trail in Phase 5. */
+.tl-node:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: calc(0.5rem + 7px);          /* first marker's centre */
+    width: 2px;
+    height: 100%;
+    background: var(--line);
+    transform: translateX(-50%);
+    z-index: 0;
+}
 .tl-marker {
     position: absolute;
-    left: -8px; top: 6px;
+    left: 7px; top: 0.5rem;
     width: 14px; height: 14px;
     border-radius: 50%;
     background: var(--amber);
     border: 3px solid var(--paper);
+    transform: translateX(-50%);
+    z-index: 1;
 }
 .tl-edu .tl-marker { background: var(--moss-gold); }
 .tl-edu-note {
@@ -1528,6 +1518,31 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
     .nav-links { transition: none; }
     .scroll-cue svg { animation: none; }
+}
+
+
+/* ============================================================
+   PHONES — tighten gutters, wrap actions, guard overflow
+   (headless Edge floors the viewport at ~474px, so these are
+   reasoned for the 320-430px range that real phones use)
+   ============================================================ */
+@media (max-width: 600px) {
+    body { overflow-x: clip; }              /* belt-and-suspenders vs sub-pixel spill */
+
+    .hero { padding-inline: 6%; }
+    .section-inner { padding: 0 6%; }
+    .content-page { padding: 1.5rem 6%; }
+    .projects-container { padding: 1.5rem 6%; }
+    .contact-section { padding: 1.5rem 6%; }
+    .featured { padding: 3rem 6% 3.25rem; }
+
+    /* Actions wrap to full-width taps instead of overflowing the row */
+    .cta-buttons { flex-wrap: wrap; }
+    .cta-buttons .btn { flex: 1 1 12rem; text-align: center; }
+    .project-links { flex-wrap: wrap; }
+
+    .peek-grid { gap: var(--space-4); }
+    .page-title { margin-bottom: 2.5rem; }
 }
 
 
