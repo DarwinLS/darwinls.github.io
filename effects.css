@@ -80,6 +80,21 @@
    as a 0s time animation instead) - verified against Edge 149. */
 @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
+        /* Pre-promote every animated scenery element so the compositor
+           owns them from the first frame (no mid-scroll re-raster). */
+        :is([data-intensity="balanced"], [data-intensity="immersive"]) :is(.sd, .vl, .scene-track) {
+            will-change: transform, opacity;
+        }
+        /* Whole-scene drift: the scenery itself slowly rides the scroll
+           (paths carry a 380px bottom bleed, so nothing un-fills). */
+        :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-descent .scene-track {
+            animation: track-drift-home linear both;
+            animation-timeline: scroll(root block);
+        }
+        :is([data-intensity="balanced"], [data-intensity="immersive"]) .vista .scene-track {
+            animation: track-drift-vista linear both;
+            animation-timeline: scroll(root block);
+        }
         :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-descent {
             & .sd-1  { animation: dsc-sd1 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
             & .sd-2  { animation: dsc-sd2 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
@@ -102,8 +117,11 @@
 @keyframes dsc-m1 { from { opacity: 0.85; } to { transform: translate3d(3%, -40px, 0); opacity: 0.15; } }
 @keyframes dsc-m2 { from { opacity: 0.7; } to { opacity: 0.25; } }
 /* mid ridges part around you */
-@keyframes dsc-sd3 { to { transform: translate3d(-2%, -90px, 0); } }
-@keyframes dsc-sd4 { to { transform: translate3d(2%, -140px, 0); } }
+@keyframes dsc-sd3 { to { transform: translate3d(-2%, -120px, 0); } }
+@keyframes dsc-sd4 { to { transform: translate3d(2%, -180px, 0); } }
+/* whole-scene scroll drift (the mountain itself moves with you) */
+@keyframes track-drift-home { to { transform: translateY(-6vh); } }
+@keyframes track-drift-vista { to { transform: translateY(-10vh); } }
 /* the valley forest rises from below to meet the footer */
 @keyframes dsc-sd5 { from { transform: translateY(22vh); } to { transform: translateY(0); } }
 @keyframes dsc-sd6 { from { transform: translateY(24vh); } to { transform: translateY(0); } }
@@ -204,7 +222,7 @@
 /* ---------------- REDUCED MOTION HARD STOP ---------------- */
 @media (prefers-reduced-motion: reduce) {
     .fx-haze,
-    .sd, .vl,
+    .sd, .vl, .scene-track,
     .firefly,
     .foliage-divider path { animation: none !important; }
     .foliage-divider path { stroke-dashoffset: 0 !important; }

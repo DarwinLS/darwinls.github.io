@@ -1598,13 +1598,29 @@ body::after {
     pointer-events: none;
     contain: strict;
 }
+/* The track carries the slow whole-scene scroll drift (effects.css);
+   layers animate on their own wrappers inside it. */
+.scene-track {
+    position: absolute;
+    inset: 0;
+}
+/* Each layer is a DIV wrapper (compositor-safe animation target);
+   the artwork svg inside never re-rasterizes when the wrapper moves. */
 .sd,
 .vl {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+}
+.sd > svg,
+.vl > svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     overflow: visible;
+    display: block;
 }
 /* Dusk pools in the valley as you arrive at the page floor (opacity
    animated by the scroll choreography; invisible when static). */

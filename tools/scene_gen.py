@@ -262,8 +262,8 @@ def smooth_ridge_path(layer, w, h, env, bleed=20, drop=0):
 
 
 def tree_points(xc, yb, th, hw, lean):
-    """Conifer spire: base, shoulder, branch-tier notch, leaning tip,
-    mirrored down. Reads as cryptomeria / hinoki at silhouette scale."""
+    """Small conifer spire for distant layers: base, shoulder, branch
+    notch, leaning tip, mirrored down."""
     return [
         (xc - hw, yb),
         (xc - hw * 0.30 + lean * 0.45, yb - th * 0.52),
@@ -275,15 +275,41 @@ def tree_points(xc, yb, th, hw, lean):
     ]
 
 
+def tree_points_tiered(xc, yb, th, hw, lean, rng):
+    """Alishan cryptomeria silhouette for near layers: three jittered
+    branch tiers with drooping shelf notches, narrowing to a slim
+    leaning tip. Reads as layered cedar rather than a plain spike."""
+    t1 = 0.26 + 0.07 * rng()
+    t2 = 0.52 + 0.07 * rng()
+    t3 = 0.77 + 0.05 * rng()
+    s1 = 0.80 + 0.12 * rng()
+    s2 = 0.56 + 0.10 * rng()
+    s3 = 0.34 + 0.08 * rng()
+    profile = [
+        (1.00, 0.0),
+        (0.48, t1), (s1, t1 + 0.05),
+        (0.34, t2), (s2, t2 + 0.045),
+        (0.17, t3), (s3, t3 + 0.04),
+    ]
+    up = [(xc - hw * w + lean * h, yb - th * h) for w, h in profile]
+    down = [(xc + hw * w + lean * h, yb - th * h) for w, h in reversed(profile)]
+    return up + [(xc + lean, yb - th)] + down
+
+
 def serrated_ridge_path(layer, w, h, env, bleed=20, drop=0):
-    """Forest ridge: the base curve carries irregular tree spires; ~20%
-    of steps are skipped for canopy gaps, and a slow height-multiplier
-    noise makes tree heights swell in grove waves."""
+    """Forest ridge: the base curve carries irregular trees; ~20% of
+    steps are skipped for canopy gaps, and a slow height-multiplier
+    noise makes tree heights swell in grove waves. Trees big enough to
+    read (treeH >= 20) get the tiered Alishan cryptomeria silhouette
+    plus occasional emergent old-growth giants; smaller trees stay
+    simple spires. Tiered layers round to integers (byte budget)."""
     y = ridge_profile(layer, w, env)
     rng = mulberry32(layer["seed"] * 7 + 13)
     grove = fbm(layer["seed"] * 3 + 5, 5)
     step, th_base, tw = layer["serr"]
     skip = layer.get("skip", 0.2)
+    tiered = th_base >= 20
+    fmt = (lambda v: str(int(round(v)))) if tiered else r1
     pts = [(float(-bleed), y(-bleed))]
     x = -bleed + step * 0.5
     while x < w + bleed:
@@ -294,12 +320,18 @@ def serrated_ridge_path(layer, w, h, env, bleed=20, drop=0):
             th = th_base * h_mul * (0.45 + 0.9 * rng())
             thw = (tw * (0.7 + 0.6 * rng())) / 2
             lean = -1.5 + 5 * rng()
-            pts.extend(tree_points(x, y(x), th, thw, lean))
+            if tiered:
+                if rng() < 0.08:
+                    th *= 1.5 + 0.2 * rng()   # emergent giant cedar
+                    thw *= 0.8
+                pts.extend(tree_points_tiered(x, y(x), th, thw, lean, rng))
+            else:
+                pts.extend(tree_points(x, y(x), th, thw, lean))
         x += step * (0.75 + 0.5 * rng())
     pts.append((w + bleed, y(w + bleed)))
-    d = f"M{r1(pts[0][0])},{r1(pts[0][1])}"
+    d = f"M{fmt(pts[0][0])},{fmt(pts[0][1])}"
     for px, py in pts[1:]:
-        d += f"L{r1(px)},{r1(py)}"
+        d += f"L{fmt(px)},{fmt(py)}"
     d += f"L{w + bleed},{h + drop}L{-bleed},{h + drop}Z"
     return d
 
@@ -359,22 +391,26 @@ def ridge_svg(layer, scene, w, h):
         "</linearGradient>"
     )
     d = (
-        serrated_ridge_path(layer, w, h, env, bleed=60, drop=220)
+        serrated_ridge_path(layer, w, h, env, bleed=60, drop=380)
         if layer["serr"]
-        else smooth_ridge_path(layer, w, h, env, bleed=60, drop=220)
+        else smooth_ridge_path(layer, w, h, env, bleed=60, drop=380)
     )
     return (
-        f'<svg class="{scene["prefix"]} {layer["name"]}" viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false">'
-        f'<defs>{grad}</defs><path fill="url(#{gid})" d="{d}"/></svg>'
+        f'<div class="{scene["prefix"]} {layer["name"]}">'
+        f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false">'
+        f'<defs>{grad}</defs><path fill="url(#{gid})" d="{d}"/></svg></div>'
     )
 
 
 def mist_svg(layer, scene, w, h):
     gid = f"g-{scene['grad_ns']}-{layer['name']}"
     d, grad = mist_band(layer, w, gid, bleed=60)
+    # Base opacity rides the inner svg so wrapper-level opacity
+    # animations (choreography) multiply with it instead of fighting.
     return (
-        f'<svg class="{scene["prefix"]} {layer["name"]} mist" viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false" style="opacity:{layer["opacity"]}">'
-        f'<defs>{grad}</defs><path fill="url(#{gid})" d="{d}"/></svg>'
+        f'<div class="{scene["prefix"]} {layer["name"]} mist">'
+        f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false" style="opacity:{layer["opacity"]}">'
+        f'<defs>{grad}</defs><path fill="url(#{gid})" d="{d}"/></svg></div>'
     )
 
 
@@ -387,9 +423,10 @@ def glow_svg(layer, scene, w, h):
         "</radialGradient>"
     )
     return (
-        f'<svg class="{scene["prefix"]} {layer["name"]} glow" viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false">'
+        f'<div class="{scene["prefix"]} {layer["name"]} glow">'
+        f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false">'
         f'<defs>{grad}</defs>'
-        f'<ellipse cx="{layer["cx"]}" cy="{layer["cy"]}" rx="{layer["rx"]}" ry="{layer["ry"]}" fill="url(#{gid})"/></svg>'
+        f'<ellipse cx="{layer["cx"]}" cy="{layer["cy"]}" rx="{layer["rx"]}" ry="{layer["ry"]}" fill="url(#{gid})"/></svg></div>'
     )
 
 
