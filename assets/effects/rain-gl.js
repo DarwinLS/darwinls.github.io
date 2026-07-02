@@ -49,9 +49,13 @@ float rainLayer(vec2 uv, float t, float cols, float speed,
     float bri = 0.6 + 0.4 * hash(id + 11.0);
     float th  = thick * (0.8 + 0.4 * hash(id * 5.1 + 3.0));
     float off = hash(id * 4.1) * 9.0;
-    float fy  = fract(uv.y * (cols * 0.14) + t * spd + off);
-    /* bright head, tail fading out over the dash length */
-    float dash = smoothstep(0.0, 0.02, fy) * smoothstep(len, len * 0.15, fy);
+    /* MINUS t so the pattern travels DOWN the screen (uv.y grows
+       downward): constant-phase points sit at uv.y = (c + t*spd)/k */
+    float fy  = fract(uv.y * (cols * 0.14) - t * spd + off);
+    /* bright head at the BOTTOM (leading) edge, tail fading upward */
+    float tail = smoothstep(0.0, len * 0.8, fy);
+    float head = 1.0 - smoothstep(len * 0.97, len, fy);
+    float dash = tail * head * step(fy, len);
     float line = smoothstep(th, th * soft, abs(fx));
     return dash * line * bri;
 }
@@ -84,12 +88,14 @@ void main(){
     o = vec4(uColor * alpha, alpha);                  /* premultiplied */
 }`;
 
-/* Per-intensity render profile. coarse pointers get fewer columns
-   and a lower DPR cap; the watchdog in ambient.js guards the rest. */
+/* Per-intensity render profile. The whole budget is engineered to fit
+   an INTEGRATED GPU comfortably: soft streaks hide the low DPR, and
+   balanced renders at ~30fps. coarse pointers go lower still; the
+   watchdog in ambient.js guards the rest. */
 function profile(level, coarse) {
     const p = level === "immersive"
-        ? { cols: [34, 22, 14], op: [0.46, 0.55], speed: 1.15, wind: 1.0, dpr: coarse ? 1.5 : 1.75 }
-        : { cols: [26, 15, 0],  op: [0.34, 0.44], speed: 1.0,  wind: 0.5, dpr: coarse ? 1.25 : 1.5 };
+        ? { cols: [34, 22, 14], op: [0.46, 0.55], speed: 1.15, wind: 1.0, dpr: coarse ? 1.0 : 1.25, minFrame: 0 }
+        : { cols: [26, 15, 0],  op: [0.34, 0.44], speed: 1.0,  wind: 0.5, dpr: coarse ? 1.0 : 1.25, minFrame: 31 };
     if (coarse) p.cols = p.cols.map((c) => Math.round(c * 0.7));
     return p;
 }
@@ -110,7 +116,12 @@ export function createRainGL(host, opts = {}) {
     canvas.className = "fx-rain is-fixed";
     canvas.setAttribute("aria-hidden", "true");
 
-    const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: false, depth: false });
+    /* low-power on purpose: ambient rain must never wake the discrete
+       GPU (fan spin) on dual-GPU laptops; the budget fits the iGPU */
+    const gl = canvas.getContext("webgl2", {
+        alpha: true, premultipliedAlpha: true, antialias: false, depth: false,
+        powerPreference: "low-power",
+    });
     if (!gl) return null;
 
     const vs = compile(gl, gl.VERTEX_SHADER, VERT);
@@ -165,9 +176,16 @@ export function createRainGL(host, opts = {}) {
         gl.viewport(0, 0, W, H);
     }
 
-    let raf = 0, running = false, t0 = performance.now();
+    let raf = 0, running = false, t0 = performance.now(), lastDraw = 0;
     function frame(now) {
         if (!running) return;
+        /* balanced runs at ~30fps: half the fragment work, invisible
+           on soft streaks */
+        if (prof.minFrame && now - lastDraw < prof.minFrame) {
+            raf = requestAnimationFrame(frame);
+            return;
+        }
+        lastDraw = now;
         gl.useProgram(prog);
         gl.uniform2f(U.uRes, W, H);
         gl.uniform1f(U.uTime, (now - t0) / 1000);

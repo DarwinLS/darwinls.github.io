@@ -311,7 +311,13 @@ function boot() {
     try { mountReveals(); } catch (e) {}
 }
 
-boot();
+/* Speculation Rules prerender pages in the background; never run the
+   rain (or any rAF work) inside a prerendered page - boot on reveal. */
+if (document.prerendering) {
+    document.addEventListener("prerenderingchange", boot, { once: true });
+} else {
+    boot();
+}
 
 // Re-mount when the intensity dial changes (nav toggle / device re-clamp).
 let remountTimer = 0;
