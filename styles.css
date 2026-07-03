@@ -46,8 +46,12 @@
     --sky-1: #c9d2d0;        /* home / dawn */
     --sky-2: #e8d9c2;
 
-    /* Scenery (generated SVG scenes; see tools/scene_gen.py) */
-    --ridge-ink: var(--pine);                                  /* mountain ink */
+    /* Scenery (generated SVG scenes; see tools/scene_gen.py).
+       Two canopy anchors: depth rotates the HUE from saturated
+       emerald (near, Alishan cedar) to cool jade (far), instead of
+       just fading one ink - that hue travel is what reads as lush. */
+    --canopy-near: #1d5c40;   /* deep saturated emerald */
+    --canopy-far:  #628f83;   /* cool jade, dissolving toward the sky */
     --mist-veil: color-mix(in srgb, var(--sky-2) 38%, white);  /* in-scene fog */
     --haze-a: color-mix(in srgb, var(--sky-2) 40%, transparent); /* drifting air */
     --haze-b: color-mix(in srgb, var(--mist) 22%, transparent);
@@ -110,8 +114,12 @@
     --bark-deep:  #060a08;
     --sky-1:      #0f1620;
     --sky-2:      #1a2230;
-    --ridge-ink:  #0c1410;   /* night mountains: near-silhouette, not lightened pine */
-    --mist-veil:  color-mix(in srgb, var(--mist) 24%, var(--sky-2)); /* moonlit, dimmer */
+    /* Night forest: near ridges sink to black-green silhouettes while
+       FAR ridges lift ABOVE the sky value (moonlit fog behind them),
+       stretching the value ladder so layers stay distinguishable. */
+    --canopy-near: #0e2018;
+    --canopy-far:  #52727a;
+    --mist-veil:  color-mix(in srgb, var(--mist) 32%, var(--sky-2)); /* moonlit fog */
     --haze-a: rgba(58, 74, 99, 0.16);
     --haze-b: rgba(143, 163, 176, 0.10);
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.40);
@@ -134,8 +142,9 @@
         --pine: #2f5142; --moss: #5e7f63; --fern: #86a781; --accent-text: #8fb389;
         --amber: #e0913f; --amber-soft: #eaa862; --bark-deep: #060a08;
         --sky-1: #0f1620; --sky-2: #1a2230;
-        --ridge-ink: #0c1410;
-        --mist-veil: color-mix(in srgb, var(--mist) 24%, var(--sky-2));
+        --canopy-near: #0e2018;
+        --canopy-far:  #52727a;
+        --mist-veil: color-mix(in srgb, var(--mist) 32%, var(--sky-2));
         --haze-a: rgba(58, 74, 99, 0.16);
         --haze-b: rgba(143, 163, 176, 0.10);
         --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.40);
@@ -1674,25 +1683,70 @@ body::after {
     opacity: 0;
 }
 
-/* Atmospheric-perspective ink ramp: every ridge fill is a vertical
-   gradient whose stops carry these classes, so the whole mountain
-   range re-tints itself from the theme tokens (light / dark / biome).
-   a = crest (more ink), b = base (dissolving into the sky). */
-.gs-1a { stop-color: color-mix(in srgb, var(--ridge-ink) 20%, var(--sky-2)); }
-.gs-1b { stop-color: color-mix(in srgb, var(--ridge-ink) 10%, var(--sky-2)); }
-.gs-2a { stop-color: color-mix(in srgb, var(--ridge-ink) 30%, var(--sky-2)); }
-.gs-2b { stop-color: color-mix(in srgb, var(--ridge-ink) 18%, var(--sky-2)); }
-.gs-3a { stop-color: color-mix(in srgb, var(--ridge-ink) 42%, var(--sky-2)); }
-.gs-3b { stop-color: color-mix(in srgb, var(--ridge-ink) 28%, var(--sky-2)); }
-.gs-4a { stop-color: color-mix(in srgb, var(--ridge-ink) 57%, var(--sky-2)); }
-.gs-4b { stop-color: color-mix(in srgb, var(--ridge-ink) 40%, var(--sky-2)); }
-.gs-5a { stop-color: color-mix(in srgb, var(--ridge-ink) 72%, var(--sky-2)); }
-.gs-5b { stop-color: color-mix(in srgb, var(--ridge-ink) 52%, var(--sky-2)); }
-.gs-6a { stop-color: color-mix(in srgb, var(--ridge-ink) 86%, var(--sky-2)); }
-.gs-6b { stop-color: color-mix(in srgb, var(--ridge-ink) 64%, var(--sky-2)); }
-.gs-7a { stop-color: color-mix(in srgb, var(--ridge-ink) 97%, var(--sky-2)); }
-.gs-7b { stop-color: color-mix(in srgb, var(--ridge-ink) 78%, var(--sky-2)); }
+/* Atmospheric-perspective canopy ramp: each depth N gets its own hue
+   (--cp-N interpolates jade-far -> emerald-near), then its gradient
+   stops haze that hue toward the sky. a = crest (lit canopy tops),
+   b = base (dissolving into fog). --gs-N* are plain custom properties
+   so themes/biomes can retune the whole range without touching svg. */
+:root {
+    --cp-1: color-mix(in srgb, var(--canopy-near) 10%, var(--canopy-far));
+    --cp-2: color-mix(in srgb, var(--canopy-near) 22%, var(--canopy-far));
+    --cp-3: color-mix(in srgb, var(--canopy-near) 36%, var(--canopy-far));
+    --cp-4: color-mix(in srgb, var(--canopy-near) 52%, var(--canopy-far));
+    --cp-5: color-mix(in srgb, var(--canopy-near) 68%, var(--canopy-far));
+    --cp-6: color-mix(in srgb, var(--canopy-near) 84%, var(--canopy-far));
+    --cp-7: var(--canopy-near);
+    /* far/high ridges dissolve into the UPPER sky (sky-1, cool), not
+       the warm horizon glow - warm mixing turned them khaki */
+    --gs-1a: color-mix(in srgb, var(--cp-1) 32%, var(--sky-1));
+    --gs-1b: color-mix(in srgb, var(--cp-1) 18%, var(--sky-1));
+    --gs-2a: color-mix(in srgb, var(--cp-2) 44%, var(--sky-1));
+    --gs-2b: color-mix(in srgb, var(--cp-2) 28%, var(--sky-1));
+    --gs-3a: color-mix(in srgb, var(--cp-3) 54%, var(--sky-2));
+    --gs-3b: color-mix(in srgb, var(--cp-3) 36%, var(--sky-2));
+    --gs-4a: color-mix(in srgb, var(--cp-4) 66%, var(--sky-2));
+    --gs-4b: color-mix(in srgb, var(--cp-4) 48%, var(--sky-2));
+    --gs-5a: color-mix(in srgb, var(--cp-5) 80%, var(--sky-2));
+    --gs-5b: color-mix(in srgb, var(--cp-5) 60%, var(--sky-2));
+    --gs-6a: color-mix(in srgb, var(--cp-6) 92%, var(--sky-2));
+    --gs-6b: color-mix(in srgb, var(--cp-6) 72%, var(--sky-2));
+    --gs-7a: var(--cp-7);
+    --gs-7b: color-mix(in srgb, var(--cp-7) 86%, var(--sky-2));
+    /* interior canopy shade one step past the nearest ramp */
+    --gs-8a: color-mix(in srgb, var(--cp-7) 86%, #06120c);
+}
+.gs-1a { stop-color: var(--gs-1a); }
+.gs-1b { stop-color: var(--gs-1b); }
+.gs-2a { stop-color: var(--gs-2a); }
+.gs-2b { stop-color: var(--gs-2b); }
+.gs-3a { stop-color: var(--gs-3a); }
+.gs-3b { stop-color: var(--gs-3b); }
+.gs-4a { stop-color: var(--gs-4a); }
+.gs-4b { stop-color: var(--gs-4b); }
+.gs-5a { stop-color: var(--gs-5a); }
+.gs-5b { stop-color: var(--gs-5b); }
+.gs-6a { stop-color: var(--gs-6a); }
+.gs-6b { stop-color: var(--gs-6b); }
+.gs-7a { stop-color: var(--gs-7a); }
+.gs-7b { stop-color: var(--gs-7b); }
 .gs-mist { stop-color: var(--mist-veil); }
+/* Moonlit crest rim: at night a faint fog-glow line hugs every ridge
+   silhouette so adjacent layers separate (the fill ladder alone is
+   too subtle in the dark range). The stroke rides the ridge paths
+   themselves; their bottom/side outline segments sit outside the
+   clipped viewport, so only the crest edge shows. */
+[data-theme="dark"] :is(.sd, .vl):not(.mist):not(.glow) svg path {
+    stroke: var(--mist-veil);
+    stroke-opacity: 0.3;
+    stroke-width: 1.2;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) :is(.sd, .vl):not(.mist):not(.glow) svg path {
+        stroke: var(--mist-veil);
+        stroke-opacity: 0.3;
+        stroke-width: 1.2;
+    }
+}
 .gs-glow { stop-color: color-mix(in srgb, var(--amber-soft) 40%, transparent); }
 [data-theme="dark"] .gs-glow { stop-color: color-mix(in srgb, var(--amber) 22%, transparent); }
 
@@ -1769,7 +1823,9 @@ body::after {
 
 /* Pre-color-mix browsers: flat token fills, hide the soft extras */
 @supports not (color: color-mix(in srgb, red, red)) {
-    .sd path, .vl path { fill: var(--slate); }
+    /* !important so the flat fill also beats the interior canopy
+       rows' inline style="fill:var(--gs-Na)" (a color-mix value) */
+    .sd path, .vl path { fill: var(--slate) !important; }
     .mist, .glow { display: none; }
     .footer-scene path { fill: var(--bark-deep); }
     .veil, .veil-column { background: var(--paper); }
