@@ -66,7 +66,9 @@
 }
 @media (prefers-reduced-motion: no-preference) {
     :is([data-intensity="balanced"], [data-intensity="immersive"]) .fx-haze {
-        animation: haze-drift 70s ease-in-out infinite alternate;
+        /* steps() so the sub-pixel drift only damages ~2 frames/s
+           instead of waking the compositor at every vsync forever */
+        animation: haze-drift 70s steps(140) infinite alternate;
     }
 }
 @keyframes haze-drift {
@@ -88,26 +90,23 @@
 }
 [data-theme="dark"] .fx-dew { opacity: 0.35; }
 
-/* ---------------- THE DESCENT (home scroll choreography) ----------------
-   The page-level scene walks you down the mountain: summits recede
-   and dim, the cloud sea thins and parts, mid ridges slide apart,
-   and the valley forest rises to meet the footer while dusk pools.
-   The UNANIMATED positions form the complete static composition, so
-   Firefox / reduced-motion / calm simply hold that pose. fill-mode
-   `both` means the pre-range pose (summit view) owns the hero.
-   NOTE: percentage ranges are percent-of-total-scroll; if Home gains
-   or loses sections, re-tune the mid/late ranges below. */
-/* NOTE: each layer keeps its FULL animation declaration in one rule.
-   Splitting the shorthand and animation-name across cascade rules
-   leaves the scroll timeline unattached in Blink (the animation runs
-   as a 0s time animation instead) - verified against Edge 149. */
+/* ---------------- SCENE DRIFT (scroll-linked) ----------------
+   ONE animated scenery layer: the track, carrying the whole scene in
+   a slow drift with the scroll. The old per-layer descent choreography
+   (11 animated fullscreen layers) is retired on ALL devices: measured
+   on the owner's 144Hz machine (tools/perf_probe.py, headed Edge),
+   each animated fullscreen layer costs ~1.5-3ms per scrolled frame
+   against a 6.9ms budget, so the full choreography pinned scrolling
+   to 72fps. Track-only + rain measured ~143Hz. Rain itself was FREE
+   (2-3 sheets, no measurable delta) - the "rain lag" was really the
+   choreography, conflated because the calm toggle removed both.
+   Unanimated, un-promoted layers flatten into the track's single
+   texture, which is also what keeps phones stable. */
+/* NOTE: keep the FULL animation declaration in one rule. Splitting
+   the shorthand and animation-name across cascade rules leaves the
+   scroll timeline unattached in Blink - verified against Edge 149. */
 @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
-        /* Whole-scene drift runs on EVERY pointer type: on phones the
-           track is the only animated scenery element, so the compositor
-           flattens all the layer divs into this one texture. (Per-layer
-           choreography below is fine-pointer only: promoting ~10 full-
-           screen layers at phone DPR evicted textures and flashed.) */
         :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-track {
             will-change: transform;
         }
@@ -120,68 +119,11 @@
             animation: track-drift-vista linear both;
             animation-timeline: scroll(root block);
         }
-        @media (pointer: fine) {
-            /* Pre-promote the animated scenery layers so the compositor
-               owns them from the first frame (no mid-scroll re-raster). */
-            :is([data-intensity="balanced"], [data-intensity="immersive"]) :is(.sd, .vl) {
-                will-change: transform, opacity;
-            }
-            :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-descent {
-                /* GEOMETRY moves all run 0..100%: every ridge is in motion
-                   from the first scrolled pixel (staged ranges made upper
-                   layers move while lower ones waited, then visibly "join").
-                   Only OPACITY effects (mist thinning, dusk) stay staged. */
-                & .sd-1  { animation: dsc-sd1 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
-                & .sd-2  { animation: dsc-sd2 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
-                & .sd-m1 { animation: dsc-m1 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
-                & .sd-3  { animation: dsc-sd3 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
-                & .sd-4  { animation: dsc-sd4 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
-                & .sd-m2 { animation: dsc-m2 linear both; animation-timeline: scroll(root block); animation-range: 10vh 60%; }
-                & .sd-5  { animation: dsc-sd5 linear both; animation-timeline: scroll(root block); animation-range: 0 90%; }
-                & .sd-6  { animation: dsc-sd6 linear both; animation-timeline: scroll(root block); animation-range: 0 92%; }
-                & .sd-7  { animation: dsc-sd7 linear both; animation-timeline: scroll(root block); animation-range: 0 95%; }
-                & .sd-m3 { animation: dsc-m3 linear both; animation-timeline: scroll(root block); animation-range: 40% 100%; }
-                & .sd-dusk { animation: dsc-dusk linear both; animation-timeline: scroll(root block); animation-range: 60% 100%; }
-            }
-        }
     }
 }
-/* summits recede and dim as you rise past them */
-@keyframes dsc-sd1 { to { transform: translateY(-30px); opacity: 0.55; } }
-@keyframes dsc-sd2 { to { transform: translateY(-55px); opacity: 0.6; } }
-/* the cloud sea drifts sideways and thins */
-@keyframes dsc-m1 { from { opacity: 0.85; } to { transform: translate3d(3%, -40px, 0); opacity: 0.15; } }
-@keyframes dsc-m2 { from { opacity: 0.7; } to { opacity: 0.25; } }
-/* mid ridges part around you */
-@keyframes dsc-sd3 { to { transform: translate3d(-2%, -120px, 0); } }
-@keyframes dsc-sd4 { to { transform: translate3d(2%, -180px, 0); } }
 /* whole-scene scroll drift (the mountain itself moves with you) */
 @keyframes track-drift-home { to { transform: translateY(-6vh); } }
 @keyframes track-drift-vista { to { transform: translateY(-10vh); } }
-/* the valley forest rises from below to meet the footer (gentle
-   offsets: large ones opened a visible gap against the mid ridges) */
-@keyframes dsc-sd5 { from { transform: translateY(12vh); } to { transform: translateY(0); } }
-@keyframes dsc-sd6 { from { transform: translateY(14vh); } to { transform: translateY(0); } }
-@keyframes dsc-sd7 { from { transform: translateY(16vh); } to { transform: translateY(0); } }
-/* valley mist pools and dusk gathers at the floor */
-@keyframes dsc-m3 { from { opacity: 0; } to { opacity: 0.55; } }
-@keyframes dsc-dusk { from { opacity: 0; } to { opacity: 0.8; } }
-
-/* Vista depth: the nearest layer of a page vista drifts up slightly
-   over the full scroll (same one-rule pattern as the descent above). */
-@supports (animation-timeline: scroll()) {
-    @media (prefers-reduced-motion: no-preference) and (pointer: fine) {
-        :is([data-intensity="balanced"], [data-intensity="immersive"]) .vista-projects .vl-3 {
-            animation: vista-near linear both;
-            animation-timeline: scroll(root block);
-        }
-        :is([data-intensity="balanced"], [data-intensity="immersive"]) .vista-about .vl-4 {
-            animation: vista-near linear both;
-            animation-timeline: scroll(root block);
-        }
-    }
-}
-@keyframes vista-near { to { transform: translateY(-3vh); } }
 
 /* ---------------- FOLIAGE DRAW-ON-SCROLL ---------------- */
 /* Line-art dividers draw themselves as they enter view. Paths carry

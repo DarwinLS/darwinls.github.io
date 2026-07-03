@@ -1289,7 +1289,10 @@ main {
 /* --- WHAT I DO --- */
 /* Side gutters so the veil floats clear of the viewport edges on
    mid-size screens (it goes full-bleed band on phones instead). */
-.what { padding: var(--section-y) 4%; }
+.what {
+    padding: var(--section-y) 4%;
+    scroll-margin-top: var(--nav-height);   /* native anchor fallback lands clear of the fixed nav */
+}
 .what-statement {
     font-size: clamp(1.6rem, 3.4vw, 2.6rem);
     line-height: 1.22;

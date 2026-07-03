@@ -81,6 +81,30 @@
         });
     })();
 
+    /* --- Graceful scroll cue ---
+       Eased rAF tween instead of the native jump. The anchor href is
+       the no-JS fallback; reduced-motion keeps the native behavior. */
+    var cue = document.querySelector(".scroll-cue");
+    if (cue) {
+        cue.addEventListener("click", function (e) {
+            if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            var target = document.querySelector(cue.getAttribute("href"));
+            if (!target) return;
+            e.preventDefault();
+            var navH = parseFloat(getComputedStyle(root).getPropertyValue("--nav-height")) || 0;
+            var from = window.scrollY;
+            var to = target.getBoundingClientRect().top + from - navH;
+            var dur = 900, t0 = performance.now();
+            (function step(t) {
+                var p = Math.min(1, (t - t0) / dur);
+                /* ease-in-out cubic */
+                var eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+                window.scrollTo(0, from + (to - from) * eased);
+                if (p < 1) requestAnimationFrame(step);
+            })(t0);
+        });
+    }
+
     /* --- Mobile hamburger drawer --- */
     var burger = document.getElementById("nav-burger");
     if (burger) {

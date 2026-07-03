@@ -37,8 +37,15 @@ function destroyAll() {
    RAIN - compositor-tiled sheets.
    ============================================================ */
 
+/* Dev-only override, set by the perf harness (tools/perf_probe.py)
+   before this module loads: { off, sheets, stepsPerSec }. Never set
+   in production pages. */
+const rainDebug = () => window.__rainDebug || null;
+
 /* null = no rain at all (calm, reduced motion, save-data, low-end) */
 function rainLevel() {
+    const dbg = rainDebug();
+    if (dbg && dbg.off) return null;
     const lvl = level();
     if (lvl === "calm" || !motionOK()) return null;
     const conn = navigator.connection;
@@ -101,12 +108,14 @@ function makeRainTile(rgb, sheet, densityMul, tileH) {
 function mountRain() {
     const lvl = rainLevel();
     if (!lvl) return;
+    const dbg = rainDebug();
     const coarse = !finePointer.matches;
     /* Touch devices get ONE mid-depth sheet on a half-height tile:
        fullscreen fixed layers cost real GPU memory at phone DPR, and
        rain must never evict the page's own layers. */
-    const sheets = coarse ? [SHEETS[1]]
+    let sheets = coarse ? [SHEETS[1]]
         : lvl === "immersive" ? SHEETS : SHEETS.slice(0, 2);
+    if (dbg && dbg.sheets) sheets = SHEETS.slice(0, dbg.sheets);
     const tileH = coarse ? 512 : 1024;
     const densityMul = (coarse ? 0.8 : 1) * (lvl === "immersive" ? 1 : 0.8);
 
@@ -117,8 +126,20 @@ function mountRain() {
     for (const sheet of sheets) {
         const move = document.createElement("div");
         move.className = "fx-rain-move";
-        move.style.setProperty("--dur", (sheet.dur * tileH) / 1024 + "s");
+        const dur = (sheet.dur * tileH) / 1024;
+        move.style.setProperty("--dur", dur + "s");
         move.style.setProperty("--tile-h", tileH + "px");
+        /* Quantized fall: with steps() the transform only changes N
+           times per second, so the frames in between carry no damage
+           and the compositor skips them entirely. A linear fall damages
+           EVERY vsync: on a 144Hz+ panel that keeps the GPU compositing
+           the whole page stack nonstop even while idle (fan spin-up).
+           32/s reads as smooth motion at rain speeds. */
+        const sps = dbg && dbg.linear ? 0 : (dbg && dbg.stepsPerSec) || 32;
+        if (sps) {
+            move.style.animationTimingFunction =
+                `steps(${Math.max(2, Math.round(dur * sps))})`;
+        }
         move.style.backgroundImage = `url(${makeRainTile(rainRGB(), sheet, densityMul, tileH)})`;
         host.appendChild(move);
         movers.push({ move, sheet });
