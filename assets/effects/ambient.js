@@ -48,8 +48,12 @@ function rainLevel() {
 }
 
 /* Depth sheets, far -> near. Each becomes one small tiling texture
-   drawn once, then scrolled forever by the compositor. */
-const TILE_W = 512, TILE_H = 1024;
+   drawn once, then scrolled forever by the compositor. The slant is
+   BAKED into the streaks (no rotated wrapper: the old rotate needed a
+   -14%/-10% oversize, and on DPR-3 phones those oversized sheets blew
+   the compositor's texture budget - other layers got evicted and the
+   page visibly flashed while scrolling). dur is seconds per 1024px. */
+const TILE_W = 512;
 const SHEETS = [
     { count: 170, len: 30, w: 1.0, a: 0.20, dur: 2.6, slant: 3 },
     { count: 100, len: 48, w: 1.4, a: 0.30, dur: 1.7, slant: 5 },
@@ -61,30 +65,34 @@ function rainRGB() {
         .replace(/\s+/g, ",");
 }
 
-/* One tile: vertical streaks with a bright falling head fading up,
-   drawn around the vertical seam so the loop is seamless. */
-function makeRainTile(rgb, sheet, densityMul) {
+/* One tile: slanted streaks with a bright falling head fading up,
+   drawn around both seams (3x3 offsets) so the loop is seamless. */
+function makeRainTile(rgb, sheet, densityMul, tileH) {
     const c = document.createElement("canvas");
     c.width = TILE_W;
-    c.height = TILE_H;
+    c.height = tileH;
     const ctx = c.getContext("2d");
     ctx.lineCap = "round";
-    const n = Math.round(sheet.count * densityMul);
+    const slope = Math.tan((sheet.slant * Math.PI) / 180);
+    const n = Math.round(sheet.count * densityMul * (tileH / 1024));
     for (let i = 0; i < n; i++) {
         const x = Math.random() * TILE_W;
-        const y = Math.random() * TILE_H;
+        const y = Math.random() * tileH;
         const len = sheet.len * (0.55 + 0.9 * Math.random());
         const a = sheet.a * (0.55 + 0.9 * Math.random());
+        const dx = slope * len;
         ctx.lineWidth = sheet.w * (0.75 + 0.5 * Math.random());
-        for (const yy of [y - TILE_H, y, y + TILE_H]) {
-            const g = ctx.createLinearGradient(x, yy - len, x, yy);
-            g.addColorStop(0, `rgba(${rgb},0)`);
-            g.addColorStop(1, `rgba(${rgb},${a})`);
-            ctx.strokeStyle = g;
-            ctx.beginPath();
-            ctx.moveTo(x, yy - len);
-            ctx.lineTo(x, yy);
-            ctx.stroke();
+        for (const ox of [-TILE_W, 0, TILE_W]) {
+            for (const oy of [-tileH, 0, tileH]) {
+                const g = ctx.createLinearGradient(x + ox - dx, y + oy - len, x + ox, y + oy);
+                g.addColorStop(0, `rgba(${rgb},0)`);
+                g.addColorStop(1, `rgba(${rgb},${a})`);
+                ctx.strokeStyle = g;
+                ctx.beginPath();
+                ctx.moveTo(x + ox - dx, y + oy - len);
+                ctx.lineTo(x + ox, y + oy);
+                ctx.stroke();
+            }
         }
     }
     return c.toDataURL();
@@ -94,32 +102,34 @@ function mountRain() {
     const lvl = rainLevel();
     if (!lvl) return;
     const coarse = !finePointer.matches;
-    const sheets = lvl === "immersive" ? SHEETS : SHEETS.slice(0, 2);
-    const densityMul = (coarse ? 0.6 : 1) * (lvl === "immersive" ? 1 : 0.8);
+    /* Touch devices get ONE mid-depth sheet on a half-height tile:
+       fullscreen fixed layers cost real GPU memory at phone DPR, and
+       rain must never evict the page's own layers. */
+    const sheets = coarse ? [SHEETS[1]]
+        : lvl === "immersive" ? SHEETS : SHEETS.slice(0, 2);
+    const tileH = coarse ? 512 : 1024;
+    const densityMul = (coarse ? 0.8 : 1) * (lvl === "immersive" ? 1 : 0.8);
 
     const host = document.createElement("div");
     host.className = "fx-rain is-fixed";
     host.setAttribute("aria-hidden", "true");
     const movers = [];
     for (const sheet of sheets) {
-        const slant = document.createElement("div");
-        slant.className = "fx-rain-slant";
-        slant.style.setProperty("--slant", sheet.slant + "deg");
         const move = document.createElement("div");
         move.className = "fx-rain-move";
-        move.style.setProperty("--dur", sheet.dur + "s");
-        move.style.backgroundImage = `url(${makeRainTile(rainRGB(), sheet, densityMul)})`;
-        slant.appendChild(move);
-        host.appendChild(slant);
+        move.style.setProperty("--dur", (sheet.dur * tileH) / 1024 + "s");
+        move.style.setProperty("--tile-h", tileH + "px");
+        move.style.backgroundImage = `url(${makeRainTile(rainRGB(), sheet, densityMul, tileH)})`;
+        host.appendChild(move);
         movers.push({ move, sheet });
     }
     document.body.appendChild(host);
 
-    /* re-tint on theme flip (regenerating three small tiles is cheap) */
+    /* re-tint on theme flip (regenerating the small tiles is cheap) */
     const themeObs = new MutationObserver(() => {
         const rgb = rainRGB();
         for (const m of movers) {
-            m.move.style.backgroundImage = `url(${makeRainTile(rgb, m.sheet, densityMul)})`;
+            m.move.style.backgroundImage = `url(${makeRainTile(rgb, m.sheet, densityMul, tileH)})`;
         }
     });
     themeObs.observe(root, { attributes: true, attributeFilter: ["data-theme"] });

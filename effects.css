@@ -36,21 +36,19 @@
     overflow: hidden;
     contain: strict;
 }
-.fx-rain-slant {
-    position: absolute;
-    inset: -14% -10%;
-    transform: rotate(var(--slant, 4deg));
-}
+/* Slant is baked into the tile art (ambient.js), so each sheet is a
+   plain viewport-sized layer: no rotated oversize wrapper eating GPU
+   memory on high-DPR phones. --tile-h is set inline per sheet. */
 .fx-rain-move {
     position: absolute;
-    inset: -1024px 0 0 0;
+    inset: calc(-1 * var(--tile-h, 1024px)) 0 0 0;
     background-repeat: repeat;
-    background-size: 512px 1024px;
+    background-size: 512px var(--tile-h, 1024px);
     animation: rain-fall var(--dur, 1.6s) linear infinite;
     will-change: transform;
 }
 /* one tile height per loop = seamless */
-@keyframes rain-fall { to { transform: translateY(1024px); } }
+@keyframes rain-fall { to { transform: translateY(var(--tile-h, 1024px)); } }
 
 /* ---------------- ATMOSPHERIC HAZE ----------------
    The fog replacement: pre-feathered radial gradients, pre-tinted
@@ -105,13 +103,15 @@
    as a 0s time animation instead) - verified against Edge 149. */
 @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
-        /* Pre-promote every animated scenery element so the compositor
-           owns them from the first frame (no mid-scroll re-raster). */
-        :is([data-intensity="balanced"], [data-intensity="immersive"]) :is(.sd, .vl, .scene-track) {
-            will-change: transform, opacity;
+        /* Whole-scene drift runs on EVERY pointer type: on phones the
+           track is the only animated scenery element, so the compositor
+           flattens all the layer divs into this one texture. (Per-layer
+           choreography below is fine-pointer only: promoting ~10 full-
+           screen layers at phone DPR evicted textures and flashed.) */
+        :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-track {
+            will-change: transform;
         }
-        /* Whole-scene drift: the scenery itself slowly rides the scroll
-           (paths carry a 380px bottom bleed, so nothing un-fills). */
+        /* (paths carry a 380px bottom bleed, so drift never un-fills) */
         :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-descent .scene-track {
             animation: track-drift-home linear both;
             animation-timeline: scroll(root block);
@@ -120,22 +120,29 @@
             animation: track-drift-vista linear both;
             animation-timeline: scroll(root block);
         }
-        :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-descent {
-            /* GEOMETRY moves all run 0..100%: every ridge is in motion
-               from the first scrolled pixel (staged ranges made upper
-               layers move while lower ones waited, then visibly "join").
-               Only OPACITY effects (mist thinning, dusk) stay staged. */
-            & .sd-1  { animation: dsc-sd1 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
-            & .sd-2  { animation: dsc-sd2 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
-            & .sd-m1 { animation: dsc-m1 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
-            & .sd-3  { animation: dsc-sd3 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
-            & .sd-4  { animation: dsc-sd4 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
-            & .sd-m2 { animation: dsc-m2 linear both; animation-timeline: scroll(root block); animation-range: 10vh 60%; }
-            & .sd-5  { animation: dsc-sd5 linear both; animation-timeline: scroll(root block); animation-range: 0 90%; }
-            & .sd-6  { animation: dsc-sd6 linear both; animation-timeline: scroll(root block); animation-range: 0 92%; }
-            & .sd-7  { animation: dsc-sd7 linear both; animation-timeline: scroll(root block); animation-range: 0 95%; }
-            & .sd-m3 { animation: dsc-m3 linear both; animation-timeline: scroll(root block); animation-range: 40% 100%; }
-            & .sd-dusk { animation: dsc-dusk linear both; animation-timeline: scroll(root block); animation-range: 60% 100%; }
+        @media (pointer: fine) {
+            /* Pre-promote the animated scenery layers so the compositor
+               owns them from the first frame (no mid-scroll re-raster). */
+            :is([data-intensity="balanced"], [data-intensity="immersive"]) :is(.sd, .vl) {
+                will-change: transform, opacity;
+            }
+            :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-descent {
+                /* GEOMETRY moves all run 0..100%: every ridge is in motion
+                   from the first scrolled pixel (staged ranges made upper
+                   layers move while lower ones waited, then visibly "join").
+                   Only OPACITY effects (mist thinning, dusk) stay staged. */
+                & .sd-1  { animation: dsc-sd1 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
+                & .sd-2  { animation: dsc-sd2 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
+                & .sd-m1 { animation: dsc-m1 linear both; animation-timeline: scroll(root block); animation-range: 0 120vh; }
+                & .sd-3  { animation: dsc-sd3 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
+                & .sd-4  { animation: dsc-sd4 linear both; animation-timeline: scroll(root block); animation-range: 0 100%; }
+                & .sd-m2 { animation: dsc-m2 linear both; animation-timeline: scroll(root block); animation-range: 10vh 60%; }
+                & .sd-5  { animation: dsc-sd5 linear both; animation-timeline: scroll(root block); animation-range: 0 90%; }
+                & .sd-6  { animation: dsc-sd6 linear both; animation-timeline: scroll(root block); animation-range: 0 92%; }
+                & .sd-7  { animation: dsc-sd7 linear both; animation-timeline: scroll(root block); animation-range: 0 95%; }
+                & .sd-m3 { animation: dsc-m3 linear both; animation-timeline: scroll(root block); animation-range: 40% 100%; }
+                & .sd-dusk { animation: dsc-dusk linear both; animation-timeline: scroll(root block); animation-range: 60% 100%; }
+            }
         }
     }
 }
@@ -163,7 +170,7 @@
 /* Vista depth: the nearest layer of a page vista drifts up slightly
    over the full scroll (same one-rule pattern as the descent above). */
 @supports (animation-timeline: scroll()) {
-    @media (prefers-reduced-motion: no-preference) {
+    @media (prefers-reduced-motion: no-preference) and (pointer: fine) {
         :is([data-intensity="balanced"], [data-intensity="immersive"]) .vista-projects .vl-3 {
             animation: vista-near linear both;
             animation-timeline: scroll(root block);

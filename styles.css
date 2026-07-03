@@ -385,11 +385,18 @@ main {
 }
 
 /* BOTTOM FOOTER */
+/* No hard top edge and no gap: the footer opens on the same wash the
+   Home about-teaser ends on (identical color at the seam), then dusk
+   deepens to bark behind the treeline over the scene-svg's height. */
 .site-footer {
+    --footer-scene-h: clamp(90px, 13vw, 180px);
     text-align: center;
     padding: var(--space-12) 2rem;
-    background-color: var(--bark-deep);
-    margin-top: var(--space-16);
+    margin-top: 0;
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--sky-2) 45%, transparent) 0,
+        color-mix(in srgb, var(--bark-deep) 55%, transparent) calc(var(--footer-scene-h) * 0.55),
+        var(--bark-deep) var(--footer-scene-h));
     color: #aeb9ae; /* always light — footer is the dark valley floor */
 }
 
@@ -1226,18 +1233,24 @@ main {
 .hero-text-container { position: relative; z-index: 1; max-width: 640px; }
 /* Soft scrim so the name/hook keep AA contrast over ridgelines or rain,
    in either theme (paper is light in day, near-black at night).
-   Fully feathered: the gradient dissolves to nothing well inside its
-   box, so there is no visible container edge over the scenery. */
+   closest-side + centered = the ellipse is inscribed in its own box,
+   so alpha reaches ZERO before any edge: no visible cut, ever (the old
+   off-center 58%-radius ellipse clipped mid-alpha on the left). */
 .hero-text-container::before {
     content: "";
     position: absolute;
-    inset: -4.5rem -6rem;
+    inset: -5rem -7rem;
     z-index: -1;
     pointer-events: none;
-    background: radial-gradient(58% 54% at 46% 47%,
-        color-mix(in srgb, var(--paper) 64%, transparent) 0%,
-        color-mix(in srgb, var(--paper) 40%, transparent) 52%,
-        transparent 96%);
+    background: radial-gradient(closest-side at 50% 50%,
+        color-mix(in srgb, var(--paper) 62%, transparent) 0%,
+        color-mix(in srgb, var(--paper) 38%, transparent) 55%,
+        transparent 100%);
+}
+@media (max-width: 700px) {
+    /* keep the halo box inside the narrow viewport (alpha is 0 at the
+       box edge, so even a slight viewport crop stays invisible) */
+    .hero-text-container::before { inset: -3rem -1.25rem; }
 }
 .hero-hook {
     font-size: clamp(1.05rem, 1.4vw, 1.3rem);
@@ -1245,6 +1258,9 @@ main {
     max-width: 32em;
     margin-bottom: var(--space-8);
 }
+/* No surface at all: the cue is small enough to read bare over the
+   mist band; a paper-tinted text-shadow keeps the letters legible
+   without drawing any visible shape behind them. */
 .scroll-cue {
     position: absolute;
     z-index: 1;
@@ -1259,16 +1275,21 @@ main {
     text-transform: uppercase;
     letter-spacing: 0.14em;
     color: var(--ink-2);
-    padding: 0.9rem 1.6rem;
-    background: radial-gradient(50% 60% at 50% 50%,
-        color-mix(in srgb, var(--paper) 58%, transparent) 0%,
-        transparent 92%);
+    padding: 0.6rem 1rem;
+    /* stacked glyph-hugging halo: legible over dark trees, shapeless */
+    text-shadow: 0 0 2px var(--paper), 0 0 6px var(--paper),
+        0 0 12px var(--paper), 0 0 20px var(--paper);
 }
-.scroll-cue svg { animation: cue-bob 1.8s ease-in-out infinite; }
+.scroll-cue svg {
+    animation: cue-bob 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 3px var(--paper)) drop-shadow(0 0 8px var(--paper));
+}
 @keyframes cue-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 
 /* --- WHAT I DO --- */
-.what { padding: var(--section-y) 0; }
+/* Side gutters so the veil floats clear of the viewport edges on
+   mid-size screens (it goes full-bleed band on phones instead). */
+.what { padding: var(--section-y) 4%; }
 .what-statement {
     font-size: clamp(1.6rem, 3.4vw, 2.6rem);
     line-height: 1.22;
@@ -1290,7 +1311,7 @@ main {
 .featured { padding-block: var(--section-y); }
 
 /* --- SELECTED WORK PEEK --- */
-.work-peek { padding: var(--section-y) 0; }
+.work-peek { padding: var(--section-y) 4%; }   /* same gutters as .what */
 .peek-head {
     display: flex;
     justify-content: space-between;
@@ -1321,24 +1342,36 @@ main {
 .peek-card p { color: var(--ink-2); font-size: 1rem; }
 
 /* --- ABOUT TEASER --- */
+/* The wash deepens toward the page floor and hands off to the footer
+   at the exact same color (footer gradient starts where this ends),
+   so section and footer read as one continuous dusk. */
 .about-teaser {
     padding: var(--section-y) 0;
+    margin-bottom: 0;
     background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--sky-2) 45%, transparent));
 }
 .teaser-inner {
     display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: var(--space-12);
+    grid-template-columns: clamp(150px, 20vw, 220px) 1fr;
+    gap: clamp(var(--space-8), 5vw, var(--space-12));
     align-items: center;
 }
 .teaser-portrait { margin: 0; }
 .teaser-portrait img {
     width: 100%;
+    max-width: 100%;
     aspect-ratio: 1;
     object-fit: cover;
     border-radius: 50%;
     border: 4px solid var(--raised);
     box-shadow: var(--shadow-lift);
+    display: block;
+}
+/* Phones: stack, and keep the portrait a modest accent (a fixed-width
+   grid column here is what used to shove the page past the viewport) */
+@media (max-width: 700px) {
+    .teaser-inner { grid-template-columns: 1fr; gap: var(--space-6); }
+    .teaser-portrait { width: min(160px, 42vw); margin-inline: auto; }
 }
 .teaser-text h2 {
     font-size: clamp(1.5rem, 3vw, 2.2rem);
@@ -1668,7 +1701,7 @@ body::after {
 .footer-scene svg {
     display: block;
     width: 100%;
-    height: clamp(90px, 13vw, 180px);
+    height: var(--footer-scene-h, clamp(90px, 13vw, 180px));
 }
 .ft-1 { fill: color-mix(in srgb, var(--bark-deep) 72%, var(--sky-2)); }
 .ft-2 { fill: color-mix(in srgb, var(--bark-deep) 86%, var(--sky-2)); }
@@ -1709,6 +1742,20 @@ body::after {
     margin-inline: auto;
     padding: 1.75rem 3rem;
 }
+/* About's reading column floats clear of the edges on mid screens */
+@media (max-width: 1040px) {
+    .content-page.veil-column { margin-inline: 4%; }
+}
+/* Phones: full-width veils become clean full-bleed BANDS. A rounded
+   corner pressed against the screen edge reads as a layout mistake;
+   squared edge-to-edge surfaces read as intentional. Narrow
+   fit-content plates (.page-title, .cs-intro) keep their radius
+   because they keep real gaps. */
+@media (max-width: 700px) {
+    .what, .work-peek { padding-inline: 0; }
+    .section-inner.veil { border-radius: 0; padding: 2rem 6%; }
+    .content-page.veil-column { border-radius: 0; margin-inline: 0; }
+}
 /* Phones: prune composited scene layers (11 -> 8 on home; vistas
    drop their farthest ridge) to bound GPU memory on small devices. */
 @media (max-width: 700px) {
@@ -1723,6 +1770,8 @@ body::after {
     .mist, .glow { display: none; }
     .footer-scene path { fill: var(--bark-deep); }
     .veil, .veil-column { background: var(--paper); }
+    .site-footer { background: var(--bark-deep); }
+    .about-teaser { background: none; }
 }
 
 /* About lede: bio text beside the portrait that the Home teaser

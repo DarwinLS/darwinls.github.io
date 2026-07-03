@@ -107,17 +107,19 @@ SCENES = {
             {"type": "ridge", "name": "vl-1", "seed": 501, "baseline": 812, "amp": 60, "freq": 1.6, "sharp": 1.55, "skew": 0.15, "ramp": 1, "serr": None},
         ],
     },
-    # FOOTER: valley-floor treelines, all pages, in-flow svg.
-    # Two lines only (three read as clutter at 180px): a soft distant
-    # line behind a dark near one, with a whisper of pooled mist.
+    # FOOTER: valley floor, all pages, in-flow svg. ONE treeline, at
+    # the same tree rhythm as the page scenes' near ridge (sd-7): two
+    # compact lines squeezed into a 180px band read as clutter next to
+    # the airy ranges behind them. Depth comes from a smooth treeless
+    # ridge and pooled mist instead of more trees.
     "footer-valley": {
         "kind": "footer",
         "frame": (1440, 180),
         "grad_ns": "foot",
         "layers": [
-            {"type": "treeline", "name": "ft-1", "seed": 601, "baseline": 112, "amp": 22, "freq": 2.4, "sharp": 1.15, "skew": 0.25, "serr": (27, 30, 26), "skip": 0.36},
-            {"type": "mist",     "name": "ft-m1", "seed": 651, "yc": 142, "thick": 65, "opacity": 0.25},
-            {"type": "treeline", "name": "ft-3", "seed": 603, "baseline": 150, "amp": 18, "freq": 3.2, "sharp": 1.05, "skew": 0.30, "serr": (22, 42, 32), "skip": 0.3},
+            {"type": "treeline", "name": "ft-1", "seed": 601, "baseline": 116, "amp": 16, "freq": 2.0, "sharp": 1.25, "skew": 0.20, "serr": None},
+            {"type": "mist",     "name": "ft-m1", "seed": 651, "yc": 136, "thick": 60, "opacity": 0.3},
+            {"type": "treeline", "name": "ft-3", "seed": 603, "baseline": 154, "amp": 14, "freq": 2.8, "sharp": 1.10, "skew": 0.30, "serr": (15, 40, 20), "skip": 0.2},
         ],
         "fireflies": {"seed": 691, "count": 9, "x": (70, 1380), "y": (72, 148), "r": (1.5, 2.5)},
     },
@@ -459,7 +461,8 @@ def footer_scene(scene):
             defs.append(grad)
             parts.append(f'<path fill="url(#{gid})" opacity="{layer["opacity"]}" d="{d}"/>')
         else:
-            parts.append(f'<path class="{layer["name"]}" d="{serrated_ridge_path(layer, w, h, None)}"/>')
+            path_fn = serrated_ridge_path if layer.get("serr") else smooth_ridge_path
+            parts.append(f'<path class="{layer["name"]}" d="{path_fn(layer, w, h, None)}"/>')
     ff = scene.get("fireflies")
     if ff:
         rng = mulberry32(ff["seed"])
