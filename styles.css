@@ -394,19 +394,28 @@ main {
 }
 
 /* BOTTOM FOOTER */
-/* No hard top edge and no gap: the footer opens on the same wash the
-   Home about-teaser ends on (identical color at the seam), then dusk
-   deepens to bark behind the treeline over the scene-svg's height. */
+/* No hard top edge anywhere: by default the footer fades IN from
+   fully transparent (the page scene dissolves gradually into dusk,
+   then bark, behind the treeline). Home overrides the start color to
+   the exact wash its about-teaser ends on, so that seam stays
+   invisible too. */
 .site-footer {
     --footer-scene-h: clamp(90px, 13vw, 180px);
     text-align: center;
     padding: var(--space-12) 2rem;
     margin-top: 0;
     background: linear-gradient(180deg,
+        transparent 0,
+        color-mix(in srgb, var(--sky-2) 45%, transparent) calc(var(--footer-scene-h) * 0.4),
+        color-mix(in srgb, var(--bark-deep) 55%, transparent) calc(var(--footer-scene-h) * 0.75),
+        var(--bark-deep) var(--footer-scene-h));
+    color: #aeb9ae; /* always light — footer is the dark valley floor */
+}
+[data-biome="home"] .site-footer {
+    background: linear-gradient(180deg,
         color-mix(in srgb, var(--sky-2) 45%, transparent) 0,
         color-mix(in srgb, var(--bark-deep) 55%, transparent) calc(var(--footer-scene-h) * 0.55),
         var(--bark-deep) var(--footer-scene-h));
-    color: #aeb9ae; /* always light — footer is the dark valley floor */
 }
 
 /* Social link icons in the footer */
@@ -1240,36 +1249,19 @@ main {
     min-height: calc(100svh - var(--nav-height));
 }
 .hero-text-container { position: relative; z-index: 1; max-width: 640px; }
-/* Soft scrim so the name/hook keep AA contrast over ridgelines or rain,
-   in either theme (paper is light in day, near-black at night).
-   closest-side + centered = the ellipse is inscribed in its own box,
-   so alpha reaches ZERO before any edge: no visible cut, ever (the old
-   off-center 58%-radius ellipse clipped mid-alpha on the left). */
-.hero-text-container::before {
-    content: "";
-    position: absolute;
-    inset: -5rem -7rem;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(closest-side at 50% 50%,
-        color-mix(in srgb, var(--paper) 62%, transparent) 0%,
-        color-mix(in srgb, var(--paper) 38%, transparent) 55%,
-        transparent 100%);
-}
-@media (max-width: 700px) {
-    /* keep the halo box inside the narrow viewport (alpha is 0 at the
-       box edge, so even a slight viewport crop stays invisible) */
-    .hero-text-container::before { inset: -3rem -1.25rem; }
-}
+/* No CSS scrim behind the hero text: readability comes from the
+   scene itself (the sd-fog valley-fog pocket generated into the Home
+   scenery sits exactly behind the text zone, in the mist color, both
+   themes). The landscape is the surface; there is no UI glow. */
 .hero-hook {
     font-size: clamp(1.05rem, 1.4vw, 1.3rem);
     color: var(--ink-2);
     max-width: 32em;
     margin-bottom: var(--space-8);
 }
-/* No surface at all: the cue is small enough to read bare over the
-   mist band; a paper-tinted text-shadow keeps the letters legible
-   without drawing any visible shape behind them. */
+/* The cue sits over the dark near canopy in BOTH themes, so it reads
+   like a photo caption: fixed ivory, one crisp hairline shadow, no
+   halo (paper-glow halos fuzzed the thin letterforms in light mode). */
 .scroll-cue {
     position: absolute;
     z-index: 1;
@@ -1281,18 +1273,14 @@ main {
     align-items: center;
     gap: 0.3rem;
     font-size: 0.72rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: var(--ink-2);
+    color: #e9ede7;
     padding: 0.6rem 1rem;
-    /* stacked glyph-hugging halo: legible over dark trees, shapeless */
-    text-shadow: 0 0 2px var(--paper), 0 0 6px var(--paper),
-        0 0 12px var(--paper), 0 0 20px var(--paper);
+    text-shadow: 0 1px 2px rgba(10, 16, 13, 0.45);
 }
-.scroll-cue svg {
-    animation: cue-bob 1.8s ease-in-out infinite;
-    filter: drop-shadow(0 0 3px var(--paper)) drop-shadow(0 0 8px var(--paper));
-}
+.scroll-cue svg { animation: cue-bob 1.8s ease-in-out infinite; }
 @keyframes cue-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 
 /* --- WHAT I DO --- */
@@ -1621,11 +1609,28 @@ body::after {
     inset: 0;
     z-index: -3;
     pointer-events: none;
-    background: linear-gradient(180deg,
+    background: var(--sky-gradient);
+}
+:root {
+    /* one definition, used by .sky-backdrop on desktop and painted
+       directly onto the scene container on phones (layer diet below) */
+    --sky-gradient: linear-gradient(180deg,
         var(--sky-1) 0%,
         var(--sky-2) 42%,
         color-mix(in srgb, var(--sky-2) 45%, var(--paper)) 72%,
         var(--paper) 100%);
+}
+/* Phones: fullscreen fixed layers are the scarce resource (DPR 3
+   makes each one ~13MB of compositor texture; too many and Android
+   Chrome evicts layers mid-scroll and the page visibly flashes).
+   Cut from five to two: sky merges INTO the scene container, haze
+   and film grain go entirely (the in-scene mist bands carry the
+   atmosphere at phone size). vt-sky moves with it (transitions.css). */
+@media (pointer: coarse) {
+    .sky-backdrop { display: none; }
+    .scene-descent, .vista { background: var(--sky-gradient); }
+    .fx-haze { display: none; }
+    body::after { display: none; }   /* film grain */
 }
 
 /* ============================================================

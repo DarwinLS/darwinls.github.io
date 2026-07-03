@@ -33,9 +33,9 @@ INJECT = "--inject" in sys.argv
 # the width. ramp = which .gs-N gradient ramp colors the layer
 # (1 = farthest / dissolved into sky, 7 = nearest / most ink).
 # canopy = billowing forest mass riding the ridge: r = clump radius
-# range, em/em_h = emergent-giant probability per clump + height,
-# inner = y-offset of a deeper interior canopy row. No canopy = bare
-# smooth ridge. env(x) optionally scales amplitude across the width.
+# range, inner = y-offset of a deeper interior canopy row. No canopy
+# = bare smooth ridge. fog = feathered radial mist pocket (diegetic
+# readability surface). env(x) optionally scales amplitude.
 
 FRAME = (1440, 900)
 
@@ -52,11 +52,12 @@ SCENES = {
             {"type": "ridge", "name": "sd-2", "seed": 102, "baseline": 400, "amp": 108, "freq": 2.7, "sharp": 1.20, "skew": 0.20, "ramp": 2, "ridged": True},
             {"type": "mist",  "name": "sd-m2", "seed": 152, "yc": 615, "thick": 150, "opacity": 0.7},
             {"type": "ridge", "name": "sd-3", "seed": 103, "baseline": 470, "amp": 110, "freq": 3.0, "sharp": 1.35, "skew": 0.22, "ramp": 3, "canopy": {"r": (7, 13)}},
-            {"type": "ridge", "name": "sd-4", "seed": 104, "baseline": 550, "amp": 120, "freq": 2.8, "sharp": 1.25, "skew": 0.25, "ramp": 4, "canopy": {"r": (9, 16), "em": 0.05, "em_h": 26}},
+            {"type": "ridge", "name": "sd-4", "seed": 104, "baseline": 550, "amp": 120, "freq": 2.8, "sharp": 1.25, "skew": 0.25, "ramp": 4, "canopy": {"r": (9, 16)}},
             {"type": "mist",  "name": "sd-m3", "seed": 153, "yc": 800, "thick": 180, "opacity": 0.7},
-            {"type": "ridge", "name": "sd-5", "seed": 105, "baseline": 640, "amp": 120, "freq": 3.4, "sharp": 1.20, "skew": 0.28, "ramp": 5, "canopy": {"r": (10, 17), "em": 0.09, "em_h": 48, "inner": 24}},
-            {"type": "ridge", "name": "sd-6", "seed": 106, "baseline": 730, "amp": 110, "freq": 4.0, "sharp": 1.15, "skew": 0.30, "ramp": 6, "canopy": {"r": (12, 21), "em": 0.11, "em_h": 62, "inner": 30}},
-            {"type": "ridge", "name": "sd-7", "seed": 107, "baseline": 830, "amp": 80,  "freq": 4.6, "sharp": 1.10, "skew": 0.30, "ramp": 7, "canopy": {"r": (15, 26), "em": 0.13, "em_h": 80, "inner": 38}},
+            {"type": "ridge", "name": "sd-5", "seed": 105, "baseline": 640, "amp": 120, "freq": 3.4, "sharp": 1.20, "skew": 0.28, "ramp": 5, "canopy": {"r": (10, 17), "inner": 24}},
+            {"type": "fog",   "name": "sd-fog", "cx": 430, "cy": 510, "rx": 520, "ry": 290, "opacity": 0.65},
+            {"type": "ridge", "name": "sd-6", "seed": 106, "baseline": 730, "amp": 110, "freq": 4.0, "sharp": 1.15, "skew": 0.30, "ramp": 6, "canopy": {"r": (12, 21), "inner": 30}},
+            {"type": "ridge", "name": "sd-7", "seed": 107, "baseline": 830, "amp": 80,  "freq": 4.6, "sharp": 1.10, "skew": 0.30, "ramp": 7, "canopy": {"r": (15, 26), "inner": 38}},
         ],
     },
     # PROJECTS: rain-veiled closer forest
@@ -68,8 +69,8 @@ SCENES = {
         "layers": [
             {"type": "ridge", "name": "vl-1", "seed": 201, "baseline": 620, "amp": 100, "freq": 2.6, "sharp": 1.35, "skew": 0.22, "ramp": 3, "canopy": {"r": (8, 14)}},
             {"type": "mist",  "name": "vl-m1", "seed": 251, "yc": 700, "thick": 135, "opacity": 0.65},
-            {"type": "ridge", "name": "vl-2", "seed": 202, "baseline": 720, "amp": 110, "freq": 3.2, "sharp": 1.20, "skew": 0.26, "ramp": 5, "canopy": {"r": (12, 22), "em": 0.07, "em_h": 46, "inner": 28}},
-            {"type": "ridge", "name": "vl-3", "seed": 203, "baseline": 810, "amp": 90,  "freq": 3.8, "sharp": 1.12, "skew": 0.30, "ramp": 6, "canopy": {"r": (16, 28), "em": 0.09, "em_h": 60, "inner": 38}},
+            {"type": "ridge", "name": "vl-2", "seed": 202, "baseline": 720, "amp": 110, "freq": 3.2, "sharp": 1.20, "skew": 0.26, "ramp": 5, "canopy": {"r": (12, 22), "inner": 28}},
+            {"type": "ridge", "name": "vl-3", "seed": 203, "baseline": 810, "amp": 90,  "freq": 3.8, "sharp": 1.12, "skew": 0.30, "ramp": 6, "canopy": {"r": (16, 28), "inner": 38}},
         ],
     },
     # ABOUT: dusk valley, ridges frame the timeline column
@@ -83,8 +84,8 @@ SCENES = {
             {"type": "ridge", "name": "vl-1", "seed": 301, "baseline": 600, "amp": 95,  "freq": 2.2, "sharp": 1.45, "skew": 0.20, "ramp": 2},
             {"type": "ridge", "name": "vl-2", "seed": 302, "baseline": 680, "amp": 105, "freq": 2.7, "sharp": 1.30, "skew": 0.24, "ramp": 3, "canopy": {"r": (8, 14)}},
             {"type": "mist",  "name": "vl-m1", "seed": 351, "yc": 760, "thick": 130, "opacity": 0.6},
-            {"type": "ridge", "name": "vl-3", "seed": 303, "baseline": 760, "amp": 100, "freq": 3.2, "sharp": 1.18, "skew": 0.28, "ramp": 5, "canopy": {"r": (12, 22), "em": 0.06, "em_h": 44, "inner": 28}},
-            {"type": "ridge", "name": "vl-4", "seed": 304, "baseline": 845, "amp": 80,  "freq": 3.7, "sharp": 1.12, "skew": 0.30, "ramp": 6, "canopy": {"r": (15, 26), "em": 0.08, "em_h": 56, "inner": 36}},
+            {"type": "ridge", "name": "vl-3", "seed": 303, "baseline": 760, "amp": 100, "freq": 3.2, "sharp": 1.18, "skew": 0.28, "ramp": 5, "canopy": {"r": (12, 22), "inner": 28}},
+            {"type": "ridge", "name": "vl-4", "seed": 304, "baseline": 845, "amp": 80,  "freq": 3.7, "sharp": 1.12, "skew": 0.30, "ramp": 6, "canopy": {"r": (15, 26), "inner": 36}},
         ],
     },
     # CONTACT: golden-hour clearing, soft far ridges + horizon glow
@@ -97,7 +98,7 @@ SCENES = {
             {"type": "glow",  "name": "vl-glow", "cx": 730, "cy": 815, "rx": 560, "ry": 175},
             {"type": "ridge", "name": "vl-1", "seed": 401, "baseline": 700, "amp": 60, "freq": 1.8, "sharp": 1.55, "skew": 0.16, "ramp": 1},
             {"type": "mist",  "name": "vl-m1", "seed": 451, "yc": 805, "thick": 150, "opacity": 0.6},
-            {"type": "ridge", "name": "vl-2", "seed": 402, "baseline": 790, "amp": 70, "freq": 2.2, "sharp": 1.45, "skew": 0.18, "ramp": 2, "canopy": {"r": (8, 14), "em": 0.03, "em_h": 30}},
+            {"type": "ridge", "name": "vl-2", "seed": 402, "baseline": 790, "amp": 70, "freq": 2.2, "sharp": 1.45, "skew": 0.18, "ramp": 2, "canopy": {"r": (8, 14)}},
         ],
     },
     # VERAFLUX: reading sanctuary, one distant ridge
@@ -120,7 +121,7 @@ SCENES = {
         "layers": [
             {"type": "treeline", "name": "ft-1", "seed": 601, "baseline": 116, "amp": 16, "freq": 2.0, "sharp": 1.25, "skew": 0.20},
             {"type": "mist",     "name": "ft-m1", "seed": 651, "yc": 136, "thick": 60, "opacity": 0.3},
-            {"type": "treeline", "name": "ft-3", "seed": 603, "baseline": 154, "amp": 14, "freq": 2.8, "sharp": 1.10, "skew": 0.30, "canopy": {"r": (9, 16), "em": 0.08, "em_h": 40}},
+            {"type": "treeline", "name": "ft-3", "seed": 603, "baseline": 154, "amp": 14, "freq": 2.8, "sharp": 1.10, "skew": 0.30, "canopy": {"r": (9, 16)}},
         ],
         "fireflies": {"seed": 691, "count": 9, "x": (70, 1380), "y": (72, 148), "r": (1.5, 2.5)},
     },
@@ -265,32 +266,11 @@ def smooth_ridge_path(layer, w, h, env, bleed=20, drop=0):
     return d
 
 
-def tree_points_giant(xc, yb, th, hw, lean, rng):
-    """Emergent old-growth cryptomeria silhouette: four drooping bough
-    shelves narrowing to a slim crown; ~30% get the flat broken top of
-    true ancients. Returns the outline (left up, apex, right down)."""
-    prof = [(0.90, 0.02)]
-    hgt, wdt = 0.14 + 0.05 * rng(), 0.88
-    for _ in range(4):
-        prof.append((wdt + 0.10 * rng(), hgt))                    # bough out
-        prof.append((wdt * (0.42 + 0.10 * rng()), hgt + 0.055))   # notch in
-        hgt += 0.155 + 0.045 * rng()
-        wdt *= 0.70 + 0.07 * rng()
-    if rng() < 0.3:
-        prof += [(0.18, 0.90), (0.10, 0.98)]      # flat / broken crown
-    else:
-        prof.append((0.10, 0.93))
-    up = [(xc - hw * p + lean * t, yb - th * t) for p, t in prof]
-    down = [(xc + hw * p + lean * t, yb - th * t) for p, t in reversed(prof)]
-    return up + [(xc + lean, yb - th)] + down
-
-
-def canopy_edge_d(layer, w, env, bleed, y_off=0.0, seed_off=0, r_scale=1.0, emergents=True):
+def canopy_edge_d(layer, w, env, bleed, y_off=0.0, seed_off=0, r_scale=1.0):
     """Scalloped canopy top edge: overlapping clump bumps (one Q arc
     each) riding the ridge profile - a continuous billowing forest
     MASS rather than individual trees. A slow grove wave swells and
-    shrinks clump size across the width; sparse emergent giants are
-    spliced into the edge where configured. Returns a path fragment
+    shrinks clump size across the width. Returns a path fragment
     from M at x=-bleed to x>=w+bleed (integer coords)."""
     base = ridge_profile(layer, w, env)
     y = lambda x: base(x) + y_off
@@ -298,8 +278,6 @@ def canopy_edge_d(layer, w, env, bleed, y_off=0.0, seed_off=0, r_scale=1.0, emer
     r_lo, r_hi = cfg["r"]
     rng = mulberry32(layer["seed"] * 11 + 3 + seed_off)
     grove = fbm(layer["seed"] * 5 + 9, 4)
-    em_p = cfg.get("em", 0) if emergents else 0
-    em_h = cfg.get("em_h", 40)
     F = lambda v: str(int(round(v)))
     x = float(-bleed)
     d = f"M{F(x)},{F(y(x))}"
@@ -314,21 +292,13 @@ def canopy_edge_d(layer, w, env, bleed, y_off=0.0, seed_off=0, r_scale=1.0, emer
         bump = r * (0.55 + 0.6 * rng())
         d += f"Q{F(xm)},{F(y(xm) - bump)} {F(x2)},{F(y(x2) + 1 + 3.5 * rng())}"
         x = x2
-        if em_p and rng() < em_p and x < w + bleed - 60:
-            th = em_h * (0.75 + 0.5 * rng())
-            hw = th * (0.18 + 0.06 * rng())
-            lean = -2 + 4 * rng()
-            xc = x + hw
-            for px, py in tree_points_giant(xc, y(xc) + 6, th, hw, lean, rng):
-                d += f"L{F(px)},{F(py)}"
-            x = xc + hw
     return d
 
 
 def canopy_ridge_path(layer, w, h, env, bleed=60, drop=380,
-                      y_off=0.0, seed_off=0, r_scale=1.0, emergents=True):
+                      y_off=0.0, seed_off=0, r_scale=1.0):
     """Closed canopy-forest ridge fill (scalloped edge + body)."""
-    d = canopy_edge_d(layer, w, env, bleed, y_off, seed_off, r_scale, emergents)
+    d = canopy_edge_d(layer, w, env, bleed, y_off, seed_off, r_scale)
     return d + f"L{w + bleed},{h + drop}L{-bleed},{h + drop}Z"
 
 
@@ -379,7 +349,7 @@ def ridge_svg(layer, scene, w, h):
     min_y = min(y(x) for x in range(0, w + 1, 8))
     cnp = layer.get("canopy")
     if cnp:
-        min_y -= cnp["r"][1] * 1.3 + (cnp.get("em_h", 0) if cnp.get("em") else 0)
+        min_y -= cnp["r"][1] * 1.3
     y2 = min(h, layer["baseline"] + 190)
     grad = (
         f'<linearGradient id="{gid}" gradientUnits="userSpaceOnUse" x1="0" y1="{r1(min_y)}" x2="0" y2="{r1(y2)}">'
@@ -398,8 +368,7 @@ def ridge_svg(layer, scene, w, h):
     if cnp and cnp.get("inner"):
         inner_ramp = min(8, layer["ramp"] + 1)
         d2 = canopy_ridge_path(layer, w, h, env, bleed=60, drop=380,
-                               y_off=cnp["inner"], seed_off=7,
-                               r_scale=1.25, emergents=False)
+                               y_off=cnp["inner"], seed_off=7, r_scale=1.25)
         paths += f'<path style="fill:var(--gs-{inner_ramp}a)" d="{d2}"/>'
     return (
         f'<div class="{scene["prefix"]} {layer["name"]}">'
@@ -417,6 +386,26 @@ def mist_svg(layer, scene, w, h):
         f'<div class="{scene["prefix"]} {layer["name"]} mist">'
         f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false" style="opacity:{layer["opacity"]}">'
         f'<defs>{grad}</defs><path fill="url(#{gid})" d="{d}"/></svg></div>'
+    )
+
+
+def fog_svg(layer, scene, w, h):
+    """Feathered radial fog pocket in the scene's mist color: valley
+    fog pooling among the canopy. Doubles as the diegetic readability
+    surface behind the Home hero text (replaces the old CSS scrim)."""
+    gid = f"g-{scene['grad_ns']}-{layer['name']}"
+    grad = (
+        f'<radialGradient id="{gid}">'
+        '<stop offset="0" class="gs-mist"/>'
+        '<stop offset="0.55" class="gs-mist" stop-opacity="0.6"/>'
+        '<stop offset="1" class="gs-mist" stop-opacity="0"/>'
+        "</radialGradient>"
+    )
+    return (
+        f'<div class="{scene["prefix"]} {layer["name"]} mist">'
+        f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false" style="opacity:{layer["opacity"]}">'
+        f'<defs>{grad}</defs>'
+        f'<ellipse cx="{layer["cx"]}" cy="{layer["cy"]}" rx="{layer["rx"]}" ry="{layer["ry"]}" fill="url(#{gid})"/></svg></div>'
     )
 
 
@@ -442,6 +431,8 @@ def layers_scene(scene):
     for layer in scene["layers"]:
         if layer["type"] == "mist":
             out.append(mist_svg(layer, scene, w, h))
+        elif layer["type"] == "fog":
+            out.append(fog_svg(layer, scene, w, h))
         elif layer["type"] == "glow":
             out.append(glow_svg(layer, scene, w, h))
         else:

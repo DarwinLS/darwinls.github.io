@@ -30,6 +30,12 @@
 
 /* The weather. One shared sky element cross-fades between biomes. */
 .sky-backdrop { view-transition-name: vt-sky; }
+/* Phones hide .sky-backdrop (layer diet, styles.css) and paint the
+   sky onto the scene container, so the weather name travels with it. */
+@media (pointer: coarse) {
+    .sky-backdrop { view-transition-name: none; }
+    .scene-descent, .vista { view-transition-name: vt-sky; }
+}
 
 /* Signature morph — the Veraflux story grows from a card into a page.
    Source on Home (feature band) and Projects (flagship card); target

@@ -9,8 +9,8 @@
    no-FOUC inline script) and mounts effects to match:
      calm       -> no rain, no cursor light, no reveals-hide
                    (atmosphere = static in-scene mist + .fx-haze)
-     balanced   -> tiled rain (2 sheets), reveals, timeline draw
-     immersive  -> tiled rain (3 sheets), cursor dew
+     balanced   -> tiled rain (1 dense sheet), reveals, timeline draw
+     immersive  -> tiled rain (2 sheets), cursor dew
    Rain streaks are drawn ONCE into small tiling textures; each depth
    layer is then a repeating background scrolled by a CSS transform
    animation. Zero per-frame JS, zero WebGL: the compositor moves
@@ -110,14 +110,17 @@ function mountRain() {
     if (!lvl) return;
     const dbg = rainDebug();
     const coarse = !finePointer.matches;
-    /* Touch devices get ONE mid-depth sheet on a half-height tile:
-       fullscreen fixed layers cost real GPU memory at phone DPR, and
-       rain must never evict the page's own layers. */
-    let sheets = coarse ? [SHEETS[1]]
-        : lvl === "immersive" ? SHEETS : SHEETS.slice(0, 2);
+    /* Measured (tools/perf_probe.py, 144Hz Iris Xe): ONE sheet on a
+       512 tile scrolls at a tight single-vsync cadence (p95 7.1ms);
+       every extra sheet adds regular double-vsync spills. So balanced
+       and phones run one denser mid sheet; immersive opts into two.
+       Small tiles also halve each sheet's GPU memory (phone eviction). */
+    let sheets = lvl === "immersive" && !coarse
+        ? [SHEETS[1], SHEETS[2]]
+        : [SHEETS[1]];
     if (dbg && dbg.sheets) sheets = SHEETS.slice(0, dbg.sheets);
-    const tileH = coarse ? 512 : 1024;
-    const densityMul = (coarse ? 0.8 : 1) * (lvl === "immersive" ? 1 : 0.8);
+    const tileH = (dbg && dbg.tileH) || 512;
+    const densityMul = coarse ? 0.8 : lvl === "immersive" ? 1 : 1.25;
 
     const host = document.createElement("div");
     host.className = "fx-rain is-fixed";

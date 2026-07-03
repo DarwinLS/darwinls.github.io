@@ -43,6 +43,15 @@ CONFIGS = {
     "parting4":    ({"off": True},
                     ".sd-1,.sd-2,.sd-5,.sd-6,.sd-7,.sd-dusk"
                     "{animation:none !important;will-change:auto !important}"),
+    # round 4: rain layer AREA + grain cost (per-layer choreography is
+    # already retired, so these run against the shipped track drift)
+    "r4_2s1024":   (None, ""),
+    "r4_2s512":    ({"tileH": 512}, ""),
+    "r4_1s1024":   ({"sheets": 1}, ""),
+    "r4_1s512":    ({"sheets": 1, "tileH": 512}, ""),
+    "r4_1s512_ng": ({"sheets": 1, "tileH": 512},
+                    "body::after{display:none !important}"),
+    "r4_off":      ({"off": True}, ""),
     # candidate ship config: track + sd-3/sd-4 parting + m1 fade (4 animated)
     "ship4":       (None,
                     ".sd-1,.sd-2,.sd-5,.sd-6,.sd-7,.sd-dusk,.sd-m2,.sd-m3"
