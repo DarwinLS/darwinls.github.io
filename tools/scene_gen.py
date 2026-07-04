@@ -59,6 +59,7 @@ SCENES = {
             {"type": "ridge", "name": "sd-5", "seed": 105, "baseline": 640, "amp": 120, "freq": 3.4, "sharp": 1.20, "skew": 0.28, "ramp": 5, "canopy": {"r": (10, 17), "inner": 24}},
             {"type": "ridge", "name": "sd-6", "seed": 106, "baseline": 730, "amp": 110, "freq": 4.0, "sharp": 1.15, "skew": 0.30, "ramp": 6, "canopy": {"r": (12, 21), "inner": 30}},
             {"type": "fogbank", "name": "sd-f3", "seed": 163, "yc": 775, "thick": 150, "opacity": 0.9,  "r": (36, 68)},
+            {"type": "shrine", "name": "sd-shrine", "on": "sd-6", "x": 880, "dy": 8, "s": 1.0},
             {"type": "ridge", "name": "sd-7", "seed": 107, "baseline": 830, "amp": 80,  "freq": 4.6, "sharp": 1.10, "skew": 0.30, "ramp": 7, "canopy": {"r": (15, 26), "inner": 38}},
         ],
     },
@@ -476,6 +477,64 @@ def fog_svg(layer, scene, w, h):
     )
 
 
+def shrine_svg(layer, scene, w, h):
+    """Mountain shrine landmark: a small hip-and-gable hall seated on
+    the crest of the ridge layer named by cfg["on"], with warm light
+    in the door and windows. Hand-authored silhouette template in
+    interior-shade ink; the glow is baked radial gradients riding the
+    amber tokens (gs-glow halo + gs-shrineglow apertures) so light and
+    dark retune it like the rest of the scene. y comes from the host
+    ridge's profile at x, so the shrine stays seated even if the ridge
+    seed or shape changes. Static: nothing here animates (animating a
+    child would re-raster the whole fixed scene layer)."""
+    host = next(l for l in scene["layers"] if l["name"] == layer["on"])
+    env = scene.get("env")
+    x = layer["x"]
+    y = ridge_profile(host, w, env)(x) + layer.get("dy", 0)
+    s = layer.get("s", 1.0)
+    gid = f"g-{scene['grad_ns']}-{layer['name']}"
+    halo = (
+        f'<radialGradient id="{gid}-halo">'
+        '<stop offset="0" class="gs-glow"/>'
+        '<stop offset="1" class="gs-glow" stop-opacity="0"/>'
+        "</radialGradient>"
+    )
+    warm = (
+        f'<radialGradient id="{gid}-warm">'
+        '<stop offset="0" class="gs-shrineglow"/>'
+        '<stop offset="1" class="gs-shrineglow" stop-opacity="0"/>'
+        "</radialGradient>"
+    )
+    # Local coords: origin at the crest ground line, y negative = up.
+    silhouette = (
+        "M-46,0h92v-6h-92Z"                       # stone platform
+        "M-38,-6h76v-5h-76Z"                      # upper plinth
+        "M-32,-11h64v-30h-64Z"                    # hall body
+        "M-48,-36Q-30,-53 -12,-56Q0,-58 12,-56"
+        "Q30,-53 48,-36L41,-31Q0,-46 -41,-31Z"    # swept roof, kicked eaves
+        "M-16,-56h32v-3h-32Z"                     # ridge beam
+        "M-2,-59h4v-6h-4Z"                        # finial
+    )
+    apertures = (
+        "M-5,-11V-24Q0,-30 5,-24V-11Z"            # arched door
+        "M-25,-18h6v-8h-6Z"                       # left window
+        "M19,-18h6v-8h-6Z"                        # right window
+    )
+    return (
+        f'<div class="{scene["prefix"]} {layer["name"]} glow shrine">'
+        f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false">'
+        f'<defs>{halo}{warm}</defs>'
+        f'<g transform="translate({r1(x)},{r1(y)}) scale({s})">'
+        f'<ellipse cx="0" cy="-24" rx="95" ry="48" fill="url(#{gid}-halo)"/>'
+        f'<path style="fill:var(--gs-8a)" d="{silhouette}"/>'
+        f'<path style="fill:var(--amber-soft)" d="{apertures}"/>'
+        f'<ellipse cx="0" cy="-20" rx="12" ry="11" fill="url(#{gid}-warm)"/>'
+        f'<ellipse cx="-22" cy="-22" rx="9" ry="8" fill="url(#{gid}-warm)"/>'
+        f'<ellipse cx="22" cy="-22" rx="9" ry="8" fill="url(#{gid}-warm)"/>'
+        "</g></svg></div>"
+    )
+
+
 def glow_svg(layer, scene, w, h):
     gid = f"g-{scene['grad_ns']}-{layer['name']}"
     grad = (
@@ -504,6 +563,8 @@ def layers_scene(scene):
             out.append(fog_svg(layer, scene, w, h))
         elif layer["type"] == "glow":
             out.append(glow_svg(layer, scene, w, h))
+        elif layer["type"] == "shrine":
+            out.append(shrine_svg(layer, scene, w, h))
         else:
             out.append(ridge_svg(layer, scene, w, h))
     return "\n".join(out)

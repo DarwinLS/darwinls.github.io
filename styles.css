@@ -1812,6 +1812,16 @@ body::after {
 }
 .gs-glow { stop-color: color-mix(in srgb, var(--amber-soft) 40%, transparent); }
 [data-theme="dark"] .gs-glow { stop-color: color-mix(in srgb, var(--amber) 22%, transparent); }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .gs-glow { stop-color: color-mix(in srgb, var(--amber) 22%, transparent); }
+}
+/* Shrine aperture glow (warm lamplight through door/windows): brighter
+   than the ambient gs-glow halo, warms further at night. */
+.gs-shrineglow { stop-color: color-mix(in srgb, var(--amber-soft) 55%, transparent); }
+[data-theme="dark"] .gs-shrineglow { stop-color: color-mix(in srgb, var(--amber) 45%, transparent); }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .gs-shrineglow { stop-color: color-mix(in srgb, var(--amber) 45%, transparent); }
+}
 
 /* Valley-floor footer scene: sits inside .site-footer, full-bleed,
    treelines fusing into the footer's bark ground. */
