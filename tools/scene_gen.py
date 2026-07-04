@@ -2,8 +2,8 @@
 
 Produces the inline-SVG scenery for the site: layered canopy-forest
 ridges (billowing clump masses with emergent cryptomeria giants),
-interleaved mist bands, the valley-floor footer, and botanical divider
-line-art.
+interleaved mist bands, Alishan cloud-sea fog banks (fog dial mode),
+the valley-floor footer, and botanical divider line-art.
 
 Usage:
     python tools/scene_gen.py            write partials to assets/scenes/
@@ -50,12 +50,15 @@ SCENES = {
             {"type": "ridge", "name": "sd-1", "seed": 101, "baseline": 330, "amp": 88,  "freq": 2.3, "sharp": 1.25, "skew": 0.18, "ramp": 1, "ridged": True},
             {"type": "mist",  "name": "sd-m1", "seed": 151, "yc": 468, "thick": 210, "opacity": 0.85},
             {"type": "ridge", "name": "sd-2", "seed": 102, "baseline": 400, "amp": 108, "freq": 2.7, "sharp": 1.20, "skew": 0.20, "ramp": 2, "ridged": True},
+            {"type": "fogbank", "name": "sd-f1", "seed": 161, "yc": 470, "thick": 130, "opacity": 0.9,  "r": (26, 48)},
             {"type": "mist",  "name": "sd-m2", "seed": 152, "yc": 615, "thick": 150, "opacity": 0.7},
             {"type": "ridge", "name": "sd-3", "seed": 103, "baseline": 470, "amp": 110, "freq": 3.0, "sharp": 1.35, "skew": 0.22, "ramp": 3, "canopy": {"r": (7, 13)}},
             {"type": "ridge", "name": "sd-4", "seed": 104, "baseline": 550, "amp": 120, "freq": 2.8, "sharp": 1.25, "skew": 0.25, "ramp": 4, "canopy": {"r": (9, 16)}},
+            {"type": "fogbank", "name": "sd-f2", "seed": 162, "yc": 610, "thick": 170, "opacity": 0.95, "r": (32, 60)},
             {"type": "mist",  "name": "sd-m3", "seed": 153, "yc": 800, "thick": 180, "opacity": 0.7},
             {"type": "ridge", "name": "sd-5", "seed": 105, "baseline": 640, "amp": 120, "freq": 3.4, "sharp": 1.20, "skew": 0.28, "ramp": 5, "canopy": {"r": (10, 17), "inner": 24}},
             {"type": "ridge", "name": "sd-6", "seed": 106, "baseline": 730, "amp": 110, "freq": 4.0, "sharp": 1.15, "skew": 0.30, "ramp": 6, "canopy": {"r": (12, 21), "inner": 30}},
+            {"type": "fogbank", "name": "sd-f3", "seed": 163, "yc": 775, "thick": 150, "opacity": 0.9,  "r": (36, 68)},
             {"type": "ridge", "name": "sd-7", "seed": 107, "baseline": 830, "amp": 80,  "freq": 4.6, "sharp": 1.10, "skew": 0.30, "ramp": 7, "canopy": {"r": (15, 26), "inner": 38}},
         ],
     },
@@ -67,6 +70,7 @@ SCENES = {
         "grad_ns": "proj",
         "layers": [
             {"type": "ridge", "name": "vl-1", "seed": 201, "baseline": 620, "amp": 100, "freq": 2.6, "sharp": 1.35, "skew": 0.22, "ramp": 3, "canopy": {"r": (8, 14)}},
+            {"type": "fogbank", "name": "vl-f1", "seed": 261, "yc": 690, "thick": 130, "opacity": 0.9, "r": (28, 52)},
             {"type": "mist",  "name": "vl-m1", "seed": 251, "yc": 700, "thick": 135, "opacity": 0.65},
             {"type": "ridge", "name": "vl-2", "seed": 202, "baseline": 720, "amp": 110, "freq": 3.2, "sharp": 1.20, "skew": 0.26, "ramp": 5, "canopy": {"r": (12, 22), "inner": 28}},
             {"type": "ridge", "name": "vl-3", "seed": 203, "baseline": 810, "amp": 90,  "freq": 3.8, "sharp": 1.12, "skew": 0.30, "ramp": 6, "canopy": {"r": (16, 28), "inner": 38}},
@@ -82,6 +86,7 @@ SCENES = {
         "layers": [
             {"type": "ridge", "name": "vl-1", "seed": 301, "baseline": 600, "amp": 95,  "freq": 2.2, "sharp": 1.45, "skew": 0.20, "ramp": 2},
             {"type": "ridge", "name": "vl-2", "seed": 302, "baseline": 680, "amp": 105, "freq": 2.7, "sharp": 1.30, "skew": 0.24, "ramp": 3, "canopy": {"r": (8, 14)}},
+            {"type": "fogbank", "name": "vl-f1", "seed": 361, "yc": 735, "thick": 130, "opacity": 0.9, "r": (28, 52)},
             {"type": "mist",  "name": "vl-m1", "seed": 351, "yc": 760, "thick": 130, "opacity": 0.6},
             {"type": "ridge", "name": "vl-3", "seed": 303, "baseline": 760, "amp": 100, "freq": 3.2, "sharp": 1.18, "skew": 0.28, "ramp": 5, "canopy": {"r": (12, 22), "inner": 28}},
             {"type": "ridge", "name": "vl-4", "seed": 304, "baseline": 845, "amp": 80,  "freq": 3.7, "sharp": 1.12, "skew": 0.30, "ramp": 6, "canopy": {"r": (15, 26), "inner": 36}},
@@ -96,6 +101,7 @@ SCENES = {
         "layers": [
             {"type": "glow",  "name": "vl-glow", "cx": 730, "cy": 815, "rx": 560, "ry": 175},
             {"type": "ridge", "name": "vl-1", "seed": 401, "baseline": 700, "amp": 60, "freq": 1.8, "sharp": 1.55, "skew": 0.16, "ramp": 1},
+            {"type": "fogbank", "name": "vl-f1", "seed": 461, "yc": 780, "thick": 120, "opacity": 0.85, "r": (26, 48)},
             {"type": "mist",  "name": "vl-m1", "seed": 451, "yc": 805, "thick": 150, "opacity": 0.6},
             {"type": "ridge", "name": "vl-2", "seed": 402, "baseline": 790, "amp": 70, "freq": 2.2, "sharp": 1.45, "skew": 0.18, "ramp": 2, "canopy": {"r": (8, 14)}},
         ],
@@ -108,6 +114,7 @@ SCENES = {
         "grad_ns": "vera",
         "layers": [
             {"type": "ridge", "name": "vl-1", "seed": 501, "baseline": 812, "amp": 60, "freq": 1.6, "sharp": 1.55, "skew": 0.15, "ramp": 1},
+            {"type": "fogbank", "name": "vl-f1", "seed": 561, "yc": 855, "thick": 100, "opacity": 0.85, "r": (24, 44)},
         ],
     },
     # FOOTER: valley floor, all pages, in-flow svg. One canopy line in
@@ -388,6 +395,65 @@ def mist_svg(layer, scene, w, h):
     )
 
 
+def fogbank_svg(layer, scene, w, h):
+    """Alishan cloud-sea bank: a dense fog mass pooling in a valley
+    between ridge layers, so nearer peaks pierce through it. Top edge
+    is a billowing clump-arc chain (cloud crowns: bigger, rounder and
+    flatter-advancing than canopy clumps) riding a slow swell; the
+    underside is a smooth dissolving chain. Feathered entirely by its
+    own vertical gradient (soft crown tips, dense body, dissolved
+    underside). Zero blur, zero blend mode. Hidden by default; the
+    fog dial mode fades the .fogbank wrapper in (styles.css)."""
+    gid = f"g-{scene['grad_ns']}-{layer['name']}"
+    yc, thick = layer["yc"], layer["thick"]
+    r_lo, r_hi = layer["r"]
+    bleed = 60
+    rng = mulberry32(layer["seed"] * 13 + 5)
+    swell = fbm(layer["seed"], 1.6, 3)
+    top_y = lambda x: (yc - thick / 2
+                       + (swell(min(max(x / w, 0.0), 1.0)) - 0.5) * thick * 0.5)
+    F = lambda v: str(int(round(v)))
+    x = float(-bleed)
+    d = f"M{F(x)},{F(top_y(x))}"
+    while x < w + bleed:
+        r = r_lo + (r_hi - r_lo) * rng()
+        # cloud crowns advance wider and rise shallower than canopy
+        # clumps, or the sea reads as white forest instead of cloud
+        x2 = x + r * (1.5 + 0.8 * rng())
+        xm = x + (x2 - x) * (0.40 + 0.20 * rng())
+        bump = r * (0.45 + 0.4 * rng())
+        d += f"Q{F(xm)},{F(top_y(xm) - bump)} {F(x2)},{F(top_y(x2) + 1 + 2 * rng())}"
+        x = x2
+    bot = fbm(layer["seed"] + 17, 1.8, 3)
+    n = 36
+    pts = []
+    for i in range(n + 1):
+        px = -bleed + (w + bleed * 2) * (i / n)
+        pts.append((px, yc + thick / 2 + (bot(i / n) - 0.5) * thick * 0.4))
+    rev = list(reversed(pts))
+    d += f"L{r1(rev[0][0])},{r1(rev[0][1])}"
+    for i in range(1, len(rev) - 1):
+        mx = (rev[i][0] + rev[i + 1][0]) / 2
+        my = (rev[i][1] + rev[i + 1][1]) / 2
+        d += f"Q{r1(rev[i][0])},{r1(rev[i][1])} {r1(mx)},{r1(my)}"
+    d += f"L{r1(rev[-1][0])},{r1(rev[-1][1])}Z"
+    y1 = yc - thick / 2 - r_hi * 1.1        # gradient covers the crowns
+    y2 = yc + thick / 2 + thick * 0.25
+    grad = (
+        f'<linearGradient id="{gid}" gradientUnits="userSpaceOnUse" x1="0" y1="{r1(y1)}" x2="0" y2="{r1(y2)}">'
+        '<stop offset="0" class="gs-mist" stop-opacity="0.55"/>'
+        '<stop offset="0.18" class="gs-mist" stop-opacity="0.95"/>'
+        '<stop offset="0.7" class="gs-mist" stop-opacity="0.9"/>'
+        '<stop offset="1" class="gs-mist" stop-opacity="0"/>'
+        "</linearGradient>"
+    )
+    return (
+        f'<div class="{scene["prefix"]} {layer["name"]} mist fogbank">'
+        f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMax slice" focusable="false" style="opacity:{layer["opacity"]}">'
+        f'<defs>{grad}</defs><path fill="url(#{gid})" d="{d}"/></svg></div>'
+    )
+
+
 def fog_svg(layer, scene, w, h):
     """Feathered radial fog pocket in the scene's mist color: valley
     fog pooling among the canopy. Currently unused - kept for the
@@ -432,6 +498,8 @@ def layers_scene(scene):
     for layer in scene["layers"]:
         if layer["type"] == "mist":
             out.append(mist_svg(layer, scene, w, h))
+        elif layer["type"] == "fogbank":
+            out.append(fogbank_svg(layer, scene, w, h))
         elif layer["type"] == "fog":
             out.append(fog_svg(layer, scene, w, h))
         elif layer["type"] == "glow":

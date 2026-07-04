@@ -1779,6 +1779,20 @@ body::after {
 .gs-7a { stop-color: var(--gs-7a); }
 .gs-7b { stop-color: var(--gs-7b); }
 .gs-mist { stop-color: var(--mist-veil); }
+/* Alishan cloud-sea banks (generated .fogbank layers): hidden by
+   default so calm/rain keep the current scene; the fog dial mode
+   rolls them in. Dark mode keeps the sea moonlit-dim. The .mist
+   class on the same wrapper already excludes them from the crest-rim
+   stroke below and hides them on pre-color-mix browsers. */
+.fogbank { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+    .fogbank { transition: opacity 2.8s ease; }
+}
+[data-intensity="fog"] .fogbank { opacity: 1; }
+[data-theme="dark"][data-intensity="fog"] .fogbank { opacity: 0.8; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"])[data-intensity="fog"] .fogbank { opacity: 0.8; }
+}
 /* Moonlit crest rim: at night a faint fog-glow line hugs every ridge
    silhouette so adjacent layers separate (the fill ladder alone is
    too subtle in the dark range). The stroke rides the ridge paths
@@ -1865,7 +1879,7 @@ body::after {
 /* Phones: prune composited scene layers (11 -> 8 on home; vistas
    drop their farthest ridge) to bound GPU memory on small devices. */
 @media (max-width: 700px) {
-    .sd-2, .sd-m2, .sd-4 { display: none; }
+    .sd-2, .sd-m2, .sd-4, .sd-f1 { display: none; }
     .vista-projects .vl-1,
     .vista-about .vl-1 { display: none; }
 }

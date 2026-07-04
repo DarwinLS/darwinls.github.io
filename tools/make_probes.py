@@ -18,6 +18,11 @@ CONFIGS = [
     ("_p_home_calm.html", "index.html", "light", "calm", 0, False),
     ("_p_home_fog_light.html", "index.html", "light", "fog", 0, False),
     ("_p_home_fog_dark.html", "index.html", "dark", "fog", 0, False),
+    ("_p_home_fog_coarse.html", "index.html", "light", "fog", 0, True),
+    ("_p_projects_fog.html", "projects.html", "light", "fog", 0, False),
+    ("_p_about_fog.html", "about.html", "light", "fog", 0, False),
+    ("_p_contact_fog.html", "contact.html", "light", "fog", 0, False),
+    ("_p_veraflux_fog.html", "veraflux.html", "light", "fog", 0, False),
     ("_p_about_light.html", "about.html", "light", "rain", 0, False),
     ("_p_projects_light.html", "projects.html", "light", "rain", 0, False),
     ("_p_contact_light.html", "contact.html", "light", "rain", 0, False),
@@ -60,6 +65,8 @@ window.addEventListener("load", function () {
             + " slantWrappers=" + document.querySelectorAll(".fx-rain-slant").length
             + " fxHidden=" + document.querySelectorAll(".fx-hidden").length
             + " precip=" + (function () { var c = document.querySelector(".fx-precip canvas"); return c ? c.width + "x" + c.height : "none"; })()
+            + " fogbanks=" + document.querySelectorAll(".fogbank").length
+            + " bankOpacity=" + (function () { var b = document.querySelector(".fogbank"); return b ? getComputedStyle(b).opacity : "na"; })()
             + " trackAnim=" + (track ? getComputedStyle(track).animationName : "none")
             + " sceneH=" + (scene ? Math.round(scene.getBoundingClientRect().height) : -1)
             + " innerHeight=" + window.innerHeight);
