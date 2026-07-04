@@ -59,14 +59,18 @@
    memory on high-DPR phones. --tile-h is set inline per sheet. */
 .fx-rain-move {
     position: absolute;
-    inset: calc(-1 * var(--tile-h, 1024px)) 0 0 0;
+    /* left bleed of one tile width: the loop now travels diagonally
+       (along the baked slant) and must not expose a bare left edge */
+    inset: calc(-1 * var(--tile-h, 1024px)) 0 0 -512px;
     background-repeat: repeat;
     background-size: 512px var(--tile-h, 1024px);
     animation: rain-fall var(--dur, 1.6s) linear infinite;
     will-change: transform;
 }
-/* one tile height per loop = seamless */
-@keyframes rain-fall { to { transform: translateY(var(--tile-h, 1024px)); } }
+/* one tile height (and its slant-matched x) per loop = seamless */
+@keyframes rain-fall {
+    to { transform: translate3d(var(--tile-dx, 0px), var(--tile-h, 1024px), 0); }
+}
 
 /* ---------------- ATMOSPHERIC HAZE ----------------
    The fog replacement: pre-feathered radial gradients, pre-tinted

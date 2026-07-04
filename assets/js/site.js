@@ -31,6 +31,7 @@
 
         // Highest level this device should ever run (independent of choice).
         function ceiling() {
+            if (root.dataset.gpu === "soft") return "calm";  // CPU compositing
             var conn = navigator.connection || {};
             var cores = navigator.hardwareConcurrency || 8;
             var mem = navigator.deviceMemory || 8;
@@ -82,6 +83,39 @@
             if (m.addEventListener) m.addEventListener("change", on);
             else if (m.addListener) m.addListener(on);
         });
+
+        // Software-GPU sniff. When the browser composites on the CPU
+        // (e.g. Chrome with "hardware acceleration unavailable", which
+        // reports a SwiftShader WebGL renderer), backdrop blur and rain
+        // rasterize per frame on the main processor and everything
+        // lags. Probing a GL context costs ~10ms, so it runs after
+        // first paint; the verdict persists (localStorage "gpusoft")
+        // so the no-FOUC script clamps instantly on later visits, and
+        // re-probing every load self-heals after a driver/settings fix.
+        setTimeout(function () {
+            var soft = false;
+            try {
+                var cv = document.createElement("canvas");
+                var gl = cv.getContext("webgl") || cv.getContext("experimental-webgl");
+                if (gl) {
+                    var info = gl.getExtension("WEBGL_debug_renderer_info");
+                    var rend = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+                    soft = /swiftshader|llvmpipe|software/i.test(rend);
+                    var lose = gl.getExtension("WEBGL_lose_context");
+                    if (lose) lose.loseContext();
+                }
+            } catch (e) {}
+            try {
+                if (soft) localStorage.setItem("gpusoft", "1");
+                else localStorage.removeItem("gpusoft");
+            } catch (e) {}
+            var was = root.dataset.gpu === "soft";
+            if (soft !== was) {
+                if (soft) root.dataset.gpu = "soft";
+                else delete root.dataset.gpu;
+                apply(readPref());
+            }
+        }, 0);
     })();
 
     /* --- Graceful scroll cue ---

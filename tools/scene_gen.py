@@ -519,7 +519,12 @@ def shrine_svg(layer, scene, w, h):
     silhouette = (
         "M-46,0h92v-7h-92Z"                       # stone platform
         "M-38,-7h76v-6h-76Z"                      # plinth
+        "M-46,-7h6v-32h-6Z"                       # left veranda post
+        "M40,-7h6v-32h-6Z"                        # right veranda post
         "M-30,-13h60v-32h-60Z"                    # hall body (to -45)
+        "M-54,-38h108v-7h-108Z"                   # eave beam out to the fascia:
+                                                  # no background shows between
+                                                  # roof and body
         "M0,-70Q16,-52 54,-42Q59,-41 62,-46"      # right sori sweep + tip kick
         "L56,-37Q20,-43 0,-43Q-20,-43 -56,-37"    # deep eave underside
         "L-62,-46Q-59,-41 -54,-42Q-16,-52 0,-70Z" # left tip kick + sweep
@@ -536,6 +541,10 @@ def shrine_svg(layer, scene, w, h):
         f'<defs>{halo}{warm}</defs>'
         f'<g transform="translate({r1(x)},{r1(y)}) scale({s})">'
         f'<ellipse cx="0" cy="-30" rx="100" ry="52" fill="url(#{gid}-halo)"/>'
+        # translucent under-eave shadow: the openings beside the hall
+        # (any real overhang exposes background) read as shaded veranda
+        # depth instead of glowing sky
+        f'<path style="fill:var(--gs-8a);opacity:0.55" d="M-46,-7h92v-32h-92Z"/>'
         f'<path style="fill:var(--gs-8a)" d="{silhouette}"/>'
         f'<path style="fill:var(--amber-soft)" d="{apertures}"/>'
         f'<ellipse cx="0" cy="-24" rx="12" ry="11" fill="url(#{gid}-warm)"/>'

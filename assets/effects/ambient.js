@@ -173,6 +173,11 @@ function mountRainCSS() {
         const dur = (sheet.dur * tileH) / 1024;
         move.style.setProperty("--dur", dur + "s");
         move.style.setProperty("--tile-h", tileH + "px");
+        /* fall ALONG the baked slant (straight-down motion under
+           slanted streaks reads wrong); the tile is seamless on both
+           axes, so a diagonal loop wraps cleanly */
+        move.style.setProperty("--tile-dx",
+            (Math.tan((sheet.slant * Math.PI) / 180) * tileH).toFixed(1) + "px");
         /* Quantized fall: with steps() the transform only changes N
            times per second, so the frames in between carry no damage
            and the compositor skips them entirely. A linear fall damages

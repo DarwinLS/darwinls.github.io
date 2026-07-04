@@ -1279,18 +1279,18 @@ main {
     z-index: -1;
     pointer-events: none;
     border-radius: 32px;
-    background: color-mix(in srgb, var(--mist-veil) 46%, transparent);
-    box-shadow: 0 0 72px 44px color-mix(in srgb, var(--mist-veil) 46%, transparent);
+    background: color-mix(in srgb, var(--mist-veil) 30%, transparent);
+    box-shadow: 0 0 32px 8px color-mix(in srgb, var(--mist-veil) 30%, transparent);
 }
 /* Dark: same shape, quieter - moonlit haze, not a light source. */
 [data-theme="dark"] .hero-text-container::before {
-    background: color-mix(in srgb, var(--mist-veil) 30%, transparent);
-    box-shadow: 0 0 72px 44px color-mix(in srgb, var(--mist-veil) 30%, transparent);
+    background: color-mix(in srgb, var(--mist-veil) 20%, transparent);
+    box-shadow: 0 0 32px 8px color-mix(in srgb, var(--mist-veil) 20%, transparent);
 }
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .hero-text-container::before {
-        background: color-mix(in srgb, var(--mist-veil) 30%, transparent);
-        box-shadow: 0 0 72px 44px color-mix(in srgb, var(--mist-veil) 30%, transparent);
+        background: color-mix(in srgb, var(--mist-veil) 20%, transparent);
+        box-shadow: 0 0 32px 8px color-mix(in srgb, var(--mist-veil) 20%, transparent);
     }
 }
 .hero-hook {
@@ -1962,6 +1962,37 @@ body::after {
     .sd-2, .sd-m2, .sd-4, .sd-f1 { display: none; }
     .vista-projects .vl-1,
     .vista-about .vl-1 { display: none; }
+}
+
+/* Software compositing (e.g. Chrome with "hardware acceleration
+   unavailable", which reports a SwiftShader WebGL renderer): every
+   backdrop blur re-rasterizes on the CPU while scrolling. site.js
+   sets [data-gpu="soft"] (persisted per visit, re-probed each load);
+   glass falls back to the plain tint and the ambience ceiling clamps
+   to calm through the dial. */
+[data-gpu="soft"] .site-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+[data-gpu="soft"] .veil {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: color-mix(in srgb, var(--paper) 82%, transparent);
+    border: 0;
+    box-shadow: none;
+}
+[data-gpu="soft"] .veil-column {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: color-mix(in srgb, var(--paper) 78%, transparent);
+    border: 0;
+    box-shadow: none;
+}
+[data-gpu="soft"] .nav-links {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--raised);
+    border-left-color: var(--line);
 }
 
 /* No backdrop-filter: glass surfaces fall back to the plain tint veil */
