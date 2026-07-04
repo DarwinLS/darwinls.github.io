@@ -5,13 +5,16 @@
    the site is fully styled and readable (scenery is static inline
    SVG, content is never hidden by CSS unless this script runs).
 
-   It reads the intensity dial ([data-intensity] on <html>, set by the
+   It reads the ambience dial ([data-intensity] on <html>, set by the
    no-FOUC inline script) and mounts effects to match:
-     calm       -> no rain, no cursor light, no reveals-hide
-                   (atmosphere = static in-scene mist + .fx-haze;
-                   the scroll drift is baseline CSS, not dial-gated)
-     balanced   -> tiled rain (1 dense sheet), reveals, timeline draw
-     immersive  -> tiled rain (2 sheets), cursor dew
+     calm -> no rain, no cursor light, no reveals-hide
+             (atmosphere = static in-scene mist + .fx-haze;
+             the scroll drift is baseline CSS, not dial-gated)
+     fog  -> reveals, timeline draw (the fog visuals themselves are
+             scene fog banks + the drifting precipitation layer,
+             added in later phases of the atmosphere round)
+     rain -> tiled rain (2 sheets fine / 1 coarse), cursor dew,
+             reveals, timeline draw
    Coarse pointers additionally skip reveals-hide at every level (IO
    lags fling scrolls on phones; content must never pop in late).
    Rain streaks are drawn ONCE into small tiling textures; each depth
@@ -25,7 +28,7 @@ const root = document.documentElement;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)");
 const finePointer = matchMedia("(pointer: fine)");
 
-const level = () => root.dataset.intensity || "balanced";
+const level = () => root.dataset.intensity || "rain";
 const motionOK = () => !reduce.matches;
 
 /* ---------- shared engine lifecycle ---------- */
@@ -45,8 +48,9 @@ function destroyAll() {
    in production pages. */
 const rainDebug = () => window.__rainDebug || null;
 
-/* null = no rain at all (calm, reduced motion, save-data, low-end) */
-function rainLevel() {
+/* null = no precipitation at all (calm, reduced motion, save-data,
+   low-end); otherwise the weather mode string, "fog" or "rain". */
+function precipLevel() {
     const dbg = rainDebug();
     if (dbg && dbg.off) return null;
     const lvl = level();
@@ -109,21 +113,18 @@ function makeRainTile(rgb, sheet, densityMul, tileH) {
 }
 
 function mountRain() {
-    const lvl = rainLevel();
-    if (!lvl) return;
+    if (precipLevel() !== "rain") return;
     const dbg = rainDebug();
     const coarse = !finePointer.matches;
     /* Measured (tools/perf_probe.py, 144Hz Iris Xe): ONE sheet on a
        512 tile scrolls at a tight single-vsync cadence (p95 7.1ms);
-       every extra sheet adds regular double-vsync spills. So balanced
-       and phones run one denser mid sheet; immersive opts into two.
+       every extra sheet adds regular double-vsync spills. So phones
+       run one denser mid sheet; fine pointers opt into two.
        Small tiles also halve each sheet's GPU memory (phone eviction). */
-    let sheets = lvl === "immersive" && !coarse
-        ? [SHEETS[1], SHEETS[2]]
-        : [SHEETS[1]];
+    let sheets = !coarse ? [SHEETS[1], SHEETS[2]] : [SHEETS[1]];
     if (dbg && dbg.sheets) sheets = SHEETS.slice(0, dbg.sheets);
     const tileH = (dbg && dbg.tileH) || 512;
-    const densityMul = coarse ? 0.8 : lvl === "immersive" ? 1 : 1.25;
+    const densityMul = coarse ? 0.8 : 1;
 
     const host = document.createElement("div");
     host.className = "fx-rain is-fixed";
@@ -168,11 +169,11 @@ function mountRain() {
 }
 
 /* ============================================================
-   CURSOR DEW - immersive + fine pointer only. A soft light that
+   CURSOR DEW - rain mode + fine pointer only. A soft light that
    follows the pointer (plain alpha radial, no blend mode).
    ============================================================ */
 function mountCursor() {
-    if (level() !== "immersive" || !finePointer.matches || !motionOK()) return;
+    if (level() !== "rain" || !finePointer.matches || !motionOK()) return;
     const dew = document.createElement("div");
     dew.className = "fx-dew";
     dew.setAttribute("aria-hidden", "true");

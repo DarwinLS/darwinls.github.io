@@ -1517,15 +1517,15 @@ main {
 .theme-toggle svg, .nav-burger svg, .intensity-toggle svg { width: 22px; height: 22px; }
 .nav-burger { display: none; }                 /* shown on mobile only */
 
-/* Intensity dial: JS-only control (does nothing without the runtime).
-   The icon (cloud -> rain -> downpour) reflects the chosen preference. */
+/* Ambience dial: JS-only control (does nothing without the runtime).
+   The icon (cloud / fog / rain) reflects the chosen weather mode. */
 .intensity-toggle { display: none; }
 .js .intensity-toggle { display: inline-flex; }
 .intensity-toggle svg { display: none; }
-[data-pref="calm"]      .intensity-toggle .i-calm,
-[data-pref="balanced"]  .intensity-toggle .i-balanced,
-[data-pref="immersive"] .intensity-toggle .i-immersive { display: block; }
-:root:not([data-pref]) .intensity-toggle .i-balanced { display: block; } /* pre-script fallback */
+[data-pref="calm"] .intensity-toggle .i-calm,
+[data-pref="fog"]  .intensity-toggle .i-fog,
+[data-pref="rain"] .intensity-toggle .i-rain { display: block; }
+:root:not([data-pref]) .intensity-toggle .i-rain { display: block; } /* pre-script fallback */
 
 /* The dial is already live: Calm stills the ambient cues. Later phases
    read [data-intensity] to mount/skip rain, fog, parallax, and choreography. */

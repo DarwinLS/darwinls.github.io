@@ -65,7 +65,7 @@
    The fog replacement: pre-feathered radial gradients, pre-tinted
    per theme via tokens. No blur filter, no blend mode - the softness
    is baked into the gradients themselves. Present in static HTML on
-   every page (works without JS); drifts gently at balanced+. */
+   every page (works without JS); drifts gently at fog/rain. */
 .fx-haze {
     position: fixed;
     inset: -6% -8%;
@@ -76,7 +76,7 @@
         radial-gradient(100% 45% at 75% 62%, var(--haze-b), transparent 70%);
 }
 @media (prefers-reduced-motion: no-preference) {
-    :is([data-intensity="balanced"], [data-intensity="immersive"]) .fx-haze {
+    :is([data-intensity="fog"], [data-intensity="rain"]) .fx-haze {
         /* steps() so the sub-pixel drift only damages ~2 frames/s
            instead of waking the compositor at every vsync forever */
         animation: haze-drift 70s steps(140) infinite alternate;
@@ -87,7 +87,7 @@
     to   { transform: translate3d(1.5%, -1%, 0); }
 }
 
-/* Cursor dew (immersive, fine pointer) - a soft light that follows
+/* Cursor dew (rain mode, fine pointer) - a soft light that follows
    the pointer. Plain alpha radial, no blend mode. */
 .fx-dew {
     position: fixed;
@@ -147,7 +147,7 @@
    Calm / reduced-motion / no view-timeline = fully drawn (static). */
 @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-        :is([data-intensity="balanced"], [data-intensity="immersive"]) .foliage-divider path {
+        :is([data-intensity="fog"], [data-intensity="rain"]) .foliage-divider path {
             stroke-dasharray: 1;
             stroke-dashoffset: 1;
             animation: foliage-draw linear both;
@@ -175,7 +175,7 @@
 /* Timeline trail draw-on-scroll: ambient.js sets --draw 0->1 per node.
    Falls back to a fully drawn line when JS/scroll-timeline is absent. */
 @media (prefers-reduced-motion: no-preference) {
-    html.fx-ready:is([data-intensity="balanced"], [data-intensity="immersive"]) .tl-node:not(:last-child)::before {
+    html.fx-ready:is([data-intensity="fog"], [data-intensity="rain"]) .tl-node:not(:last-child)::before {
         transform: translateX(-50%) scaleY(var(--draw, 0));
         transform-origin: top;
         transition: transform 0.6s var(--ease-draw);
@@ -184,15 +184,15 @@
 
 /* ---------------- FIREFLIES (footer valley, night only) ----------------
    Static amber points by default (styles.css shows them in dark mode);
-   at balanced+ they breathe. Each circle carries its own --fd phase
+   at fog/rain they breathe. Each circle carries its own --fd phase
    delay from the generator so they never pulse in sync. */
 @media (prefers-reduced-motion: no-preference) {
-    :root[data-theme="dark"]:is([data-intensity="balanced"], [data-intensity="immersive"]) .firefly {
+    :root[data-theme="dark"]:is([data-intensity="fog"], [data-intensity="rain"]) .firefly {
         animation: firefly-blink 5.5s ease-in-out infinite;
         animation-delay: calc(var(--fd, 0) * -1s);
     }
     @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]):is([data-intensity="balanced"], [data-intensity="immersive"]) .firefly {
+        :root:not([data-theme="light"]):is([data-intensity="fog"], [data-intensity="rain"]) .firefly {
             animation: firefly-blink 5.5s ease-in-out infinite;
             animation-delay: calc(var(--fd, 0) * -1s);
         }

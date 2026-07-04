@@ -19,14 +19,15 @@
         });
     }
 
-    /* --- Ambient intensity dial (Calm / Balanced / Immersive) ---
-       The user picks a preference; the device caps how far it can go.
-       This scaffold sets [data-intensity] (effective) + [data-pref]
-       (chosen) on <html> so later phases can gate ambient + motion.
+    /* --- Ambience dial (Calm / Fog / Rain) ---
+       The user picks a weather mode; the device caps how far it can go
+       (low-end / reduced-motion clamps to Calm). This scaffold sets
+       [data-intensity] (effective) + [data-pref] (chosen) on <html> so
+       effects can gate on the mode.
        Pairs with the no-FOUC inline script that sets both before paint. */
     (function () {
-        var LEVELS = ["calm", "balanced", "immersive"];
-        var LABELS = { calm: "Calm", balanced: "Balanced", immersive: "Immersive" };
+        var LEVELS = ["calm", "fog", "rain"];
+        var LABELS = { calm: "Calm", fog: "Fog", rain: "Rain" };
 
         // Highest level this device should ever run (independent of choice).
         function ceiling() {
@@ -35,8 +36,7 @@
             var mem = navigator.deviceMemory || 8;
             if (matchMedia("(prefers-reduced-motion: reduce)").matches ||
                 conn.saveData || cores <= 2 || mem <= 2) return "calm";
-            if (matchMedia("(pointer: coarse)").matches) return "balanced"; // phones: Balanced-lite
-            return "immersive";
+            return "rain";
         }
         function clamp(pref) {
             return LEVELS[Math.min(LEVELS.indexOf(pref), LEVELS.indexOf(ceiling()))];
@@ -44,7 +44,10 @@
         function readPref() {
             var p = root.dataset.pref;
             if (LEVELS.indexOf(p) < 0) { try { p = localStorage.getItem("intensity"); } catch (e) {} }
-            return LEVELS.indexOf(p) < 0 ? "balanced" : p;
+            // Stored values from the old Calm/Balanced/Immersive dial.
+            if (p === "balanced") p = "fog";
+            else if (p === "immersive") p = "rain";
+            return LEVELS.indexOf(p) < 0 ? "rain" : p;
         }
 
         var btn = document.getElementById("intensity-toggle");
@@ -54,7 +57,7 @@
             root.dataset.pref = pref;
             root.dataset.intensity = eff;
             if (btn) {
-                var msg = "Ambient motion: " + LABELS[pref];
+                var msg = "Ambience: " + LABELS[pref];
                 if (eff !== pref) msg += " (limited to " + LABELS[eff] + " on this device)";
                 btn.setAttribute("aria-label", msg + ". Click to change.");
                 btn.setAttribute("title", msg);
@@ -71,9 +74,9 @@
             });
         }
 
-        // Re-clamp live when the environment changes (OS reduced-motion, etc.)
+        // Re-clamp live when the environment changes (OS reduced-motion)
         // so an accessibility toggle applies without a reload.
-        ["(prefers-reduced-motion: reduce)", "(pointer: coarse)"].forEach(function (q) {
+        ["(prefers-reduced-motion: reduce)"].forEach(function (q) {
             var m = matchMedia(q);
             var on = function () { apply(readPref()); };
             if (m.addEventListener) m.addEventListener("change", on);

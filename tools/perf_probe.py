@@ -29,7 +29,7 @@ KILL_FIXED = (".fx-haze{display:none !important}"
               "body::after{display:none !important}")
 CONFIGS = {
     "off":         ({"off": True}, ""),
-    "cur2lin":     (None, ""),                       # balanced default: 2 sheets, linear
+    "cur2lin":     (None, ""),                       # shipped default (historic name)
     "s1lin":       ({"sheets": 1}, ""),
     "s2q24":       ({"stepsPerSec": 24}, ""),
     "s2q30":       ({"stepsPerSec": 30}, ""),
@@ -119,7 +119,7 @@ def build():
     src = (ROOT / "index.html").read_text(encoding="utf-8")
     for name, (dbg, css) in CONFIGS.items():
         inject = ('<script>localStorage.setItem("theme","dark");'
-                  'localStorage.setItem("intensity","balanced");</script>')
+                  'localStorage.setItem("intensity","rain");</script>')
         if dbg is not None:
             inject += f"<script>window.__rainDebug = {json.dumps(dbg)};</script>"
         if css:

@@ -9,23 +9,23 @@ ROOT = Path(__file__).resolve().parent.parent
 
 CONFIGS = [
     # (out name, source, theme, intensity, margin_top_px, coarse)
-    ("_p_home_hero_light.html", "index.html", "light", "balanced", 0, False),
-    ("_p_home_hero_dark.html", "index.html", "dark", "balanced", 0, False),
-    ("_p_home_mid_light.html", "index.html", "light", "balanced", 1600, False),
-    ("_p_home_bot_light.html", "index.html", "light", "balanced", 3094, False),
-    ("_p_home_bot_dark.html", "index.html", "dark", "balanced", 3094, False),
-    ("_p_home_coarse.html", "index.html", "light", "balanced", 0, True),
+    ("_p_home_hero_light.html", "index.html", "light", "rain", 0, False),
+    ("_p_home_hero_dark.html", "index.html", "dark", "rain", 0, False),
+    ("_p_home_mid_light.html", "index.html", "light", "rain", 1600, False),
+    ("_p_home_bot_light.html", "index.html", "light", "rain", 3094, False),
+    ("_p_home_bot_dark.html", "index.html", "dark", "rain", 3094, False),
+    ("_p_home_coarse.html", "index.html", "light", "rain", 0, True),
     ("_p_home_calm.html", "index.html", "light", "calm", 0, False),
-    ("_p_about_light.html", "about.html", "light", "balanced", 0, False),
-    ("_p_projects_light.html", "projects.html", "light", "balanced", 0, False),
-    ("_p_contact_light.html", "contact.html", "light", "balanced", 0, False),
-    ("_p_veraflux_light.html", "veraflux.html", "light", "balanced", 0, False),
-    ("_p_projects_bot_light.html", "projects.html", "light", "balanced", 1971, False),
+    ("_p_about_light.html", "about.html", "light", "rain", 0, False),
+    ("_p_projects_light.html", "projects.html", "light", "rain", 0, False),
+    ("_p_contact_light.html", "contact.html", "light", "rain", 0, False),
+    ("_p_veraflux_light.html", "veraflux.html", "light", "rain", 0, False),
+    ("_p_projects_bot_light.html", "projects.html", "light", "rain", 1971, False),
     # mobile-width poses (headless floors the window at ~474px)
-    ("_p_m_home_mid.html", "index.html", "light", "balanced", 1000, False),
-    ("_p_m_home_low.html", "index.html", "light", "balanced", 2100, False),
-    ("_p_m_home_bot.html", "index.html", "light", "balanced", 2906, False),
-    ("_p_m_about_mid.html", "about.html", "light", "balanced", 700, False),
+    ("_p_m_home_mid.html", "index.html", "light", "rain", 1000, False),
+    ("_p_m_home_low.html", "index.html", "light", "rain", 2100, False),
+    ("_p_m_home_bot.html", "index.html", "light", "rain", 2906, False),
+    ("_p_m_about_mid.html", "about.html", "light", "rain", 700, False),
 ]
 
 COARSE_JS = """
