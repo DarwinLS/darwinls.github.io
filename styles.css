@@ -1258,40 +1258,15 @@ main {
     padding: 0 10%;
     min-height: calc(100svh - var(--nav-height));
 }
+/* No wash, no glow, no glass behind the hero text: every plate we
+   tried (radial wash, frosted pane, container glow) read as a surface
+   sitting on the vista, and it crowded the scroll cue. The text
+   carries its own contrast: the hook runs at full ink and the display
+   sizes are heavy enough to sit directly on the scenery. */
 .hero-text-container {
     position: relative;
     z-index: 1;
     max-width: 640px;
-    padding: 2.25rem 2.75rem;
-}
-/* Hero container glow: the old radial wash read shapeless and the
-   glass pane too architectural against the open vista. This sits
-   between them: a container-shaped pool of the same mist tint whose
-   edges feather through a generous box-shadow bloom (painted once,
-   not a filter - zero per-frame cost). inset: 0 only, never negative
-   (the old negative-inset wash overflowed phones); breathing room
-   comes from the container's own padding, and box-shadow ink never
-   extends the scrollable area. */
-.hero-text-container::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    border-radius: 32px;
-    background: color-mix(in srgb, var(--mist-veil) 30%, transparent);
-    box-shadow: 0 0 32px 8px color-mix(in srgb, var(--mist-veil) 30%, transparent);
-}
-/* Dark: same shape, quieter - moonlit haze, not a light source. */
-[data-theme="dark"] .hero-text-container::before {
-    background: color-mix(in srgb, var(--mist-veil) 20%, transparent);
-    box-shadow: 0 0 32px 8px color-mix(in srgb, var(--mist-veil) 20%, transparent);
-}
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .hero-text-container::before {
-        background: color-mix(in srgb, var(--mist-veil) 20%, transparent);
-        box-shadow: 0 0 32px 8px color-mix(in srgb, var(--mist-veil) 20%, transparent);
-    }
 }
 .hero-hook {
     font-size: clamp(1.05rem, 1.4vw, 1.3rem);
@@ -1659,11 +1634,10 @@ body::after {
 @media (max-width: 600px) {
     body { overflow-x: clip; }              /* belt-and-suspenders vs sub-pixel spill */
 
-    /* Phones: slimmer glow padding (the desktop 2.75rem squeezed the
-       text column) and a reserved band at the hero's foot so the CTA
-       buttons can never reach the absolute-positioned scroll cue. */
+    /* Phones: eased side padding, and a reserved band at the hero's
+       foot so the CTA buttons can never reach the absolute-positioned
+       scroll cue. */
     .hero { padding-inline: 5%; padding-bottom: 7rem; }
-    .hero-text-container { padding: 1.5rem 1.15rem; }
     .section-inner { padding: 0 6%; }
     .content-page { padding: 1.5rem 6%; }
     .projects-container { padding: 1.5rem 6%; }
@@ -2032,7 +2006,6 @@ body::after {
        rows' inline style="fill:var(--gs-Na)" (a color-mix value) */
     .sd path, .vl path { fill: var(--slate) !important; }
     .mist, .glow { display: none; }
-    .hero-text-container::before { display: none; }
     .footer-scene path { fill: var(--bark-deep); }
     .veil, .veil-column { background: var(--paper); }
     .js .nav-links { background: var(--raised); }
