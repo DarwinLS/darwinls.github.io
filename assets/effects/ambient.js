@@ -149,7 +149,8 @@ function mountRainCSS() {
     let sheets = [SHEETS[1]];
     if (dbg && dbg.sheets) sheets = SHEETS.slice(0, dbg.sheets);
     const tileH = (dbg && dbg.tileH) || 512;
-    const densityMul = coarse ? 0.8 : 1.25;
+    /* quiet-ambience diet, matching the WebGL tuning */
+    const densityMul = coarse ? 0.5 : 0.7;
 
     const host = document.createElement("div");
     host.className = "fx-rain is-fixed";

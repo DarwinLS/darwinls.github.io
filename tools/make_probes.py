@@ -67,6 +67,7 @@ window.addEventListener("load", function () {
             + " precip=" + (function () { var c = document.querySelector(".fx-precip canvas"); return c ? c.width + "x" + c.height : "none"; })()
             + " fogbanks=" + document.querySelectorAll(".fogbank").length
             + " bankOpacity=" + (function () { var b = document.querySelector(".fogbank"); return b ? getComputedStyle(b).opacity : "na"; })()
+            + " bankAnim=" + (function () { var b = document.querySelector(".fogbank"); return b ? getComputedStyle(b).animationName : "na"; })()
             + " trackAnim=" + (track ? getComputedStyle(track).animationName : "none")
             + " sceneH=" + (scene ? Math.round(scene.getBoundingClientRect().height) : -1)
             + " innerHeight=" + window.innerHeight);

@@ -152,6 +152,25 @@
 @keyframes track-drift-home { to { transform: translateY(-6vh); } }
 @keyframes track-drift-vista { to { transform: translateY(-10vh); } }
 
+/* ---------------- FOG BANK DRIFT (fog mode only) ----------------
+   The cloud-sea banks creep sideways so they read as cloud, not as
+   another ridgeline. Same budget trick as the haze: steps() timing
+   damages only ~2 frames/s per bank instead of waking the compositor
+   every vsync. Amplitude stays inside the banks' 60px path bleed.
+   FULL animation shorthand in ONE rule per bank (Blink drops the
+   animation if the declaration is split across cascade rules).
+   sd-f1 is display:none under 700px, so phones drift at most 2 banks. */
+@keyframes fogbank-drift {
+    from { transform: translate3d(calc(-1 * var(--fb-drift, 26px)), 0, 0); }
+    to   { transform: translate3d(var(--fb-drift, 26px), 0, 0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+    [data-intensity="fog"] .sd-f1 { --fb-drift: 22px; animation: fogbank-drift 90s steps(180) infinite alternate; }
+    [data-intensity="fog"] .sd-f2 { --fb-drift: 30px; animation: fogbank-drift 115s steps(230) infinite alternate-reverse; }
+    [data-intensity="fog"] .sd-f3 { --fb-drift: 38px; animation: fogbank-drift 140s steps(280) infinite alternate; }
+    [data-intensity="fog"] .vl-f1 { --fb-drift: 28px; animation: fogbank-drift 110s steps(220) infinite alternate; }
+}
+
 /* ---------------- FOLIAGE DRAW-ON-SCROLL ---------------- */
 /* Line-art dividers draw themselves as they enter view. Paths carry
    pathLength="1" so a single normalized dash animation fits every stroke.
@@ -230,6 +249,7 @@
     .fx-haze,
     .fx-rain-move,
     .sd, .vl, .scene-track,
+    .fogbank,
     .firefly,
     .foliage-divider path { animation: none !important; }
     .foliage-divider path { stroke-dashoffset: 0 !important; }

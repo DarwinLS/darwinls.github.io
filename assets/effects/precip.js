@@ -48,6 +48,7 @@ uniform vec3 u_fogColor;
 uniform float u_wind;
 uniform float u_alpha;     /* fog master opacity */
 uniform float u_fogMix;    /* fog showing through in rain mode */
+uniform float u_far;       /* far rain layer on/off (phones drop it) */
 
 float h1(vec2 p) {
     p = fract(p * vec2(123.34, 345.45));
@@ -95,9 +96,12 @@ void main() {
     float a;
     vec3 col;
     if (u_mode > 0.5) {
-        float r = streaks(st, 90.0, 5.0, 0.9, 0.28, 0.10, 0.60, 11.0) * 0.18
-                + streaks(st, 55.0, 3.4, 1.5, 0.32, 0.12, 0.55, 23.0) * 0.30
-                + streaks(st, 30.0, 2.2, 2.4, 0.38, 0.14, 0.50, 37.0) * 0.42;
+        /* Quiet ambience: about half the lit columns of the first cut,
+           dimmer heads, slightly slower fall. Rain should read as
+           atmosphere BEHIND the content, never something you watch. */
+        float r = streaks(st, 90.0, 5.0, 0.8, 0.24, 0.10, 0.30, 11.0) * u_far * 0.10
+                + streaks(st, 55.0, 3.4, 1.3, 0.27, 0.12, 0.28, 23.0) * 0.16
+                + streaks(st, 30.0, 2.2, 2.0, 0.32, 0.14, 0.25, 37.0) * 0.24;
         float f = 0.0;
         if (u_fogMix > 0.0) f = fogAmt(st, uv) * u_fogMix;
         a = min(1.0, r + f);
@@ -181,7 +185,7 @@ function mount(mode, coarse, dbg) {
 
     const isRain = mode === "rain";
     const scale = (dbg && dbg.scale)
-        || (coarse ? 1 : Math.min(devicePixelRatio || 1, 1.5)) * (isRain ? 1 : 0.5);
+        || (coarse ? 1 : Math.min(devicePixelRatio || 1, 1.25)) * (isRain ? 1 : 0.5);
     const frameMs = dbg && dbg.fps ? 1000 / dbg.fps : isRain ? 1000 / 60 : 1000 / 30;
 
     let prog = null;
@@ -205,13 +209,14 @@ function mount(mode, coarse, dbg) {
         gl.disable(gl.BLEND);
         loc = {};
         for (const u of ["u_res", "u_time", "u_mode", "u_rainColor",
-            "u_fogColor", "u_wind", "u_alpha", "u_fogMix"]) {
+            "u_fogColor", "u_wind", "u_alpha", "u_fogMix", "u_far"]) {
             loc[u] = gl.getUniformLocation(prog, u);
         }
         gl.uniform1f(loc.u_mode, isRain ? 1 : 0);
         gl.uniform1f(loc.u_wind, 0.12);
         gl.uniform1f(loc.u_alpha, 0.28);
         gl.uniform1f(loc.u_fogMix, 0);
+        gl.uniform1f(loc.u_far, coarse ? 0 : 1);
         tint();
         return true;
     }
