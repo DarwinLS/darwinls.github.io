@@ -58,9 +58,14 @@ SCENES = {
             {"type": "mist",  "name": "sd-m3", "seed": 153, "yc": 800, "thick": 180, "opacity": 0.7},
             {"type": "ridge", "name": "sd-5", "seed": 105, "baseline": 640, "amp": 120, "freq": 3.4, "sharp": 1.20, "skew": 0.28, "ramp": 5, "canopy": {"r": (10, 17), "inner": 24}},
             {"type": "ridge", "name": "sd-6", "seed": 106, "baseline": 730, "amp": 110, "freq": 4.0, "sharp": 1.15, "skew": 0.30, "ramp": 6, "canopy": {"r": (12, 21), "inner": 30}},
-            {"type": "fogbank", "name": "sd-f3", "seed": 163, "yc": 775, "thick": 150, "opacity": 0.9,  "r": (36, 68)},
             {"type": "shrine", "name": "sd-shrine", "on": "sd-7", "x": 855, "dy": 6, "s": 1.1},
             {"type": "ridge", "name": "sd-7", "seed": 107, "baseline": 830, "amp": 80,  "freq": 4.6, "sharp": 1.10, "skew": 0.30, "ramp": 7, "canopy": {"r": (15, 26), "inner": 38}},
+            # sd-f3 paints LAST: the drifting near bank must sit at the
+            # TOP of the stack, or its animation forces every layer
+            # above it out of the track's flattened texture (measured:
+            # mid-stack drift pinned fog mode to 72Hz). Ground fog in
+            # front of the near forest also reads right.
+            {"type": "fogbank", "name": "sd-f3", "seed": 163, "yc": 775, "thick": 150, "opacity": 0.9,  "r": (36, 68)},
         ],
     },
     # PROJECTS: rain-veiled closer forest

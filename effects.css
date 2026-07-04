@@ -164,10 +164,15 @@
     from { transform: translate3d(calc(-1 * var(--fb-drift, 26px)), 0, 0); }
     to   { transform: translate3d(var(--fb-drift, 26px), 0, 0); }
 }
+/* Only the NEAREST bank drifts. Measured (144Hz box): animating a bank
+   in the MIDDLE of the scene stack forces every layer painted above it
+   out of the track's flattened texture, and fog mode pinned to 72Hz
+   regardless of whether one or three banks drifted. sd-f3 sits second
+   from the top, so its drift splits only sd-7 - and the near bank is
+   where sideways motion reads strongest anyway. Same reasoning for the
+   vista banks (one bank each, near the top of their stacks). */
 @media (prefers-reduced-motion: no-preference) {
-    [data-intensity="fog"] .sd-f1 { --fb-drift: 22px; animation: fogbank-drift 90s steps(180) infinite alternate; }
-    [data-intensity="fog"] .sd-f2 { --fb-drift: 30px; animation: fogbank-drift 115s steps(230) infinite alternate-reverse; }
-    [data-intensity="fog"] .sd-f3 { --fb-drift: 38px; animation: fogbank-drift 140s steps(280) infinite alternate; }
+    [data-intensity="fog"] .sd-f3 { --fb-drift: 38px; animation: fogbank-drift 120s steps(240) infinite alternate; }
     [data-intensity="fog"] .vl-f1 { --fb-drift: 28px; animation: fogbank-drift 110s steps(220) infinite alternate; }
 }
 
