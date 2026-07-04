@@ -163,15 +163,15 @@ function buildProgram(gl) {
     return prog;
 }
 
-export function mountPrecip({ mode, coarse, dbg }) {
+export function mountPrecip({ mode, coarse, dbg, onDegrade }) {
     try {
-        return mount(mode, coarse, dbg || null);
+        return mount(mode, coarse, dbg || null, onDegrade || null);
     } catch (e) {
         return null;
     }
 }
 
-function mount(mode, coarse, dbg) {
+function mount(mode, coarse, dbg, onDegrade) {
     const canvas = document.createElement("canvas");
     const attrs = {
         alpha: true, premultipliedAlpha: true, antialias: false,
@@ -180,6 +180,22 @@ function mount(mode, coarse, dbg) {
     const gl = canvas.getContext("webgl", attrs)
         || canvas.getContext("experimental-webgl", attrs);
     if (!gl || gl.isContextLost()) return null;
+
+    /* Software WebGL (SwiftShader / llvmpipe: Chrome falls back to it
+       when its GPU blocklist or a policy disables acceleration) turns
+       the fullscreen shader into a per-frame CPU hog. Treat it as no
+       WebGL at all and let the CSS tiled rain carry the weather. */
+    try {
+        const info = gl.getExtension("WEBGL_debug_renderer_info");
+        const renderer = info
+            ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL))
+            : "";
+        if (/swiftshader|llvmpipe|software/i.test(renderer)) {
+            const ext = gl.getExtension("WEBGL_lose_context");
+            if (ext) ext.loseContext();
+            return null;
+        }
+    } catch (e) {}
 
     const host = document.createElement("div");
     host.className = "fx-rain is-fixed fx-precip";
@@ -251,9 +267,16 @@ function mount(mode, coarse, dbg) {
     size();
 
     /* Frame-capped loop: skip rAF ticks until the cap interval has
-       passed, keeping the remainder so cadence stays even. */
+       passed, keeping the remainder so cadence stays even.
+       Watchdog: if the achieved cadence of DRAWN frames runs far
+       behind the cap (weak GPU, browser throttling, anything the
+       software-renderer check above could not see), self-destruct and
+       hand the weather back to the cheap CSS path via onDegrade. */
     let raf = 0;
     let last = 0;
+    let wdCount = 0;
+    let wdStart = 0;
+    let wdDone = false;
     const t0 = performance.now();
     function frame(t) {
         raf = requestAnimationFrame(frame);
@@ -261,6 +284,18 @@ function mount(mode, coarse, dbg) {
         last = t - ((t - last) % frameMs);
         gl.uniform1f(loc.u_time, ((t - t0) / 1000) % 3600);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
+        if (!wdDone) {
+            wdCount++;
+            if (wdCount === 20) {
+                wdStart = t;             /* skip startup jank */
+            } else if (wdCount === 80) {
+                wdDone = true;
+                if ((t - wdStart) / 60 > frameMs * 1.8) {
+                    dispose();
+                    if (onDegrade) onDegrade();
+                }
+            }
+        }
     }
     function start() {
         if (!raf) raf = requestAnimationFrame(frame);
@@ -271,7 +306,14 @@ function mount(mode, coarse, dbg) {
     }
     start();
 
-    const onVis = () => (document.hidden ? stop() : start());
+    const onVis = () => {
+        if (document.hidden) {
+            stop();
+        } else {
+            wdCount = 0;                 /* do not count the hidden gap */
+            start();
+        }
+    };
     document.addEventListener("visibilitychange", onVis);
 
     let resizeTimer = 0;
@@ -301,7 +343,12 @@ function mount(mode, coarse, dbg) {
     themeObs.observe(document.documentElement,
         { attributes: true, attributeFilter: ["data-theme"] });
 
-    return () => {
+    /* Idempotent: the watchdog can dispose first and ambient.js will
+       still call the same teardown later on a dial/theme reboot. */
+    let disposed = false;
+    function dispose() {
+        if (disposed) return;
+        disposed = true;
         stop();
         clearTimeout(resizeTimer);
         themeObs.disconnect();
@@ -312,5 +359,6 @@ function mount(mode, coarse, dbg) {
         const ext = gl.getExtension("WEBGL_lose_context");
         if (ext) ext.loseContext();
         host.remove();
-    };
+    }
+    return dispose;
 }

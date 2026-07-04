@@ -126,11 +126,22 @@ function mountPrecipitation() {
     const dbg = rainDebug();
     if (!(dbg && dbg.forceCSS)) {
         let down = null;
+        const myGen = gen;
+        /* precip.js self-destructs when its frame watchdog sees the GPU
+           can't keep up; swap in the CSS path unless a reboot already
+           replaced this mount (gen guard). */
+        const degrade = () => {
+            if (gen !== myGen) return;
+            const i = teardown.indexOf(down);
+            if (i >= 0) teardown.splice(i, 1);
+            if (lvl === "rain") mountRainCSS();
+        };
         try {
             down = mountPrecip({
                 mode: (dbg && dbg.mode) || lvl,
                 coarse: !finePointer.matches,
                 dbg,
+                onDegrade: degrade,
             });
         } catch (e) {}
         if (down) { teardown.push(down); return; }
