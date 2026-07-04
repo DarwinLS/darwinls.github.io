@@ -55,7 +55,6 @@ SCENES = {
             {"type": "ridge", "name": "sd-4", "seed": 104, "baseline": 550, "amp": 120, "freq": 2.8, "sharp": 1.25, "skew": 0.25, "ramp": 4, "canopy": {"r": (9, 16)}},
             {"type": "mist",  "name": "sd-m3", "seed": 153, "yc": 800, "thick": 180, "opacity": 0.7},
             {"type": "ridge", "name": "sd-5", "seed": 105, "baseline": 640, "amp": 120, "freq": 3.4, "sharp": 1.20, "skew": 0.28, "ramp": 5, "canopy": {"r": (10, 17), "inner": 24}},
-            {"type": "fog",   "name": "sd-fog", "cx": 430, "cy": 510, "rx": 520, "ry": 290, "opacity": 0.65},
             {"type": "ridge", "name": "sd-6", "seed": 106, "baseline": 730, "amp": 110, "freq": 4.0, "sharp": 1.15, "skew": 0.30, "ramp": 6, "canopy": {"r": (12, 21), "inner": 30}},
             {"type": "ridge", "name": "sd-7", "seed": 107, "baseline": 830, "amp": 80,  "freq": 4.6, "sharp": 1.10, "skew": 0.30, "ramp": 7, "canopy": {"r": (15, 26), "inner": 38}},
         ],
@@ -391,8 +390,10 @@ def mist_svg(layer, scene, w, h):
 
 def fog_svg(layer, scene, w, h):
     """Feathered radial fog pocket in the scene's mist color: valley
-    fog pooling among the canopy. Doubles as the diegetic readability
-    surface behind the Home hero text (replaces the old CSS scrim)."""
+    fog pooling among the canopy. Currently unused - kept for the
+    future landmark/diegetic-elements round (fog placed intentionally
+    as scenery; hero readability now comes from a hero-anchored wash
+    in styles.css, not a scene layer)."""
     gid = f"g-{scene['grad_ns']}-{layer['name']}"
     grad = (
         f'<radialGradient id="{gid}">'

@@ -1249,13 +1249,42 @@ main {
     min-height: calc(100svh - var(--nav-height));
 }
 .hero-text-container { position: relative; z-index: 1; max-width: 640px; }
-/* No CSS scrim behind the hero text: readability comes from the
-   scene itself (the sd-fog valley-fog pocket generated into the Home
-   scenery sits exactly behind the text zone, in the mist color, both
-   themes). The landscape is the surface; there is no UI glow. */
+/* Hero-anchored mist wash. Not the old paper-white glow: the color is
+   --mist-veil (sky-tinted, re-tints per theme and biome) and it rides
+   the full-width hero box with percentage geometry chosen so the
+   feather reaches zero BEFORE every edge at any viewport size (the
+   left-edge distance equals the transparent stop) - no cutoffs, no
+   horizontal overflow. Left-biased over the text zone. It lives in
+   page flow, so it scrolls away with the hero, and at z -1 in the
+   root stacking context the rain falls in FRONT of it (fog depth). */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(46% 50% at 30% 46%,
+        color-mix(in srgb, var(--mist-veil) 62%, transparent),
+        transparent 65%);
+}
+/* Dark mode: same shape, quieter - moonlit haze, not a light source. */
+[data-theme="dark"] .hero::before {
+    background: radial-gradient(46% 50% at 30% 46%,
+        color-mix(in srgb, var(--mist-veil) 40%, transparent),
+        transparent 65%);
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .hero::before {
+        background: radial-gradient(46% 50% at 30% 46%,
+            color-mix(in srgb, var(--mist-veil) 40%, transparent),
+            transparent 65%);
+    }
+}
 .hero-hook {
     font-size: clamp(1.05rem, 1.4vw, 1.3rem);
-    color: var(--ink-2);
+    /* full ink, not ink-2: the hook crosses the canopy transition on
+       narrow viewports and secondary ink went thin there */
+    color: var(--ink);
     max-width: 32em;
     margin-bottom: var(--space-8);
 }
@@ -1655,6 +1684,21 @@ body::after {
     pointer-events: none;
     contain: strict;
 }
+/* Size the fixed scenery in LARGE viewport units. With inset: 0 the
+   layer tracks the layout viewport, which on Android resizes when the
+   URL bar hides/shows (exactly at page top and bottom): the bottom-
+   anchored artwork (xMidYMax) re-anchored by the bar height and the
+   whole layer re-rastered at DPR 3 - the "background jumps into place"
+   flash. At 100lvh nothing ever resizes; while the bar is visible the
+   bottom ~60px is clipped offscreen, which lands entirely inside the
+   scenes' 380px bottom path bleed. Desktop: lvh = vh, no change. */
+@supports (height: 100lvh) {
+    .scene-descent,
+    .vista {
+        inset: 0 0 auto 0;
+        height: 100lvh;
+    }
+}
 /* The track carries the slow whole-scene scroll drift (effects.css);
    layers animate on their own wrappers inside it. */
 .scene-track {
@@ -1832,6 +1876,7 @@ body::after {
        rows' inline style="fill:var(--gs-Na)" (a color-mix value) */
     .sd path, .vl path { fill: var(--slate) !important; }
     .mist, .glow { display: none; }
+    .hero::before { display: none; }
     .footer-scene path { fill: var(--bark-deep); }
     .veil, .veil-column { background: var(--paper); }
     .site-footer { background: var(--bark-deep); }

@@ -8,9 +8,12 @@
    It reads the intensity dial ([data-intensity] on <html>, set by the
    no-FOUC inline script) and mounts effects to match:
      calm       -> no rain, no cursor light, no reveals-hide
-                   (atmosphere = static in-scene mist + .fx-haze)
+                   (atmosphere = static in-scene mist + .fx-haze;
+                   the scroll drift is baseline CSS, not dial-gated)
      balanced   -> tiled rain (1 dense sheet), reveals, timeline draw
      immersive  -> tiled rain (2 sheets), cursor dew
+   Coarse pointers additionally skip reveals-hide at every level (IO
+   lags fling scrolls on phones; content must never pop in late).
    Rain streaks are drawn ONCE into small tiling textures; each depth
    layer is then a repeating background scrolled by a CSS transform
    animation. Zero per-frame JS, zero WebGL: the compositor moves
@@ -201,7 +204,13 @@ const REVEAL = [
 const STAGGER = [".pillars", ".tech-stack", ".feature-points", ".peek-grid"];
 
 function mountReveals() {
-    if (!motionOK() || level() === "calm" || !("IntersectionObserver" in window)) return;
+    /* Coarse pointers never hide-for-reveal: on Android fling scrolls
+       the IntersectionObserver callback runs on the (busy) main thread
+       and lags the compositor, so hidden content scrolls into view and
+       pops in late - it reads as elements flashing/glitching. Phones
+       get everything visible immediately, like calm. */
+    if (!motionOK() || level() === "calm" || !finePointer.matches ||
+        !("IntersectionObserver" in window)) return;
     root.classList.add("fx-ready");
 
     const els = new Set();

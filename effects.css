@@ -1,9 +1,11 @@
 /* ============================================================
    AMBIENT + CHOREOGRAPHY (CSS half)
    Everything here is gated by the intensity dial ([data-intensity])
-   and prefers-reduced-motion. Calm / reduced-motion = static frames,
-   no drift. The JS half (assets/effects/ambient.js) mounts the rain
-   and reveals against the same dial.
+   and prefers-reduced-motion, EXCEPT the scene scroll drift, which is
+   baseline at every dial level (reduced-motion still stills it).
+   Calm / reduced-motion = static ambient frames. The JS half
+   (assets/effects/ambient.js) mounts the rain and reveals against
+   the same dial.
 
    Layer ledger (all fixed, pointer-events none - and, deliberately,
    ZERO filter/blur and ZERO mix-blend-mode anywhere in this stack:
@@ -35,6 +37,15 @@
     z-index: -1;
     overflow: hidden;
     contain: strict;
+}
+/* Large-viewport sizing, same reason as the scene containers in
+   styles.css: an inset: 0 fixed layer resizes with the Android URL
+   bar and re-rasterizes on every bar settle. lvh never resizes. */
+@supports (height: 100lvh) {
+    .fx-rain.is-fixed {
+        inset: 0 0 auto 0;
+        height: 100lvh;
+    }
 }
 /* Slant is baked into the tile art (ambient.js), so each sheet is a
    plain viewport-sized layer: no rotated oversize wrapper eating GPU
@@ -105,17 +116,22 @@
 /* NOTE: keep the FULL animation declaration in one rule. Splitting
    the shorthand and animation-name across cascade rules leaves the
    scroll timeline unattached in Blink - verified against Edge 149. */
+/* The drift is BASELINE, not dial-gated: it is composited, scroll-
+   linked (no idle damage), and measured cheap (~143Hz with rain on the
+   144Hz box), so calm keeps it too - the dial governs the expensive
+   ambient extras (rain, haze drift, reveals), not this. Only the
+   reduced-motion hard stop below stills it. */
 @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
-        :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-track {
+        .scene-track {
             will-change: transform;
         }
         /* (paths carry a 380px bottom bleed, so drift never un-fills) */
-        :is([data-intensity="balanced"], [data-intensity="immersive"]) .scene-descent .scene-track {
+        .scene-descent .scene-track {
             animation: track-drift-home linear both;
             animation-timeline: scroll(root block);
         }
-        :is([data-intensity="balanced"], [data-intensity="immersive"]) .vista .scene-track {
+        .vista .scene-track {
             animation: track-drift-vista linear both;
             animation-timeline: scroll(root block);
         }

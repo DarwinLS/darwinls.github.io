@@ -15,6 +15,7 @@ CONFIGS = [
     ("_p_home_bot_light.html", "index.html", "light", "balanced", 3094, False),
     ("_p_home_bot_dark.html", "index.html", "dark", "balanced", 3094, False),
     ("_p_home_coarse.html", "index.html", "light", "balanced", 0, True),
+    ("_p_home_calm.html", "index.html", "light", "calm", 0, False),
     ("_p_about_light.html", "about.html", "light", "balanced", 0, False),
     ("_p_projects_light.html", "projects.html", "light", "balanced", 0, False),
     ("_p_contact_light.html", "contact.html", "light", "balanced", 0, False),
@@ -48,11 +49,17 @@ PROBE_JS = """
 <script>
 window.addEventListener("load", function () {
     setTimeout(function () {
+        var scene = document.querySelector(".scene-descent, .vista");
+        var track = document.querySelector(".scene-track");
         console.log("[probe] scrollWidth=" + document.documentElement.scrollWidth
             + " innerWidth=" + window.innerWidth
             + " scrollHeight=" + document.documentElement.scrollHeight
             + " rainSheets=" + document.querySelectorAll(".fx-rain-move").length
-            + " slantWrappers=" + document.querySelectorAll(".fx-rain-slant").length);
+            + " slantWrappers=" + document.querySelectorAll(".fx-rain-slant").length
+            + " fxHidden=" + document.querySelectorAll(".fx-hidden").length
+            + " trackAnim=" + (track ? getComputedStyle(track).animationName : "none")
+            + " sceneH=" + (scene ? Math.round(scene.getBoundingClientRect().height) : -1)
+            + " innerHeight=" + window.innerHeight);
     }, 400);
 });
 </script>
