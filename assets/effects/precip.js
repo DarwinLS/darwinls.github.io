@@ -80,7 +80,10 @@ float streaks(vec2 st, float cols, float stretch, float speed,
     float xc = p.x * cols;
     float col = floor(xc);
     float r = h1(vec2(col, seed));
-    float on = step(1.0 - keep, h1(vec2(col, seed + 5.0)));
+    /* col * 7.13 decorrelates the on/off gate from neighboring columns:
+       raw consecutive integers cluster the lit columns to one side of
+       narrow (portrait) viewports where few columns fit on screen */
+    float on = step(1.0 - keep, h1(vec2(col * 7.13, seed + 5.0)));
     float yv = fract(p.y * stretch + u_time * speed * (0.8 + 0.4 * r) + r * 7.0);
     float tail = smoothstep(len * (0.7 + 0.6 * r), 0.0, yv);
     tail *= tail;
@@ -236,7 +239,10 @@ function mount(mode, coarse, dbg, onDegrade) {
         gl.uniform1f(loc.u_wind, 0.12);
         gl.uniform1f(loc.u_alpha, 0.28);
         gl.uniform1f(loc.u_fogMix, 0);
-        gl.uniform1f(loc.u_far, coarse ? 0 : 1);
+        /* Phones keep the far layer at reduced weight: it carries most
+           of the spatial coverage, and dropping it outright left rain
+           visibly patchy on narrow portrait viewports. */
+        gl.uniform1f(loc.u_far, coarse ? 0.7 : 1);
         tint();
         return true;
     }

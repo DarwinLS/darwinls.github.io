@@ -456,7 +456,7 @@ main {
 /* Tablet: keep the ascent hero (column, left-aligned) but ease padding/type */
 @media (max-width: 768px) {
     .tagline { font-size: 1.5rem; }
-    .hero { padding-inline: 8%; }
+    .hero { padding-inline: 8%; padding-bottom: 6rem; }  /* keep clear of the scroll cue */
 }
 
 
@@ -1592,7 +1592,11 @@ body::after {
         margin: 0;
         padding: calc(var(--nav-height) + 1rem) 1.5rem 2rem;
         padding-right: max(1.5rem, env(safe-area-inset-right));
-        background: var(--glass-fill);
+        /* Denser fill than the reading veils: page text scrolls right
+           behind this panel and the standard 36% glass let it fight
+           the menu labels. Still glassy, but the words behind melt
+           into tone instead of ghosting through. */
+        background: color-mix(in srgb, var(--paper) 72%, transparent);
         backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
         -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
         border-left: 1px solid var(--glass-line);
@@ -1655,7 +1659,11 @@ body::after {
 @media (max-width: 600px) {
     body { overflow-x: clip; }              /* belt-and-suspenders vs sub-pixel spill */
 
-    .hero { padding-inline: 6%; }
+    /* Phones: slimmer glow padding (the desktop 2.75rem squeezed the
+       text column) and a reserved band at the hero's foot so the CTA
+       buttons can never reach the absolute-positioned scroll cue. */
+    .hero { padding-inline: 5%; padding-bottom: 7rem; }
+    .hero-text-container { padding: 1.5rem 1.15rem; }
     .section-inner { padding: 0 6%; }
     .content-page { padding: 1.5rem 6%; }
     .projects-container { padding: 1.5rem 6%; }
