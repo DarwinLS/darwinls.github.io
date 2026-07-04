@@ -126,5 +126,17 @@
         document.addEventListener("keydown", function (e) {
             if (e.key === "Escape" && root.dataset.menu === "open") setMenu(false);
         });
+        // Close on any tap outside the panel (the dim scrim is a header
+        // pseudo-element, so scrim taps land here too).
+        document.addEventListener("click", function (e) {
+            if (root.dataset.menu !== "open") return;
+            if (e.target.closest("#nav-links") || e.target.closest("#nav-burger")) return;
+            setMenu(false);
+        });
+        // Auto-close when the viewport grows past the drawer breakpoint.
+        var wide = matchMedia("(min-width: 821px)");
+        var onWide = function () { if (wide.matches) setMenu(false); };
+        if (wide.addEventListener) wide.addEventListener("change", onWide);
+        else if (wide.addListener) wide.addListener(onWide);
     }
 })();

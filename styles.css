@@ -75,6 +75,12 @@
     --shadow-soft: 0 4px 20px rgba(25, 33, 28, 0.06);
     --shadow-lift: 0 18px 40px rgba(25, 33, 28, 0.13);
 
+    /* Glass (forest-pavilion surfaces: frosted transparency + a thin
+       light-catching edge; consumers pair these with backdrop-filter) */
+    --glass-fill: color-mix(in srgb, var(--paper) 36%, transparent);
+    --glass-line: rgba(255, 255, 255, 0.30);
+    --glass-blur: 14px;
+
     /* Spacing scale (8px base) + airy-editorial section rhythm */
     --space-2: 0.5rem;  --space-3: 0.75rem; --space-4: 1rem;
     --space-6: 1.5rem;  --space-8: 2rem;    --space-12: 3rem;
@@ -124,6 +130,8 @@
     --haze-b: rgba(143, 163, 176, 0.10);
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.40);
     --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.50);
+    --glass-fill: color-mix(in srgb, var(--raised) 30%, transparent);
+    --glass-line: rgba(255, 255, 255, 0.12);
 }
 /* Night-forest per-biome sky. Theme lives on <html>, biome on <body>,
    so match the biome as a DESCENDANT of the dark root (a compound
@@ -149,6 +157,8 @@
         --haze-b: rgba(143, 163, 176, 0.10);
         --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.40);
         --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.50);
+        --glass-fill: color-mix(in srgb, var(--raised) 30%, transparent);
+        --glass-line: rgba(255, 255, 255, 0.12);
     }
     /* Biome skies at night on the OS-auto path (mirrors the explicit-dark set) */
     :root:not([data-theme="light"]) [data-biome="projects"] { --sky-1: #0f1a15; --sky-2: #16211b; }
@@ -1555,14 +1565,21 @@ body::after {
     padding-right: max(5%, env(safe-area-inset-right));
 }
 
-/* Mobile hamburger drawer (JS-enhanced; without JS, links fall back to wrapped inline) */
+/* Mobile hamburger drawer (JS-enhanced; without JS, links fall back to
+   wrapped inline). The drawer and its scrim are ABSOLUTE, not fixed:
+   the header's backdrop-filter makes it the containing block for fixed
+   descendants, which used to collapse both to the 72px header box (the
+   "drawer sitting on nothing" bug). Absolute boxes anchor to the same
+   header, which is viewport-pinned at the top, so top 0 + an explicit
+   viewport height behaves like fixed, without the collapse. */
 @media (max-width: 820px) {
     .nav-links { flex-wrap: wrap; gap: 1rem 1.25rem; }   /* no-JS fallback */
     .js .nav-burger { display: inline-flex; }
     .js .nav-right { gap: 0.4rem; }
     .js .nav-links {
-        position: fixed;
-        top: 0; bottom: 0; right: 0;
+        position: absolute;
+        top: 0; right: 0;
+        height: 100vh;
         width: min(82vw, 320px);
         flex-wrap: nowrap;
         flex-direction: column;
@@ -1572,11 +1589,18 @@ body::after {
         margin: 0;
         padding: calc(var(--nav-height) + 1rem) 1.5rem 2rem;
         padding-right: max(1.5rem, env(safe-area-inset-right));
-        background: var(--raised);
-        box-shadow: var(--shadow-lift);
+        background: var(--glass-fill);
+        backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
+        border-left: 1px solid var(--glass-line);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), var(--shadow-lift);
         transform: translateX(100%);
         transition: transform 0.32s var(--ease-settle);
         z-index: 1200;
+    }
+    /* lvh: never resize with the Android URL bar (site-wide rule) */
+    @supports (height: 100lvh) {
+        .js .nav-links { height: 100lvh; }
     }
     .js .nav-links li { width: 100%; }
     .js .nav-links a { display: block; padding: 0.7rem 0; font-size: 1.05rem; }
@@ -1584,15 +1608,38 @@ body::after {
     .js[data-menu="open"] .nav-links { transform: translateX(0); }
     .js[data-menu="open"] .site-header::after {
         content: "";
-        position: fixed;
-        inset: 0;
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 100vh;
         background: rgba(10, 16, 13, 0.45);
         z-index: 1100;
     }
+    @supports (height: 100lvh) {
+        .js[data-menu="open"] .site-header::after { height: 100lvh; }
+    }
+    /* Burger stays tappable above the open drawer and morphs to an X */
+    .js[data-menu="open"] .nav-burger { position: relative; z-index: 1300; }
+    /* fill-box: each line rotates about its OWN center (rightmost
+       function applies to the point first: rotate in place, then
+       translate to the icon center), which lands both diagonals of
+       the X crossing at the middle. */
+    .js .nav-burger path {
+        transition: transform 0.3s var(--ease-settle), opacity 0.2s ease;
+        transform-box: fill-box;
+        transform-origin: center;
+    }
+    .js[data-menu="open"] .nav-burger path:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .js[data-menu="open"] .nav-burger path:nth-child(2) { opacity: 0; }
+    .js[data-menu="open"] .nav-burger path:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    /* Scroll lock while open. Freezing root scroll also pauses the
+       scroll() scene timelines at their current pose; fine while a
+       modal drawer covers interaction. */
+    .js[data-menu="open"] { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .nav-links { transition: none; }
+    .nav-burger path { transition: none; }
     .scroll-cue svg { animation: none; }
 }
 
@@ -1894,6 +1941,11 @@ body::after {
     .vista-about .vl-1 { display: none; }
 }
 
+/* No backdrop-filter: glass surfaces fall back to the plain tint veil */
+@supports not (backdrop-filter: blur(1px)) {
+    .js .nav-links { background: var(--raised); }
+}
+
 /* Pre-color-mix browsers: flat token fills, hide the soft extras */
 @supports not (color: color-mix(in srgb, red, red)) {
     /* !important so the flat fill also beats the interior canopy
@@ -1903,6 +1955,7 @@ body::after {
     .hero::before { display: none; }
     .footer-scene path { fill: var(--bark-deep); }
     .veil, .veil-column { background: var(--paper); }
+    .js .nav-links { background: var(--raised); }
     .site-footer { background: var(--bark-deep); }
     .about-teaser { background: none; }
 }
