@@ -1258,37 +1258,31 @@ main {
     padding: 0 10%;
     min-height: calc(100svh - var(--nav-height));
 }
-.hero-text-container { position: relative; z-index: 1; max-width: 640px; }
-/* Hero-anchored mist wash. Not the old paper-white glow: the color is
-   --mist-veil (sky-tinted, re-tints per theme and biome) and it rides
-   the full-width hero box with percentage geometry chosen so the
-   feather reaches zero BEFORE every edge at any viewport size (the
-   left-edge distance equals the transparent stop) - no cutoffs, no
-   horizontal overflow. Left-biased over the text zone. It lives in
-   page flow, so it scrolls away with the hero, and at z -1 in the
-   root stacking context the rain falls in FRONT of it (fog depth). */
-.hero::before {
+.hero-text-container {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    padding: 2.25rem 2.75rem;
+}
+/* Hero glass pavilion: a rounded frosted pane behind the intro text
+   that DISSOLVES to the right (mask fades fill, border, and blur
+   together), like a glass wall opening onto the vista. inset: 0 only,
+   never negative (the old negative-inset wash overflowed phones); the
+   breathing room comes from the container's own padding above. */
+.hero-text-container::before {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: radial-gradient(46% 50% at 30% 46%,
-        color-mix(in srgb, var(--mist-veil) 62%, transparent),
-        transparent 65%);
-}
-/* Dark mode: same shape, quieter - moonlit haze, not a light source. */
-[data-theme="dark"] .hero::before {
-    background: radial-gradient(46% 50% at 30% 46%,
-        color-mix(in srgb, var(--mist-veil) 40%, transparent),
-        transparent 65%);
-}
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .hero::before {
-        background: radial-gradient(46% 50% at 30% 46%,
-            color-mix(in srgb, var(--mist-veil) 40%, transparent),
-            transparent 65%);
-    }
+    border-radius: 24px;
+    background: var(--glass-fill);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
+    border: 1px solid var(--glass-line);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), var(--shadow-soft);
+    mask-image: linear-gradient(to right, black 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 60%, transparent 100%);
 }
 .hero-hook {
     font-size: clamp(1.05rem, 1.4vw, 1.3rem);
@@ -1890,25 +1884,41 @@ body::after {
     :root:not([data-theme="light"]) .firefly { display: block; opacity: 0.45; }
 }
 
-/* Readability veil for open text sitting directly over scenery
-   (cards already provide their own solid --raised surface).
-   A PADDED surface on the element itself: the old negative-inset
-   ::before wrapped the element box, not the content, which left
-   lopsided gaps wherever containers were wider than their text. */
+/* Reading GLASS for open text sitting directly over scenery: the
+   forest-pavilion surface (cards stay solid --raised, the furniture
+   inside the pavilion). Frosted transparency + a thin light-catching
+   edge + a top specular line; the softness comes from backdrop blur,
+   never a white wash. A PADDED surface on the element itself: the old
+   negative-inset ::before wrapped the element box, not the content,
+   which left lopsided gaps wherever containers were wider than text. */
+.veil,
+.veil-column {
+    background: var(--glass-fill);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
+    border: 1px solid var(--glass-line);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), var(--shadow-soft);
+    border-radius: var(--radius);
+}
 .veil {
     position: relative;
-    background: color-mix(in srgb, var(--paper) 82%, transparent);
-    border-radius: var(--radius);
     padding: 2rem 2.25rem;
 }
 @media (max-width: 600px) {
     .veil { padding: 1.5rem 1.25rem; }
 }
-/* Column variant: the whole reading column floats as one translucent
-   surface while the vista's high side-ridges frame it (About). */
-.veil-column {
-    background: color-mix(in srgb, var(--paper) 78%, transparent);
-    border-radius: var(--radius);
+/* Phones: large glass panes are the expensive kind (big re-blur region
+   while scrolling over the fixed scene), so coarse pointers keep glass
+   only on the small plates and get the plain tint on full-width veils. */
+@media (pointer: coarse) {
+    .section-inner.veil,
+    .content-page.veil-column {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: color-mix(in srgb, var(--paper) 82%, transparent);
+        border: 0;
+        box-shadow: none;
+    }
 }
 /* Per-block fits */
 .section-inner.veil { padding: 2.25rem 2.5rem; }  /* replaces the 8% gutters */
@@ -1944,6 +1954,21 @@ body::after {
 /* No backdrop-filter: glass surfaces fall back to the plain tint veil */
 @supports not (backdrop-filter: blur(1px)) {
     .js .nav-links { background: var(--raised); }
+    .veil {
+        background: color-mix(in srgb, var(--paper) 82%, transparent);
+        border: 0;
+        box-shadow: none;
+    }
+    .veil-column {
+        background: color-mix(in srgb, var(--paper) 78%, transparent);
+        border: 0;
+        box-shadow: none;
+    }
+    .hero-text-container::before {
+        background: color-mix(in srgb, var(--paper) 70%, transparent);
+        border: 0;
+        box-shadow: none;
+    }
 }
 
 /* Pre-color-mix browsers: flat token fills, hide the soft extras */
@@ -1952,7 +1977,7 @@ body::after {
        rows' inline style="fill:var(--gs-Na)" (a color-mix value) */
     .sd path, .vl path { fill: var(--slate) !important; }
     .mist, .glow { display: none; }
-    .hero::before { display: none; }
+    .hero-text-container::before { display: none; }
     .footer-scene path { fill: var(--bark-deep); }
     .veil, .veil-column { background: var(--paper); }
     .js .nav-links { background: var(--raised); }
