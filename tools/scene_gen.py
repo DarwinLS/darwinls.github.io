@@ -522,12 +522,15 @@ def shrine_svg(layer, scene, w, h):
         "M-46,-7h6v-32h-6Z"                       # left veranda post
         "M40,-7h6v-32h-6Z"                        # right veranda post
         "M-30,-13h60v-32h-60Z"                    # hall body (to -45)
-        "M-54,-38h108v-7h-108Z"                   # eave beam out to the fascia:
-                                                  # no background shows between
-                                                  # roof and body
-        "M0,-70Q16,-52 54,-42Q59,-41 62,-46"      # right sori sweep + tip kick
-        "L56,-37Q20,-43 0,-43Q-20,-43 -56,-37"    # deep eave underside
-        "L-62,-46Q-59,-41 -54,-42Q-16,-52 0,-70Z" # left tip kick + sweep
+        # Roof as ONE closed shape: sori sweeps + kicked tips on top, a
+        # straight tip-to-tip fascia underneath (at -36 it overlaps the
+        # wall top at -45, so the roof can never float off the body).
+        # Traced LEFT first so its winding matches the h/v rectangles:
+        # opposite windings cancel under the nonzero fill rule and every
+        # overlap turns into a see-through hole (the old roof gap bug).
+        "M0,-70Q-16,-52 -54,-42Q-59,-41 -62,-46"  # left sweep + tip kick
+        "L-58,-36L58,-36"                         # straight fascia underside
+        "L62,-46Q59,-41 54,-42Q16,-52 0,-70Z"     # right tip kick + sweep
         "M-2,-70h4v-7h-4Z"                        # gable finial
     )
     apertures = (

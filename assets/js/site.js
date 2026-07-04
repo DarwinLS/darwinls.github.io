@@ -31,12 +31,14 @@
 
         // Highest level this device should ever run (independent of choice).
         function ceiling() {
-            if (root.dataset.gpu === "soft") return "calm";  // CPU compositing
             var conn = navigator.connection || {};
             var cores = navigator.hardwareConcurrency || 8;
             var mem = navigator.deviceMemory || 8;
             if (matchMedia("(prefers-reduced-motion: reduce)").matches ||
                 conn.saveData || cores <= 2 || mem <= 2) return "calm";
+            // CPU compositing: fog still works (static banks, drift and
+            // rain stay off), so the dial keeps doing something visible.
+            if (root.dataset.gpu === "soft") return "fog";
             return "rain";
         }
         function clamp(pref) {
