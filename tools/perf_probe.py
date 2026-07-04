@@ -22,12 +22,22 @@ from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# name -> (rainDebug dict or None, extra CSS or "")
+# name -> (rainDebug dict or None, extra CSS or "", [intensity])
+# intensity defaults to "rain" when the tuple has two entries.
 KILL_CHOREO = (".sd,.vl,.scene-track{animation:none !important;"
                "will-change:auto !important}")
 KILL_FIXED = (".fx-haze{display:none !important}"
               "body::after{display:none !important}")
 CONFIGS = {
+    # atmosphere round: WebGL precip (primary) vs CSS fallback vs off
+    "glr":       (None, ""),                                  # WebGL rain, shipped
+    "glf":       (None, "", "fog"),                           # WebGL fog, shipped
+    "cssr":      ({"forceCSS": True}, ""),                    # CSS fallback: 1 sheet
+    "cssr2":     ({"forceCSS": True, "sheets": 2}, ""),       # old 2-sheet baseline
+    "noprecip":  ({"off": True}, ""),                         # floor
+    "glr_dpr1":  ({"scale": 1}, ""),                          # DPR sensitivity
+    "glr_30":    ({"fps": 30}, ""),                           # fps-cap headroom
+    "glr_nodew": (None, ".fx-dew{display:none !important}"),  # dew delta
     "off":         ({"off": True}, ""),
     "cur2lin":     (None, ""),                       # shipped default (historic name)
     "s1lin":       ({"sheets": 1}, ""),
@@ -117,9 +127,11 @@ window.addEventListener("load", function () {
 
 def build():
     src = (ROOT / "index.html").read_text(encoding="utf-8")
-    for name, (dbg, css) in CONFIGS.items():
+    for name, cfg in CONFIGS.items():
+        dbg, css = cfg[0], cfg[1]
+        intensity = cfg[2] if len(cfg) > 2 else "rain"
         inject = ('<script>localStorage.setItem("theme","dark");'
-                  'localStorage.setItem("intensity","rain");</script>')
+                  f'localStorage.setItem("intensity","{intensity}");</script>')
         if dbg is not None:
             inject += f"<script>window.__rainDebug = {json.dumps(dbg)};</script>"
         if css:

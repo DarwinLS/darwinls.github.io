@@ -25,11 +25,13 @@
     :root:not([data-theme="light"]) { --rain-color: 180 200 220; }
 }
 
-/* ---------------- RAIN (compositor-tiled sheets) ----------------
-   ambient.js draws streak tiles once; each depth sheet is then a
-   repeating background scrolled by ONE looping transform animation.
-   No canvas, no WebGL, no per-frame JS: rain costs the compositor
-   the same as scrolling an image. */
+/* ---------------- PRECIPITATION HOST ----------------
+   Primary: ONE WebGL canvas (precip.js) rendering the weather mode
+   (rain streaks or drifting near-fog), frame- and DPR-capped.
+   Fallback (no WebGL): ambient.js draws streak tiles once; each depth
+   sheet is a repeating background scrolled by ONE looping transform
+   animation - rain at the cost of scrolling an image. Both ride this
+   same fixed lvh host. */
 .fx-rain { pointer-events: none; }
 .fx-rain.is-fixed {
     position: fixed;
@@ -47,6 +49,9 @@
         height: 100lvh;
     }
 }
+/* The WebGL canvas fills the host; its backing store is sized once
+   from this box (precip.js) so bar settles never re-raster it. */
+.fx-precip canvas { display: block; width: 100%; height: 100%; }
 /* Slant is baked into the tile art (ambient.js), so each sheet is a
    plain viewport-sized layer: no rotated oversize wrapper eating GPU
    memory on high-DPR phones. --tile-h is set inline per sheet. */
@@ -98,6 +103,10 @@
     pointer-events: none;
     opacity: 0.5;
     background: radial-gradient(circle, var(--haze-a) 0%, transparent 62%);
+    /* ambient.js only retargets the transform per pointermove; this
+       transition does the glide on the compositor (no per-frame JS). */
+    will-change: transform;
+    transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 [data-theme="dark"] .fx-dew { opacity: 0.35; }
 

@@ -13,16 +13,20 @@
      fog  -> reveals, timeline draw (the fog visuals themselves are
              scene fog banks + the drifting precipitation layer,
              added in later phases of the atmosphere round)
-     rain -> tiled rain (2 sheets fine / 1 coarse), cursor dew,
-             reveals, timeline draw
+     rain -> WebGL rain, cursor dew, reveals, timeline draw
    Coarse pointers additionally skip reveals-hide at every level (IO
    lags fling scrolls on phones; content must never pop in late).
-   Rain streaks are drawn ONCE into small tiling textures; each depth
-   layer is then a repeating background scrolled by a CSS transform
-   animation. Zero per-frame JS, zero WebGL: the compositor moves
-   three textures, the same cost as scrolling a page. save-data and
-   low-memory devices get no rain at all.
+
+   Precipitation is rendered by ONE fixed WebGL canvas (precip.js:
+   procedural streaks or drifting near-fog, frame-capped, DPR-capped).
+   When WebGL is unavailable the rain mode falls back to the original
+   compositor-tiled CSS rain kept below (streaks drawn ONCE into a
+   small tiling texture, scrolled by a CSS transform animation), and
+   fog mode falls back to the static .fx-haze already on every page.
+   save-data and low-memory devices get no precipitation at all.
    ============================================================ */
+
+import { mountPrecip } from "./precip.js";
 
 const root = document.documentElement;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)");
@@ -44,8 +48,9 @@ function destroyAll() {
    ============================================================ */
 
 /* Dev-only override, set by the perf harness (tools/perf_probe.py)
-   before this module loads: { off, sheets, stepsPerSec }. Never set
-   in production pages. */
+   before this module loads. Never set in production pages.
+   { off, forceCSS, mode, fps, scale }   gate + WebGL path (precip.js)
+   { sheets, tileH, stepsPerSec, linear } CSS fallback path */
 const rainDebug = () => window.__rainDebug || null;
 
 /* null = no precipitation at all (calm, reduced motion, save-data,
@@ -112,19 +117,39 @@ function makeRainTile(rgb, sheet, densityMul, tileH) {
     return c.toDataURL();
 }
 
-function mountRain() {
-    if (precipLevel() !== "rain") return;
+/* Primary path: the WebGL canvas (precip.js) for both weather modes.
+   Fallback: rain -> the CSS tiled rain below; fog -> nothing extra
+   (the static .fx-haze already carries fog on every page). */
+function mountPrecipitation() {
+    const lvl = precipLevel();
+    if (!lvl) return;
+    const dbg = rainDebug();
+    if (!(dbg && dbg.forceCSS)) {
+        let down = null;
+        try {
+            down = mountPrecip({
+                mode: (dbg && dbg.mode) || lvl,
+                coarse: !finePointer.matches,
+                dbg,
+            });
+        } catch (e) {}
+        if (down) { teardown.push(down); return; }
+    }
+    if (lvl === "rain") mountRainCSS();
+}
+
+function mountRainCSS() {
     const dbg = rainDebug();
     const coarse = !finePointer.matches;
     /* Measured (tools/perf_probe.py, 144Hz Iris Xe): ONE sheet on a
        512 tile scrolls at a tight single-vsync cadence (p95 7.1ms);
-       every extra sheet adds regular double-vsync spills. So phones
-       run one denser mid sheet; fine pointers opt into two.
+       every extra sheet adds regular double-vsync spills. The fallback
+       therefore always runs one denser mid sheet.
        Small tiles also halve each sheet's GPU memory (phone eviction). */
-    let sheets = !coarse ? [SHEETS[1], SHEETS[2]] : [SHEETS[1]];
+    let sheets = [SHEETS[1]];
     if (dbg && dbg.sheets) sheets = SHEETS.slice(0, dbg.sheets);
     const tileH = (dbg && dbg.tileH) || 512;
-    const densityMul = coarse ? 0.8 : 1;
+    const densityMul = coarse ? 0.8 : 1.25;
 
     const host = document.createElement("div");
     host.className = "fx-rain is-fixed";
@@ -177,17 +202,19 @@ function mountCursor() {
     const dew = document.createElement("div");
     dew.className = "fx-dew";
     dew.setAttribute("aria-hidden", "true");
+    dew.style.transform =
+        `translate3d(${innerWidth / 2}px,${innerHeight / 2}px,0) translate(-50%,-50%)`;
     document.body.appendChild(dew);
-    let tx = innerWidth / 2, ty = innerHeight / 2, x = tx, y = ty, raf = 0;
-    const move = (e) => { tx = e.clientX; ty = e.clientY; };
-    function loop() {
-        x += (tx - x) * 0.12; y += (ty - y) * 0.12;
-        dew.style.transform = `translate3d(${x}px,${y}px,0) translate(-50%,-50%)`;
-        raf = requestAnimationFrame(loop);
-    }
+    /* No rAF loop: each pointermove only RETARGETS the transform and the
+       CSS transition on .fx-dew (effects.css) glides toward it on the
+       compositor. Zero per-frame main-thread work; the old lerp loop
+       ran every frame and competed with scrolling for the frame budget. */
+    const move = (e) => {
+        dew.style.transform =
+            `translate3d(${e.clientX}px,${e.clientY}px,0) translate(-50%,-50%)`;
+    };
     window.addEventListener("pointermove", move, { passive: true });
-    raf = requestAnimationFrame(loop);
-    teardown.push(() => { cancelAnimationFrame(raf); window.removeEventListener("pointermove", move); dew.remove(); });
+    teardown.push(() => { window.removeEventListener("pointermove", move); dew.remove(); });
 }
 
 /* ============================================================
@@ -279,7 +306,7 @@ function countUp(scope) {
 function boot() {
     gen++;
     destroyAll();
-    try { mountRain(); } catch (e) {}
+    try { mountPrecipitation(); } catch (e) {}
     try { mountCursor(); } catch (e) {}
     try { mountReveals(); } catch (e) {}
 }
