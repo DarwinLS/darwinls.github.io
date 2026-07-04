@@ -26,6 +26,14 @@
    mountPrecip() returns a teardown function, or null on ANY
    failure (no context, compile/link error, context lost at
    creation) - ambient.js then falls back to the CSS tiled rain.
+
+   Measured (tools/perf_probe.py, headed Edge, 144Hz Iris Xe,
+   auto-scroll, median hz / avg ms per frame):
+     no precip 145 / 7.5   WebGL rain 143 / 8.6   WebGL fog 143 / 8.3
+     CSS 1-sheet 143 / 8.0   old 2-sheet immersive 143 / 9.5
+   WebGL rain scrolls within noise of the 1-sheet CSS fallback and
+   is CHEAPER than the 2-sheet tiled rain it replaced, with fewer
+   spill frames. Fog is the lightest active mode.
    ============================================================ */
 
 const VERT = "attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0.0,1.0);}";

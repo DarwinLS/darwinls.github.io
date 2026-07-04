@@ -14,7 +14,7 @@
     src: url('assets/fonts/fraunces-var.woff2') format('woff2');
 }
 /* ============================================================
-   DESIGN TOKENS — "Ascent" deep-naturalistic system.
+   DESIGN TOKENS - "Ascent" deep-naturalistic system.
    Forest / rain / mountain palette. Change values here to
    restyle the whole site. The old variable names are kept as
    aliases so existing components adopt the new palette.
@@ -29,7 +29,7 @@
     --ink-3:      #7c887c;   /* muted text */
     --line:       #d8e0d7;   /* hairline borders */
 
-    --pine:       #1f3a2e;   /* deep forest — structural accent */
+    --pine:       #1f3a2e;   /* deep forest - structural accent */
     --moss:       #46674c;
     --fern:       #6e8f6a;
     --slate:      #465563;   /* mountain */
@@ -42,7 +42,7 @@
     --amber-deep: #a85f1f;
     --moss-gold:  #8c9a4b;   /* secondary accent */
 
-    /* Atmosphere — per-biome overridable (set data-biome on <body>) */
+    /* Atmosphere - per-biome overridable (set data-biome on <body>) */
     --sky-1: #c9d2d0;        /* home / dawn */
     --sky-2: #e8d9c2;
 
@@ -60,7 +60,7 @@
     --bg-color:       var(--paper);
     --text-color:     var(--ink);
     --accent-color:   var(--pine);     /* structural fills: primary btn bg, focus */
-    --accent-text:    var(--pine);     /* accent TEXT (logo, tags, org) — brightens in dark */
+    --accent-text:    var(--pine);     /* accent TEXT (logo, tags, org) - brightens in dark */
     --secondary-text: var(--ink-2);
     --white:          var(--raised);
     --nav-height: 72px;
@@ -409,7 +409,7 @@ main {
         color-mix(in srgb, var(--sky-2) 45%, transparent) calc(var(--footer-scene-h) * 0.4),
         color-mix(in srgb, var(--bark-deep) 55%, transparent) calc(var(--footer-scene-h) * 0.75),
         var(--bark-deep) var(--footer-scene-h));
-    color: #aeb9ae; /* always light — footer is the dark valley floor */
+    color: #aeb9ae; /* always light - footer is the dark valley floor */
 }
 [data-biome="home"] .site-footer {
     background: linear-gradient(180deg,
@@ -1598,7 +1598,7 @@ body::after {
 
 
 /* ============================================================
-   PHONES — tighten gutters, wrap actions, guard overflow
+   PHONES - tighten gutters, wrap actions, guard overflow
    (headless Edge floors the viewport at ~474px, so these are
    reasoned for the 320-430px range that real phones use)
    ============================================================ */
@@ -1623,7 +1623,7 @@ body::after {
 
 
 /* ============================================================
-   PHASE 2 — persistent biome sky + About lede portrait
+   PHASE 2 - persistent biome sky + About lede portrait
    (the shared elements the page transitions morph/cross-fade;
    see transitions.css for the view-transition wiring)
    ============================================================ */

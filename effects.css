@@ -28,6 +28,8 @@
 /* ---------------- PRECIPITATION HOST ----------------
    Primary: ONE WebGL canvas (precip.js) rendering the weather mode
    (rain streaks or drifting near-fog), frame- and DPR-capped.
+   Measured at ~143Hz scrolled on the 144Hz box, at or under the CSS
+   fallback and under the old 2-sheet tiled immersive (see precip.js).
    Fallback (no WebGL): ambient.js draws streak tiles once; each depth
    sheet is a repeating background scrolled by ONE looping transform
    animation - rain at the cost of scrolling an image. Both ride this

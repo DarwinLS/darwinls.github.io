@@ -1,5 +1,5 @@
 /* ============================================================
-   PHASE 2 — "One continuous space": cross-document View Transitions.
+   PHASE 2 - "One continuous space": cross-document View Transitions.
    The site is treated as one forest walked between biomes, not five
    separate pages. A persistent shell (nav + footer) stays put, the
    biome sky cross-fades like changing weather, and signature elements
@@ -7,7 +7,7 @@
 
    Progressive enhancement: browsers without View Transitions (Firefox
    stable, older Safari) simply do a normal page load. Everything here
-   is additive — no layout depends on it.
+   is additive - no layout depends on it.
    ============================================================ */
 
 /* Opt every same-origin navigation into an automatic cross-document
@@ -37,14 +37,14 @@
     .scene-descent, .vista { view-transition-name: vt-sky; }
 }
 
-/* Signature morph — the Veraflux story grows from a card into a page.
+/* Signature morph - the Veraflux story grows from a card into a page.
    Source on Home (feature band) and Projects (flagship card); target
    is the case-study hero. Same name on different documents = a morph. */
 [data-biome="home"]     .featured-inner { view-transition-name: vt-veraflux-hero; }
 [data-biome="projects"] .flagship-card  { view-transition-name: vt-veraflux-hero; }
 [data-biome="veraflux"] .cs-intro       { view-transition-name: vt-veraflux-hero; }
 
-/* Signature morph — the portrait travels from the Home teaser into
+/* Signature morph - the portrait travels from the Home teaser into
    the About lede (circle → rounded square along the way). */
 [data-biome="home"]  .teaser-portrait img { view-transition-name: vt-about-portrait; }
 [data-biome="about"] .about-portrait img  { view-transition-name: vt-about-portrait; }
