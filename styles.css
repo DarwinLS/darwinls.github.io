@@ -81,6 +81,37 @@
     --glass-line: rgba(255, 255, 255, 0.30);
     --glass-blur: 14px;
 
+    /* Glass v3 optics. Grade: contrast down + saturation up makes the
+       scenery richer through the pane and steadies label contrast.
+       Rim: bright where light enters top-left, near-gone opposite.
+       Bevel: cool blue-white top-left, warm ivory bottom-right; the
+       negative-spread line hugs only the bottom edge. */
+    --glass-grade: blur(var(--glass-blur)) saturate(1.5) contrast(0.82) brightness(1.06);
+    --glass-grade-header: blur(10px) saturate(1.35) contrast(0.9) brightness(1.03);
+    --rim-grad: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.30) 30%,
+        rgba(255, 255, 255, 0.06) 55%, rgba(255, 255, 255, 0.42) 100%);
+    --glass-bevel:
+        inset 2px 2px 6px rgba(200, 225, 255, 0.30),
+        inset 8px 8px 18px rgba(160, 200, 255, 0.10),
+        inset -2px -2px 8px rgba(255, 244, 214, 0.24),
+        inset -8px -8px 18px rgba(255, 250, 220, 0.08),
+        inset 0 -9px 0 -8px rgba(255, 255, 255, 0.65);
+    --glass-bevel-sm:
+        inset 1.5px 1.5px 5px rgba(200, 225, 255, 0.30),
+        inset -1.5px -1.5px 6px rgba(255, 244, 214, 0.24),
+        inset 0 -7px 0 -6px rgba(255, 255, 255, 0.55);
+
+    /* Shoji inner frame + scene-lit pane edges (day: sky-lit from above) */
+    --shoji-line: color-mix(in srgb, var(--bark) 20%, transparent);
+    --pane-top-edge: rgba(255, 255, 255, 0.35);
+    --pane-bottom-edge: rgba(255, 255, 255, 0.10);
+
+    /* Lantern focus. Ring must hold 3:1 against paper (WCAG 1.4.11);
+       amber-deep passes at ~4.2:1 where plain amber fails at ~2.98:1. */
+    --focus-ring-color: var(--amber-deep);
+    --focus-glow: 0 0 0 6px color-mix(in srgb, var(--amber) 16%, transparent);
+
     /* Spacing scale (8px base) + airy-editorial section rhythm */
     --space-2: 0.5rem;  --space-3: 0.75rem; --space-4: 1rem;
     --space-6: 1.5rem;  --space-8: 2rem;    --space-12: 3rem;
@@ -132,6 +163,29 @@
     --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.50);
     --glass-fill: color-mix(in srgb, var(--raised) 30%, transparent);
     --glass-line: rgba(255, 255, 255, 0.12);
+    /* Glass v3 at night: gentler grade (dark scenes crush under low
+       contrast), halved bevel alphas, warm side pulls toward amber */
+    --glass-grade: blur(var(--glass-blur)) saturate(1.35) contrast(0.9) brightness(1.12);
+    --glass-grade-header: blur(10px) saturate(1.25) contrast(0.94) brightness(1.06);
+    --rim-grad: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.50), rgba(255, 255, 255, 0.16) 30%,
+        rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.22) 100%);
+    --glass-bevel:
+        inset 2px 2px 6px rgba(170, 200, 235, 0.16),
+        inset 8px 8px 18px rgba(140, 180, 225, 0.06),
+        inset -2px -2px 8px rgba(255, 214, 150, 0.15),
+        inset -8px -8px 18px rgba(255, 224, 170, 0.06),
+        inset 0 -9px 0 -8px rgba(255, 255, 255, 0.30);
+    --glass-bevel-sm:
+        inset 1.5px 1.5px 5px rgba(170, 200, 235, 0.16),
+        inset -1.5px -1.5px 6px rgba(255, 214, 150, 0.15),
+        inset 0 -7px 0 -6px rgba(255, 255, 255, 0.26);
+    --shoji-line: rgba(255, 240, 210, 0.10);
+    /* Night panes are lantern-lit from below, not sky-lit from above */
+    --pane-top-edge: rgba(255, 255, 255, 0.10);
+    --pane-bottom-edge: rgba(255, 224, 170, 0.22);
+    --focus-ring-color: var(--amber);   /* ~6.7:1 on night paper */
+    --focus-glow: 0 0 0 8px color-mix(in srgb, var(--amber) 22%, transparent);
 }
 /* Night-forest per-biome sky. Theme lives on <html>, biome on <body>,
    so match the biome as a DESCENDANT of the dark root (a compound
@@ -159,6 +213,26 @@
         --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.50);
         --glass-fill: color-mix(in srgb, var(--raised) 30%, transparent);
         --glass-line: rgba(255, 255, 255, 0.12);
+        --glass-grade: blur(var(--glass-blur)) saturate(1.35) contrast(0.9) brightness(1.12);
+        --glass-grade-header: blur(10px) saturate(1.25) contrast(0.94) brightness(1.06);
+        --rim-grad: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.50), rgba(255, 255, 255, 0.16) 30%,
+            rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.22) 100%);
+        --glass-bevel:
+            inset 2px 2px 6px rgba(170, 200, 235, 0.16),
+            inset 8px 8px 18px rgba(140, 180, 225, 0.06),
+            inset -2px -2px 8px rgba(255, 214, 150, 0.15),
+            inset -8px -8px 18px rgba(255, 224, 170, 0.06),
+            inset 0 -9px 0 -8px rgba(255, 255, 255, 0.30);
+        --glass-bevel-sm:
+            inset 1.5px 1.5px 5px rgba(170, 200, 235, 0.16),
+            inset -1.5px -1.5px 6px rgba(255, 214, 150, 0.15),
+            inset 0 -7px 0 -6px rgba(255, 255, 255, 0.26);
+        --shoji-line: rgba(255, 240, 210, 0.10);
+        --pane-top-edge: rgba(255, 255, 255, 0.10);
+        --pane-bottom-edge: rgba(255, 224, 170, 0.22);
+        --focus-ring-color: var(--amber);
+        --focus-glow: 0 0 0 8px color-mix(in srgb, var(--amber) 22%, transparent);
     }
     /* Biome skies at night on the OS-auto path (mirrors the explicit-dark set) */
     :root:not([data-theme="light"]) [data-biome="projects"] { --sky-1: #0f1a15; --sky-2: #16211b; }
@@ -2109,6 +2183,14 @@ body::after {
        stock solid/outline button pair */
     .hero .primary-btn { background-color: var(--accent-color); }
     .hero .secondary-btn { background-color: var(--raised); }
+    /* Lantern focus: the glow is a color-mix value; the plain ring
+       (amber-deep resolves fine) carries focus alone */
+    :focus-visible { outline-color: var(--amber-deep); }
+    :where(.nav-links a, .text-link, .socials a, .theme-toggle, .nav-burger,
+           .intensity-toggle, .peek-card, .info-item a,
+           .social-links-large a):focus-visible,
+    .hero .btn:focus-visible,
+    .btn:focus-visible { box-shadow: none; }
 }
 
 /* About lede: bio text beside the portrait that the Home teaser
@@ -2133,4 +2215,28 @@ body::after {
 @media (max-width: 720px) {
     .about-lede { grid-template-columns: 1fr; gap: var(--space-8); }
     .about-portrait { max-width: 200px; order: -1; }
+}
+
+/* LANTERN FOCUS */
+/* Keyboard focus reads as warm lamplight: a firm amber ring plus a
+   soft corona. Outline (not box-shadow) carries the ring so
+   forced-colors mode keeps a visible indicator. Sits last in the
+   file so it out-cascades every component rule. */
+:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 3px;
+    border-radius: 2px; /* softens the ring corners on bare text links */
+}
+/* Corona only where box-shadow is not already load-bearing; :where()
+   keeps specificity at pseudo-class level so component shadows
+   (glass panes, lifted cards) are never clobbered by accident. */
+:where(.nav-links a, .text-link, .socials a, .theme-toggle, .nav-burger,
+       .intensity-toggle, .peek-card, .info-item a,
+       .social-links-large a):focus-visible {
+    box-shadow: var(--focus-glow);
+}
+/* Buttons carry shadows already, so restate the full stack */
+.btn:focus-visible { box-shadow: var(--focus-glow); }
+.hero .btn:focus-visible {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--shadow-soft), var(--focus-glow);
 }
