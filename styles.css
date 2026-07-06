@@ -875,10 +875,17 @@ main {
     border-radius: var(--radius-sm);
     font-family: var(--font-body);
     font-size: 1rem;
+    color: var(--text-color);
     background-color: var(--sunken);
     transition: border-color 0.25s ease, background-color 0.25s ease,
                 box-shadow 0.25s ease;
     width: 100%;
+}
+
+/* Placeholders read as a hint, not content: muted in both themes */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--ink-3);
 }
 
 /* Focus = a lantern lit inside the pane: the frame warms to amber and
