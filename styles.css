@@ -2273,32 +2273,38 @@ body::after {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
+/* Only the BLUR needs stripping (it re-runs on the CPU every scrolled
+   frame). The rim, shoji frame, and edge lines are plain paint, so the
+   panels keep them and read as polished framed panels instead of
+   glass. Only the through-the-glass warm/cool bevel wash goes: it
+   claims a transparency the tint fill does not have. */
 [data-gpu="soft"] .veil {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: color-mix(in srgb, var(--paper) 82%, transparent);
-    border: 0;
-    box-shadow: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22),
+                inset 0 -9px 0 -8px rgba(255, 255, 255, 0.30),
+                var(--shadow-soft);
 }
 [data-gpu="soft"] .veil-column {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: color-mix(in srgb, var(--paper) 78%, transparent);
-    border: 0;
-    box-shadow: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22),
+                inset 0 -9px 0 -8px rgba(255, 255, 255, 0.30),
+                var(--shadow-soft);
 }
 [data-gpu="soft"] .hero .btn {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    box-shadow: var(--shadow-soft);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -7px 0 -6px rgba(255, 255, 255, 0.30),
+                var(--shadow-soft);
     background-image: none;   /* no rain speckle on the solid fills */
 }
 [data-gpu="soft"] .hero .primary-btn { background-color: var(--accent-color); }
 [data-gpu="soft"] .hero .secondary-btn { background-color: color-mix(in srgb, var(--paper) 82%, transparent); }
-/* Glass optics (rim, shoji frame, pointer specular) die with the blur */
-[data-gpu="soft"] .veil::before, [data-gpu="soft"] .veil::after,
-[data-gpu="soft"] .veil-column::before, [data-gpu="soft"] .veil-column::after,
-[data-gpu="soft"] .hero .btn::before,
+/* The pointer specular stays glass-only */
 [data-gpu="soft"] .btn-spec { display: none; }
 /* Drawer only: scoped to the drawer breakpoint, or this would paint a
    raised slab behind the DESKTOP nav row (the ul is the same element). */
@@ -2308,6 +2314,8 @@ body::after {
         -webkit-backdrop-filter: none;
         background: var(--raised);
         border-left-color: var(--line);
+        /* solid panel: top light line only, no glass bevel wash */
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), var(--shadow-lift);
     }
 }
 /* Soft compositing still gets the fog mode LOOK (static cloud sea is
@@ -2315,29 +2323,35 @@ body::after {
 [data-gpu="soft"] .fogbank,
 [data-gpu="soft"] .fx-haze { animation: none !important; }
 
-/* No backdrop-filter: glass surfaces fall back to the plain tint veil */
+/* No backdrop-filter: the blur goes, the framed-panel optics stay
+   (rim and shoji are plain paint; only the glass bevel wash drops) */
 @supports not (backdrop-filter: blur(1px)) {
-    .js .nav-links { background: var(--raised); }
+    .js .nav-links {
+        background: var(--raised);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), var(--shadow-lift);
+    }
     .veil {
         background: color-mix(in srgb, var(--paper) 82%, transparent);
-        border: 0;
-        box-shadow: none;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22),
+                    inset 0 -9px 0 -8px rgba(255, 255, 255, 0.30),
+                    var(--shadow-soft);
     }
     .veil-column {
         background: color-mix(in srgb, var(--paper) 78%, transparent);
-        border: 0;
-        box-shadow: none;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22),
+                    inset 0 -9px 0 -8px rgba(255, 255, 255, 0.30),
+                    var(--shadow-soft);
     }
     /* Glass hero CTAs: without the blur the thin fills read washed
        out, so densify to a solid primary and a firm tint secondary */
     .hero .primary-btn { background-color: var(--accent-color); }
     .hero .secondary-btn { background-color: color-mix(in srgb, var(--paper) 82%, transparent); }
-    .hero .btn { box-shadow: var(--shadow-soft); }
+    .hero .btn {
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                    inset 0 -7px 0 -6px rgba(255, 255, 255, 0.30),
+                    var(--shadow-soft);
+    }
     [data-intensity="rain"] .hero .btn { background-image: none; }
-    /* No blur means no glass optics */
-    .veil::before, .veil::after,
-    .veil-column::before, .veil-column::after,
-    .hero .btn::before { display: none; }
 }
 
 /* Pre-color-mix browsers: flat token fills, hide the soft extras */
