@@ -1289,6 +1289,11 @@ main {
    tint: primary is a pine-tinted pane with ivory text, secondary is
    clear glass with ink text. */
 .hero .btn {
+    position: relative;
+    overflow: hidden;
+    /* guarantees the gloss pseudo (z-index -1) stays above the fill
+       even in fallback modes where backdrop-filter is absent */
+    isolation: isolate;
     border-radius: 12px;
     border-width: 1px;
     /* 1px border instead of the stock 2px; pad it back so both hero
@@ -1298,12 +1303,43 @@ main {
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--shadow-soft);
 }
+/* Glossy specular cap: light catching the top of the pane. Faint at
+   rest, blooms on hover. Sits BETWEEN fill and label (negative
+   z-index inside the isolated context) so it never washes the text.
+   A static cap that brightens, not a sliding sheen band: the sweep
+   is the template trope the design language bans. */
+.hero .btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(165deg,
+        rgba(255, 255, 255, 0.30),
+        rgba(255, 255, 255, 0.05) 42%,
+        transparent 60%);
+    opacity: 0.45;
+    transition: opacity 0.3s var(--ease-settle);
+}
+/* Hover = the pane catches the light: it lifts, the edge and top
+   specular brighten, the gloss blooms, and the fill shifts so the
+   label gets crisper rather than washed. Tap on touch shows the
+   same state briefly as press feedback (both buttons navigate, so
+   sticky :hover can't linger). */
+.hero .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), var(--shadow-lift);
+}
+.hero .btn:hover::after { opacity: 1; }
+.hero .btn:active { transform: translateY(0); }
 .hero .primary-btn {
     background-color: color-mix(in srgb, var(--pine) 68%, transparent);
     border-color: rgba(255, 255, 255, 0.35);
 }
 .hero .primary-btn:hover {
-    background-color: color-mix(in srgb, var(--pine) 86%, transparent);
+    background-color: color-mix(in srgb, var(--pine) 78%, transparent);
+    border-color: rgba(255, 255, 255, 0.60);
     color: #f3f6f4;
 }
 .hero .secondary-btn {
@@ -1313,6 +1349,7 @@ main {
 }
 .hero .secondary-btn:hover {
     background-color: color-mix(in srgb, var(--paper) 58%, transparent);
+    border-color: rgba(255, 255, 255, 0.55);
     color: var(--ink);
 }
 /* The cue sits over the dark near canopy in BOTH themes, so it reads
