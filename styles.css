@@ -557,10 +557,9 @@ main {
     display: inline-block; /* Required for the lift animation to work on text */
 }
 
-/* Lifts the link up and brightens it into a neon green when hovered */
+/* Brightens the link and warms it with a soft amber glow when hovered */
 .socials a:hover {
     color: var(--amber-soft);
-    transform: translateY(-3px);
     text-shadow: 0 4px 12px rgba(200, 119, 46, 0.40); /* soft amber glow */
 }
 
@@ -626,10 +625,9 @@ main {
 }
 
 /* HOVER STATE */
-/* The card lifts and lantern light pools beneath it: a warm under-glow
+/* Lantern light pools beneath the card on hover: a warm under-glow
    and a faint amber hairline instead of the old gradient ring */
 .project-card:hover {
-    transform: translateY(-4px);
     box-shadow: var(--shadow-lift),
                 0 14px 34px -14px color-mix(in srgb, var(--amber) 38%, transparent);
     border-color: color-mix(in srgb, var(--amber) 35%, var(--line));
@@ -839,10 +837,9 @@ main {
     font-size: 1.8rem;
 }
 
-/* Lifts the icon up slightly when you mouse over it */
+/* Warms the icon to the accent color when you mouse over it */
 .social-links-large a:hover {
     color: var(--accent-color);
-    transform: translateY(-3px); 
 }
 
 /* Right side container that holds all the input fields */
@@ -1509,18 +1506,17 @@ main {
     }
     .hero .btn:hover .btn-spec { opacity: 1; }
 }
-/* Hover = the pane catches the light: it lifts, the edge and top
-   specular brighten, the gloss blooms, and the fill shifts so the
-   label gets crisper rather than washed. Tap on touch shows the
-   same state briefly as press feedback (both buttons navigate, so
-   sticky :hover can't linger). */
+/* Hover = the pane catches the light: the edge and top specular
+   brighten, the gloss blooms, and the fill shifts so the label gets
+   crisper rather than washed. Tap on touch shows the same state
+   briefly as press feedback (both buttons navigate, so sticky :hover
+   can't linger). */
 .hero .btn:hover {
-    transform: translateY(-2px);
     box-shadow: var(--glass-bevel-sm), var(--shadow-lift);
 }
 .hero .btn:hover::before { opacity: 1; }
 .hero .btn:hover::after { opacity: 1; }
-.hero .btn:active { transform: translateY(0) scale(0.96); }
+.hero .btn:active { transform: scale(0.96); }
 .hero .primary-btn {
     background-color: color-mix(in srgb, var(--pine) 68%, transparent);
 }
@@ -1611,7 +1607,6 @@ main {
     transition: transform 0.3s var(--ease-settle), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 .peek-card:hover {
-    transform: translateY(-4px);
     box-shadow: var(--shadow-lift),
                 0 14px 34px -14px color-mix(in srgb, var(--amber) 38%, transparent);
     border-color: color-mix(in srgb, var(--amber) 35%, var(--line));
