@@ -792,16 +792,28 @@ main {
 
 /* The big white box that holds both the info and the form side-by-side */
 .contact-layout {
+    position: relative;               /* anchors the shoji frame */
     display: grid;
     grid-template-columns: 1fr 1.5fr; /* Splits the box so the form gets more space than the contact info */
     gap: 4rem;
     margin-top: 2rem;
     background: var(--white);
-    
+
     /* Makes it look like a floating card */
     padding: 3rem;
     border-radius: var(--radius);
     box-shadow: var(--shadow-soft);
+}
+/* Shoji inner frame: the same quiet timber line the .veil panels carry,
+   inset from the card edge, so the whole card reads as a framed shoji
+   screen holding the two panes rather than a plain box. */
+.contact-layout::after {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid var(--shoji-line);
+    border-radius: calc(var(--radius) - 8px);
+    pointer-events: none;
 }
 
 /* Left side container for email, social links, etc */
@@ -887,12 +899,19 @@ main {
 .form-group textarea,
 .form-group select {
     padding: 0.8rem;
-    border: 1px solid color-mix(in srgb, var(--bark) 24%, var(--line));
+    /* Shoji timber frame: a warm, clearly visible surround (bark warmed
+       with ink so it reads on both the white day card and the dark night
+       card) around a recessed paper pane. */
+    border: 1.4px solid color-mix(in srgb, var(--bark) 42%, var(--ink-3));
     border-radius: var(--radius-sm);
     font-family: var(--font-body);
     font-size: 1rem;
     color: var(--text-color);
     background-color: var(--sunken);
+    /* The pane sits INTO the frame: a light top edge catches the sky/
+       lantern, a soft inner recess reads as depth below the timber. */
+    box-shadow: inset 0 1px 0 var(--pane-top-edge),
+                inset 0 2px 6px color-mix(in srgb, var(--bark) 12%, transparent);
     transition: border-color 0.25s ease, background-color 0.25s ease,
                 box-shadow 0.25s ease;
     width: 100%;
@@ -944,10 +963,17 @@ main {
     top: 50%;
     width: 0.5em;
     height: 0.5em;
-    border-right: 2px solid var(--ink-3);
-    border-bottom: 2px solid var(--ink-3);
+    /* Timber chevron (matches the field frames), warming to lantern amber
+       when the field is focused. */
+    border-right: 2px solid color-mix(in srgb, var(--bark) 45%, var(--ink-3));
+    border-bottom: 2px solid color-mix(in srgb, var(--bark) 45%, var(--ink-3));
     transform: translateY(-70%) rotate(45deg);
+    transition: border-color 0.25s ease;
     pointer-events: none;
+}
+.form-group:focus-within .select-wrapper::after {
+    border-right-color: var(--focus-ring-color);
+    border-bottom-color: var(--focus-ring-color);
 }
 
 /* Error text that appears below the input */
