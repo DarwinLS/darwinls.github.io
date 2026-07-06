@@ -2107,7 +2107,13 @@ body::after {
    stroke below and hides them on pre-color-mix browsers. */
 .fogbank { opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
-    .fogbank { transition: opacity 1.2s ease; }
+    /* transform is transitioned too so that when the fog dial ends and
+       the fogbank-drift animation (effects.css) is removed, the parked
+       drift offset (up to +-38px) eases back to 0 over the same beat as
+       the opacity fade instead of snapping - otherwise the cloud-sea
+       lurches sideways as it fades out of fog. Entering fog is
+       unaffected: the running animation overrides this transition. */
+    .fogbank { transition: opacity 1.2s ease, transform 1.2s var(--ease-drift); }
 }
 [data-intensity="fog"] .fogbank { opacity: 1; }
 [data-theme="dark"][data-intensity="fog"] .fogbank { opacity: 0.8; }

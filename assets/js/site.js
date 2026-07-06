@@ -6,11 +6,11 @@
     var root = document.documentElement;
 
     /* --- Theme toggle (light <-> dark, persisted) ---
-       A same-document View Transition sweeps the new theme in
-       directionally: night falls from the top, dawn rises from the
-       valley, with a faint golden-hour bloom (.fx-dusk) crossing the
-       horizon. Reduced-motion, soft-GPU, and browsers without the API
-       fall through to the correct instant swap. */
+       A same-document View Transition softly dissolves the whole page
+       between light and dark while a faint golden-hour bloom (.fx-dusk)
+       rises and fades, like the sun crossing the horizon. Reduced-motion,
+       soft-GPU, and browsers without the API fall through to the correct
+       instant swap. */
     var toggle = document.getElementById("theme-toggle");
     if (toggle) {
         var dusk = document.querySelector(".fx-dusk");
@@ -36,7 +36,10 @@
                 return;
             }
 
-            root.dataset.vtTheme = next === "dark" ? "to-dark" : "to-light";
+            /* Presence flag: names .fx-dusk into the transition (styles.css)
+               and scopes the bloom rules (transitions.css). The page dissolve
+               itself is the API's default root cross-fade. */
+            root.dataset.vtTheme = "1";
             var vt = document.startViewTransition(function () {
                 swapTheme(next);
                 /* Lights the bloom only in the NEW snapshot: the pseudo
@@ -45,20 +48,10 @@
             });
             vt.ready.then(function () {
                 if (dusk) dusk.style.opacity = "";   /* restore live DOM; pseudo already captured */
-                /* dark: reveal from the top down (night falls);
-                   light: reveal from the bottom up (dawn rises). */
-                var clip = next === "dark"
-                    ? ["inset(0 0 100% 0)", "inset(0)"]
-                    : ["inset(100% 0 0 0)", "inset(0)"];
-                root.animate(
-                    { clipPath: clip },
-                    { duration: 650, easing: "cubic-bezier(0.37,0,0.63,1)",
-                      pseudoElement: "::view-transition-new(root)" }
-                );
                 if (dusk) {
                     root.animate(
                         { opacity: [0, 0.9, 0] },
-                        { duration: 650, easing: "ease-in-out",
+                        { duration: 600, easing: "ease-in-out",
                           pseudoElement: "::view-transition-new(vt-dusk)" }
                     );
                 }

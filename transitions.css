@@ -125,17 +125,18 @@
 }
 
 /* ------------------------------------------------------------
-   SAME-DOCUMENT theme sweep (light <-> dark). site.js sets
-   [data-vt-theme] on <html> for the duration of the transition and
-   drives the clip reveal + golden-hour bloom via element.animate() on
-   the pseudos. Here we only neutralize the default cross-document root
-   cross-fade for this case (JS owns the reveal) and stack the bloom.
-   Scoped to [data-vt-theme] so the navigation transitions above are
-   untouched.
+   SAME-DOCUMENT theme change (light <-> dark): a soft full-page
+   dissolve. The page uses the DEFAULT root cross-fade above - a
+   same-doc VT carries no forward/backward type, so the nav slide
+   variants never apply and every layer (root, sky, nav, footer) simply
+   cross-fades between its light and dark paint. site.js sets
+   [data-vt-theme] for the duration so the golden-hour bloom (.fx-dusk)
+   is named into the transition, and drives its 0 -> peak -> 0 opacity
+   envelope from JS.
    ------------------------------------------------------------ */
-:root[data-vt-theme]::view-transition-old(root),
-:root[data-vt-theme]::view-transition-new(root) {
-    animation: none;               /* hold the old page beneath; JS clips the new in */
-}
+/* The bloom envelope is JS-driven; silence the UA default fade on its
+   pseudos so the two don't fight. */
+:root[data-vt-theme]::view-transition-old(vt-dusk),
+:root[data-vt-theme]::view-transition-new(vt-dusk) { animation: none; }
 /* Golden-hour bloom rides above content, below the persistent shell. */
 ::view-transition-group(vt-dusk) { z-index: 25; }
