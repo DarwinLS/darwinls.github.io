@@ -134,6 +134,27 @@
    is named into the transition, and drives its 0 -> peak -> 0 opacity
    envelope from JS.
    ------------------------------------------------------------ */
+/* A theme change is a whole-page dissolve, NOT a navigation, so strip
+   every per-element transition name (sky, scenery, shell, morph anchors)
+   for the duration: the entire page becomes ONE root snapshot that
+   cross-fades uniformly, each layer in its correct paint order.
+   This is what fixes the sky flashing to --paper: with vt-sky lifted
+   out of root, root's body background filled the sky hole and, sitting
+   at a higher group z-index, composited OVER the sky layer. Folding
+   everything back into root removes the seam. Only the bloom keeps a
+   name (it must exist as its own layer). */
+:root[data-vt-theme] .site-header,
+:root[data-vt-theme] .site-footer,
+:root[data-vt-theme] .sky-backdrop,
+:root[data-vt-theme] .scene-descent,
+:root[data-vt-theme] .vista,
+:root[data-vt-theme] .featured-inner,
+:root[data-vt-theme] .flagship-card,
+:root[data-vt-theme] .cs-intro,
+:root[data-vt-theme] .teaser-portrait img,
+:root[data-vt-theme] .about-portrait img {
+    view-transition-name: none;
+}
 /* The bloom envelope is JS-driven; silence the UA default fade on its
    pseudos so the two don't fight. */
 :root[data-vt-theme]::view-transition-old(vt-dusk),
