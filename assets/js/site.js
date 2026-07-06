@@ -144,6 +144,31 @@
         });
     }
 
+    /* --- Hero pane specular ---
+       A pointer-lit highlight inside the glass CTAs. Fine hover
+       pointers only, and never under reduced motion; the span is
+       injected here so touch devices and no-JS never carry it. The
+       pointermove writes two custom props consumed by one gradient,
+       so each move is paint-only damage on a small isolated layer. */
+    if (matchMedia("(hover: hover) and (pointer: fine)").matches &&
+        !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.querySelectorAll(".hero .btn").forEach(function (btn) {
+            var spec = document.createElement("span");
+            spec.className = "btn-spec";
+            spec.setAttribute("aria-hidden", "true");
+            btn.appendChild(spec);
+            var rect = null;
+            btn.addEventListener("pointerenter", function () {
+                rect = btn.getBoundingClientRect();
+            });
+            btn.addEventListener("pointermove", function (e) {
+                if (!rect) rect = btn.getBoundingClientRect();
+                btn.style.setProperty("--mx", (e.clientX - rect.left).toFixed(1) + "px");
+                btn.style.setProperty("--my", (e.clientY - rect.top).toFixed(1) + "px");
+            }, { passive: true });
+        });
+    }
+
     /* --- Mobile hamburger drawer --- */
     var burger = document.getElementById("nav-burger");
     if (burger) {
