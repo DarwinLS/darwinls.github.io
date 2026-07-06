@@ -2000,6 +2000,14 @@ body::after {
    edge, which was invisible for the borderless wash but reads as a
    collision now that the column is an edged glass panel. */
 .content-page.veil-column { margin-top: var(--space-8); }
+/* Desktop: the plate floats with a real band of scenery under the nav.
+   The old 2rem sliver read as a collision next to the wide side
+   gutters; scale the gap with viewport height so it stays deliberate. */
+@media (min-width: 821px) {
+    .content-page.veil-column { margin-top: clamp(2.5rem, 7vh, 5.5rem); }
+    .projects-container,
+    .contact-section { padding-top: clamp(2.5rem, 7vh, 5.5rem); }
+}
 /* About's reading column floats clear of the edges on mid screens */
 @media (max-width: 1040px) {
     .content-page.veil-column { margin-inline: 4%; }
