@@ -10,8 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
         
         inputs.forEach(input => {
-            const group = input.parentElement;
-            
             // Check emptiness
             if (!input.value.trim()) {
                 setError(input, true);
@@ -58,8 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Helper: Toggle Error State (Visuals + ARIA)
+    // closest(), not parentElement: the select sits inside .select-wrapper,
+    // so its parent is not the .form-group that carries the invalid class
     function setError(input, isError) {
-        const group = input.parentElement;
+        const group = input.closest('.form-group');
         if (isError) {
             group.classList.add('invalid');
             input.setAttribute('aria-invalid', 'true');
