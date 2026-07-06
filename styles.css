@@ -287,13 +287,16 @@ a {
     top: 0;
     z-index: 1000;
     background-color: var(--bg-color);
-    box-shadow: none;
     border-bottom: 1px solid var(--line);
 
-    /* Adds that blurry "frosted glass" effect behind the nav */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    /* Frosted glass behind the nav, on the shared grade (gentler than
+       the plate grade: a viewport-wide strip re-filters every scrolled
+       frame). Scene-lit edges: by day the top line is sky-bright, at
+       night the base line warms (the tokens flip, no dark rule here). */
+    backdrop-filter: var(--glass-grade-header);
+    -webkit-backdrop-filter: var(--glass-grade-header);
     background-color: color-mix(in srgb, var(--paper) 82%, transparent);
+    box-shadow: inset 0 1px 0 var(--pane-top-edge), inset 0 -1px 0 var(--pane-bottom-edge);
 }
 
 .navbar {
@@ -1370,12 +1373,30 @@ main {
     isolation: isolate;
     border-radius: 12px;
     border-width: 1px;
+    /* the rim pseudo draws the edge; the border still holds its pixel */
+    border-color: transparent;
     /* 1px border instead of the stock 2px; pad it back so both hero
        buttons keep the same footprint as the rest of the site's */
     padding: calc(0.8rem + 1px) calc(1.8rem + 1px);
-    backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--shadow-soft);
+    backdrop-filter: var(--glass-grade);
+    -webkit-backdrop-filter: var(--glass-grade);
+    box-shadow: var(--glass-bevel-sm), var(--shadow-soft);
+}
+/* Gradient rim, CTA scale: brightest at the top-left light entry,
+   thin return at the bottom-right. Brightens fully on hover. */
+.hero .btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.2px;
+    background: var(--rim-grad);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.85;
+    transition: opacity 0.3s var(--ease-settle);
 }
 /* Glossy specular cap: light catching the top of the pane. Faint at
    rest, blooms on hover. Sits BETWEEN fill and label (negative
@@ -1403,27 +1424,24 @@ main {
    sticky :hover can't linger). */
 .hero .btn:hover {
     transform: translateY(-2px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), var(--shadow-lift);
+    box-shadow: var(--glass-bevel-sm), var(--shadow-lift);
 }
+.hero .btn:hover::before { opacity: 1; }
 .hero .btn:hover::after { opacity: 1; }
 .hero .btn:active { transform: translateY(0); }
 .hero .primary-btn {
     background-color: color-mix(in srgb, var(--pine) 68%, transparent);
-    border-color: rgba(255, 255, 255, 0.35);
 }
 .hero .primary-btn:hover {
     background-color: color-mix(in srgb, var(--pine) 78%, transparent);
-    border-color: rgba(255, 255, 255, 0.60);
     color: #f3f6f4;
 }
 .hero .secondary-btn {
     background-color: var(--glass-fill);
-    border-color: var(--glass-line);
     color: var(--ink);
 }
 .hero .secondary-btn:hover {
     background-color: color-mix(in srgb, var(--paper) 58%, transparent);
-    border-color: rgba(255, 255, 255, 0.55);
     color: var(--ink);
 }
 /* The cue sits over the dark near canopy in BOTH themes, so it reads
@@ -1722,10 +1740,13 @@ body::after {
            the menu labels. Still glassy, but the words behind melt
            into tone instead of ghosting through. */
         background: color-mix(in srgb, var(--paper) 72%, transparent);
-        backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
-        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
+        backdrop-filter: var(--glass-grade);
+        -webkit-backdrop-filter: var(--glass-grade);
+        /* plain hairline, no gradient rim: a masked ring on a panel
+           clipped by the viewport would draw a bright line at the
+           screen edge */
         border-left: 1px solid var(--glass-line);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), var(--shadow-lift);
+        box-shadow: var(--glass-bevel), var(--shadow-lift);
         transform: translateX(100%);
         transition: transform 0.32s var(--ease-settle);
         z-index: 1200;
@@ -2034,12 +2055,42 @@ body::after {
    which left lopsided gaps wherever containers were wider than text. */
 .veil,
 .veil-column {
+    position: relative; /* anchors the rim and shoji pseudos */
     background: var(--glass-fill);
-    backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
-    border: 1px solid var(--glass-line);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), var(--shadow-soft);
+    backdrop-filter: var(--glass-grade);
+    -webkit-backdrop-filter: var(--glass-grade);
+    /* transparent, not 0: the rim pseudo draws the ring; the border
+       still reserves its pixel so the box never shifts */
+    border: 1px solid transparent;
+    box-shadow: var(--glass-bevel), var(--shadow-soft);
     border-radius: var(--radius);
+}
+/* Gradient rim: the pane edge is bright where light enters (top left)
+   and nearly gone opposite. Same padded-ring mask trick as the old
+   project-card border: paint a gradient, then cut out the middle. */
+.veil::before,
+.veil-column::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.2px;
+    background: var(--rim-grad);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+/* Shoji inner frame: a quiet timber line inset from the glass edge,
+   so the pane reads as a framed panel instead of a bare slab */
+.veil::after,
+.veil-column::after {
+    content: "";
+    position: absolute;
+    inset: 9px;
+    border: 1px solid var(--shoji-line);
+    border-radius: calc(var(--radius) - 6px);
+    pointer-events: none;
 }
 .veil {
     position: relative;
@@ -2059,6 +2110,12 @@ body::after {
         background: color-mix(in srgb, var(--paper) 82%, transparent);
         border: 0;
         box-shadow: none;
+    }
+    /* Glass optics die together with the blur: rim and bevel on a
+       flat tint read as fake glass, so the pseudos go too */
+    .section-inner.veil::before, .section-inner.veil::after,
+    .content-page.veil-column::before, .content-page.veil-column::after {
+        display: none;
     }
 }
 /* Per-block fits */
@@ -2095,6 +2152,12 @@ body::after {
     .what, .work-peek { padding-inline: 0; }
     .section-inner.veil { border-radius: 0; padding: 2rem 6%; }
     .content-page.veil-column { border-radius: 0; margin-inline: 0; }
+    /* Squared bands square their rim and shoji frame too (matters
+       only for narrow fine-pointer windows; coarse hides both) */
+    .section-inner.veil::before, .content-page.veil-column::before,
+    .section-inner.veil::after, .content-page.veil-column::after {
+        border-radius: 0;
+    }
 }
 /* Phones: prune composited scene layers (11 -> 8 on home; vistas
    drop their farthest ridge) to bound GPU memory on small devices. */
@@ -2131,9 +2194,14 @@ body::after {
 [data-gpu="soft"] .hero .btn {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    box-shadow: var(--shadow-soft);
 }
 [data-gpu="soft"] .hero .primary-btn { background-color: var(--accent-color); }
 [data-gpu="soft"] .hero .secondary-btn { background-color: color-mix(in srgb, var(--paper) 82%, transparent); }
+/* Glass optics (rim, shoji frame) die with the blur */
+[data-gpu="soft"] .veil::before, [data-gpu="soft"] .veil::after,
+[data-gpu="soft"] .veil-column::before, [data-gpu="soft"] .veil-column::after,
+[data-gpu="soft"] .hero .btn::before { display: none; }
 /* Drawer only: scoped to the drawer breakpoint, or this would paint a
    raised slab behind the DESKTOP nav row (the ul is the same element). */
 @media (max-width: 820px) {
@@ -2166,6 +2234,11 @@ body::after {
        out, so densify to a solid primary and a firm tint secondary */
     .hero .primary-btn { background-color: var(--accent-color); }
     .hero .secondary-btn { background-color: color-mix(in srgb, var(--paper) 82%, transparent); }
+    .hero .btn { box-shadow: var(--shadow-soft); }
+    /* No blur means no glass optics */
+    .veil::before, .veil::after,
+    .veil-column::before, .veil-column::after,
+    .hero .btn::before { display: none; }
 }
 
 /* Pre-color-mix browsers: flat token fills, hide the soft extras */
@@ -2175,7 +2248,15 @@ body::after {
     .sd path, .vl path { fill: var(--slate) !important; }
     .mist, .glow { display: none; }
     .footer-scene path { fill: var(--bark-deep); }
-    .veil, .veil-column { background: var(--paper); }
+    .veil, .veil-column {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow-soft);
+    }
+    /* Rim/shoji/bevel lean on color-mix tokens; opaque paper drops them */
+    .veil::before, .veil::after,
+    .veil-column::before, .veil-column::after,
+    .hero .btn::before { display: none; }
     .js .nav-links { background: var(--raised); }
     .site-footer { background: var(--bark-deep); }
     .about-teaser { background: none; }
@@ -2183,6 +2264,7 @@ body::after {
        stock solid/outline button pair */
     .hero .primary-btn { background-color: var(--accent-color); }
     .hero .secondary-btn { background-color: var(--raised); }
+    .hero .btn { box-shadow: var(--shadow-soft); }
     /* Lantern focus: the glow is a color-mix value; the plain ring
        (amber-deep resolves fine) carries focus alone */
     :focus-visible { outline-color: var(--amber-deep); }
@@ -2238,5 +2320,5 @@ body::after {
 /* Buttons carry shadows already, so restate the full stack */
 .btn:focus-visible { box-shadow: var(--focus-glow); }
 .hero .btn:focus-visible {
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--shadow-soft), var(--focus-glow);
+    box-shadow: var(--glass-bevel-sm), var(--shadow-soft), var(--focus-glow);
 }
