@@ -5,17 +5,65 @@
     "use strict";
     var root = document.documentElement;
 
-    /* --- Theme toggle (light <-> dark, persisted) --- */
+    /* --- Theme toggle (light <-> dark, persisted) ---
+       A same-document View Transition sweeps the new theme in
+       directionally: night falls from the top, dawn rises from the
+       valley, with a faint golden-hour bloom (.fx-dusk) crossing the
+       horizon. Reduced-motion, soft-GPU, and browsers without the API
+       fall through to the correct instant swap. */
     var toggle = document.getElementById("theme-toggle");
     if (toggle) {
-        toggle.addEventListener("click", function () {
-            var next = root.dataset.theme === "dark" ? "light" : "dark";
+        var dusk = document.querySelector(".fx-dusk");
+
+        var swapTheme = function (next) {
             root.dataset.theme = next;
             try { localStorage.setItem("theme", next); } catch (e) {}
             toggle.setAttribute(
                 "aria-label",
                 next === "dark" ? "Switch to light theme" : "Switch to dark theme"
             );
+        };
+
+        toggle.addEventListener("click", function () {
+            var next = root.dataset.theme === "dark" ? "light" : "dark";
+            var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+            var soft = root.dataset.gpu === "soft";
+
+            /* Instant where a full-page snapshot is unsupported or unwanted
+               (a CPU-composited full-page crossfade would stutter). */
+            if (!document.startViewTransition || reduce || soft) {
+                swapTheme(next);
+                return;
+            }
+
+            root.dataset.vtTheme = next === "dark" ? "to-dark" : "to-light";
+            var vt = document.startViewTransition(function () {
+                swapTheme(next);
+                /* Lights the bloom only in the NEW snapshot: the pseudo
+                   keeps this warm texture even after we clear live opacity. */
+                if (dusk) dusk.style.opacity = "1";
+            });
+            vt.ready.then(function () {
+                if (dusk) dusk.style.opacity = "";   /* restore live DOM; pseudo already captured */
+                /* dark: reveal from the top down (night falls);
+                   light: reveal from the bottom up (dawn rises). */
+                var clip = next === "dark"
+                    ? ["inset(0 0 100% 0)", "inset(0)"]
+                    : ["inset(100% 0 0 0)", "inset(0)"];
+                root.animate(
+                    { clipPath: clip },
+                    { duration: 650, easing: "cubic-bezier(0.37,0,0.63,1)",
+                      pseudoElement: "::view-transition-new(root)" }
+                );
+                if (dusk) {
+                    root.animate(
+                        { opacity: [0, 0.9, 0] },
+                        { duration: 650, easing: "ease-in-out",
+                          pseudoElement: "::view-transition-new(vt-dusk)" }
+                    );
+                }
+            });
+            vt.finished.finally(function () { delete root.dataset.vtTheme; });
         });
     }
 

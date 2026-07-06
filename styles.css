@@ -289,6 +289,25 @@ body {
     transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* Golden-hour bloom for the theme sweep. Normally invisible; the theme
+   toggle (site.js) lights it inside the View-Transition capture so ONLY
+   the new snapshot carries the warm wash, then animates the vt-dusk
+   pseudo 0 -> peak -> 0 across the dusk/dawn reveal. Pure gradient
+   opacity, no blur - safe over the fixed effect stack. */
+.fx-dusk {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    background:
+        radial-gradient(140% 60% at 50% 0%, color-mix(in srgb, var(--amber) 34%, transparent), transparent 60%),
+        radial-gradient(140% 60% at 50% 100%, color-mix(in srgb, var(--amber-soft) 22%, transparent), transparent 62%);
+}
+/* Named only while a sweep is in flight (data-vt-theme set by site.js),
+   so navigations never capture an extra empty snapshot group. */
+:root[data-vt-theme] .fx-dusk { view-transition-name: vt-dusk; }
+
 /* Headings use the serif display (field-journal tone); taglines/labels stay sans */
 h1, h2,
 .name, .page-title h1, .cs-intro h1,
@@ -1883,6 +1902,7 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    body { transition: none; }              /* theme swaps instantly, no color fade */
     .nav-links { transition: none; }
     .nav-burger path { transition: none; }
     .scroll-cue svg { animation: none; }
@@ -2087,7 +2107,7 @@ body::after {
    stroke below and hides them on pre-color-mix browsers. */
 .fogbank { opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
-    .fogbank { transition: opacity 2.8s ease; }
+    .fogbank { transition: opacity 1.2s ease; }
 }
 [data-intensity="fog"] .fogbank { opacity: 1; }
 [data-theme="dark"][data-intensity="fog"] .fogbank { opacity: 0.8; }

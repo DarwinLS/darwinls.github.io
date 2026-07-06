@@ -72,6 +72,64 @@
     to { transform: translate3d(var(--tile-dx, 0px), var(--tile-h, 1024px), 0); }
 }
 
+/* ---------------- CSS-FALLBACK RAMPS (rain tiles + side-fog) --------
+   Graceful mount/unmount for the no-WebGL / soft-GPU weather layers.
+   ambient.js appends the host with .is-ramp (hidden), then adds .fx-in
+   next frame to play the reveal; on teardown it removes .fx-in to fade
+   out before the node is dropped. One-shot ~1s transients: opacity + a
+   mask wipe only (mask, not blur - the fixed-stack no-blur rule holds).
+   The mask is a DIRECTIONAL gradient (a solid mask would reveal nothing
+   when slid), taller/wider than the box, whose opaque band sweeps in. */
+.fx-rain.is-ramp {
+    opacity: 0;
+    -webkit-mask-image: linear-gradient(180deg, #000 0, #000 40%, transparent 62%);
+            mask-image: linear-gradient(180deg, #000 0, #000 40%, transparent 62%);
+    -webkit-mask-size: 100% 300%;  mask-size: 100% 300%;
+    -webkit-mask-position: 0 100%; mask-position: 0 100%;   /* opaque band above the viewport */
+    transition: opacity .5s ease,
+                -webkit-mask-position .9s ease-out, mask-position .9s ease-out;
+}
+.fx-rain.is-ramp.fx-in {
+    opacity: 1;
+    -webkit-mask-position: 0 0; mask-position: 0 0;         /* curtain descends from the top */
+}
+
+/* Side-fog fallback: two edge gradients rolled in from the sides. The
+   mask is opaque at both edges, feathering to a point at centre; as its
+   width shrinks 300% -> 100% the opaque edges sweep inward until they
+   meet (centre stays naturally thin, which suits fog). */
+.fx-fog.is-fixed {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    contain: strict;
+    background:
+        radial-gradient(60% 120% at 0% 60%, var(--haze-a), transparent 70%),
+        radial-gradient(60% 120% at 100% 60%, var(--haze-a), transparent 70%);
+}
+@supports (height: 100lvh) {
+    .fx-fog.is-fixed { inset: 0 0 auto 0; height: 100lvh; }
+}
+.fx-fog.is-ramp {
+    opacity: 0;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, transparent 50%, #000 100%);
+            mask-image: linear-gradient(90deg, #000 0, transparent 50%, #000 100%);
+    -webkit-mask-size: 300% 100%;  mask-size: 300% 100%;
+    -webkit-mask-position: 50% 0; mask-position: 50% 0;
+    transition: opacity .8s ease,
+                -webkit-mask-size 1s ease-in-out, mask-size 1s ease-in-out;
+}
+.fx-fog.is-ramp.fx-in {
+    opacity: 1;
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+}
+/* Reduced motion never mounts precip (ambient.js gate); belt-and-braces. */
+@media (prefers-reduced-motion: reduce) {
+    .fx-rain.is-ramp, .fx-fog.is-ramp { transition: none; }
+}
+
 /* ---------------- ATMOSPHERIC HAZE ----------------
    The fog replacement: pre-feathered radial gradients, pre-tinted
    per theme via tokens. No blur filter, no blend mode - the softness

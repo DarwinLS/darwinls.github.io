@@ -36,12 +36,20 @@ const level = () => root.dataset.intensity || "rain";
 const motionOK = () => !reduce.matches;
 
 /* ---------- shared engine lifecycle ---------- */
+/* teardown[] holds the reveal/timeline observers (full-reset lifecycle,
+   rebuilt on boot). Precipitation and the cursor dew are managed apart
+   from it so a dial change can CROSS-FADE them (ramp the old engine out
+   while the new one ramps in) instead of hard-cutting. */
 let teardown = [];
 let gen = 0;                          // bumped each boot; guards async mounts
 function destroyAll() {
     teardown.forEach((fn) => { try { fn(); } catch (e) {} });
     teardown = [];
 }
+
+let current = null;                   // active precip handle: { dispose, rampOut? }
+let currentMode = null;               // "fog" | "rain" | null
+let cursorDown = null;                // active cursor-dew teardown, or null
 
 /* ============================================================
    RAIN - compositor-tiled sheets.
@@ -117,36 +125,59 @@ function makeRainTile(rgb, sheet, densityMul, tileH) {
     return c.toDataURL();
 }
 
-/* Primary path: the WebGL canvas (precip.js) for both weather modes.
-   Fallback: rain -> the CSS tiled rain below; fog -> nothing extra
-   (the static .fx-haze already carries fog on every page). */
-function mountPrecipitation() {
-    const lvl = precipLevel();
-    if (!lvl) return;
+/* Mount the engine for one weather mode and return its handle
+   ({ dispose, rampOut? }). Primary path: the WebGL canvas (precip.js),
+   which auto ramps itself in. Fallback: rain -> the CSS tiled rain,
+   fog -> the CSS side-fog (both ramp in via CSS classes). */
+function mountForMode(mode) {
     const dbg = rainDebug();
     if (!(dbg && dbg.forceCSS)) {
-        let down = null;
+        let handle = null;
         const myGen = gen;
         /* precip.js self-destructs when its frame watchdog sees the GPU
-           can't keep up; swap in the CSS path unless a reboot already
-           replaced this mount (gen guard). */
+           can't keep up; swap in the CSS path for the SAME mode, unless
+           a reboot or a dial change already moved on. */
         const degrade = () => {
-            if (gen !== myGen) return;
-            const i = teardown.indexOf(down);
-            if (i >= 0) teardown.splice(i, 1);
-            if (lvl === "rain") mountRainCSS();
+            if (gen !== myGen || current !== handle) return;
+            current = mode === "rain" ? mountRainCSS() : mountFogCSS();
         };
         try {
-            down = mountPrecip({
-                mode: (dbg && dbg.mode) || lvl,
+            handle = mountPrecip({
+                mode: (dbg && dbg.mode) || mode,
                 coarse: !finePointer.matches,
                 dbg,
                 onDegrade: degrade,
             });
         } catch (e) {}
-        if (down) { teardown.push(down); return; }
+        if (handle) return handle;
     }
-    if (lvl === "rain") mountRainCSS();
+    return mode === "rain" ? mountRainCSS() : mountFogCSS();
+}
+
+/* Ramp the outgoing engine out, then dispose it. WebGL engines play a
+   ~1s fade uniform; the CSS engines fade via their own dispose(). */
+function rampOutAndDispose(handle) {
+    if (!handle) return;
+    if (handle.rampOut) handle.rampOut(() => { try { handle.dispose(); } catch (e) {} });
+    else { try { handle.dispose(); } catch (e) {} }
+}
+
+/* Cross-fade precipitation to the level the dial now asks for. */
+function syncPrecip() {
+    const next = precipLevel();               // null | "fog" | "rain"
+    if (next === currentMode) return;
+    const dying = current;
+    current = null;
+    currentMode = null;
+    if (dying) rampOutAndDispose(dying);       // overlaps the incoming ramp-in
+    if (next) { current = mountForMode(next); currentMode = next; }
+    syncCursor(next);
+}
+
+/* Cursor dew lives with rain only; add/remove it as we cross in/out. */
+function syncCursor(next) {
+    if (next === "rain" && !cursorDown) cursorDown = mountCursor();
+    else if (next !== "rain" && cursorDown) { cursorDown(); cursorDown = null; }
 }
 
 function mountRainCSS() {
@@ -164,7 +195,7 @@ function mountRainCSS() {
     const densityMul = coarse ? 0.5 : 0.7;
 
     const host = document.createElement("div");
-    host.className = "fx-rain is-fixed";
+    host.className = "fx-rain is-fixed is-ramp";
     host.setAttribute("aria-hidden", "true");
     const movers = [];
     for (const sheet of sheets) {
@@ -194,6 +225,9 @@ function mountRainCSS() {
         movers.push({ move, sheet });
     }
     document.body.appendChild(host);
+    /* Next frame: the .fx-in class runs the CSS reveal (opacity + a
+       top-down mask wipe) so the tiles fall in from the top over ~1s. */
+    requestAnimationFrame(() => host.classList.add("fx-in"));
 
     /* re-tint on theme flip (regenerating the small tiles is cheap) */
     const themeObs = new MutationObserver(() => {
@@ -204,10 +238,32 @@ function mountRainCSS() {
     });
     themeObs.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
-    teardown.push(() => {
-        themeObs.disconnect();
-        host.remove();
-    });
+    return {
+        dispose() {
+            themeObs.disconnect();
+            host.classList.remove("fx-in");    // fade + wipe back out
+            setTimeout(() => host.remove(), 950);
+        },
+    };
+}
+
+/* Fog fallback for the no-WebGL / soft-GPU path (WebGL fog never mounts
+   there). Two edge gradients rolled in from the sides via a CSS mask
+   transition - mask, not blur, so it honors the no-blur rule on the
+   fixed stack and survives soft-GPU (which strips animations, not
+   transitions). Ramps in with .fx-in and fades out on dispose. */
+function mountFogCSS() {
+    const host = document.createElement("div");
+    host.className = "fx-fog is-fixed is-ramp";
+    host.setAttribute("aria-hidden", "true");
+    document.body.appendChild(host);
+    requestAnimationFrame(() => host.classList.add("fx-in"));
+    return {
+        dispose() {
+            host.classList.remove("fx-in");
+            setTimeout(() => host.remove(), 1000);
+        },
+    };
 }
 
 /* ============================================================
@@ -215,7 +271,7 @@ function mountRainCSS() {
    follows the pointer (plain alpha radial, no blend mode).
    ============================================================ */
 function mountCursor() {
-    if (level() !== "rain" || !finePointer.matches || !motionOK()) return;
+    if (level() !== "rain" || !finePointer.matches || !motionOK()) return null;
     const dew = document.createElement("div");
     dew.className = "fx-dew";
     dew.setAttribute("aria-hidden", "true");
@@ -231,7 +287,7 @@ function mountCursor() {
             `translate3d(${e.clientX}px,${e.clientY}px,0) translate(-50%,-50%)`;
     };
     window.addEventListener("pointermove", move, { passive: true });
-    teardown.push(() => { window.removeEventListener("pointermove", move); dew.remove(); });
+    return () => { window.removeEventListener("pointermove", move); dew.remove(); };
 }
 
 /* ============================================================
@@ -320,12 +376,22 @@ function countUp(scope) {
 /* ============================================================
    BOOT + re-mount on intensity change
    ============================================================ */
+/* Full reset: rebuild the reveal observers and re-sync precip/cursor to
+   the current dial. Used at first boot and when the reduced-motion pref
+   flips (which changes gating across the board). */
 function boot() {
     gen++;
     destroyAll();
-    try { mountPrecipitation(); } catch (e) {}
-    try { mountCursor(); } catch (e) {}
+    try { syncPrecip(); } catch (e) {}       // ramps to the correct state
+    try { syncCursor(precipLevel()); } catch (e) {}
     try { mountReveals(); } catch (e) {}
+}
+
+/* Dial change only: cross-fade precipitation (and the cursor dew).
+   Reveals/timeline are NOT rebuilt - the content is already in place, so
+   re-hiding it on a mid-session dial click would be wrong. */
+function onDial() {
+    try { syncPrecip(); } catch (e) {}
 }
 
 /* Speculation Rules prerender pages in the background; never run the
@@ -336,11 +402,12 @@ if (document.prerendering) {
     boot();
 }
 
-// Re-mount when the intensity dial changes (nav toggle / device re-clamp).
+// Cross-fade when the intensity dial changes (nav toggle / device
+// re-clamp). Only precipitation/cursor move; reveals stay put.
 let remountTimer = 0;
 new MutationObserver(() => {
     clearTimeout(remountTimer);
-    remountTimer = setTimeout(boot, 60);
+    remountTimer = setTimeout(onDial, 60);
 }).observe(root, { attributes: true, attributeFilter: ["data-intensity"] });
 
 // Re-evaluate rain/cursor/reveal gating if the OS reduced-motion pref flips.

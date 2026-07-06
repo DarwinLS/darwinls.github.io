@@ -57,6 +57,8 @@ uniform float u_wind;
 uniform float u_alpha;     /* fog master opacity */
 uniform float u_fogMix;    /* fog showing through in rain mode */
 uniform float u_far;       /* far rain layer on/off (phones drop it) */
+uniform float u_master;    /* ramp: overall opacity 0..1 (fade in/out) */
+uniform float u_reveal;    /* ramp: directional front 0..1 (rain fills top-down, fog rolls in from the sides) */
 
 float h1(vec2 p) {
     p = fract(p * vec2(123.34, 345.45));
@@ -115,10 +117,18 @@ void main() {
                 + streaks(st, 30.0, 2.2, 2.0, 0.32, 0.14, 0.25, 37.0) * 0.24;
         float f = 0.0;
         if (u_fogMix > 0.0) f = fogAmt(st, uv) * u_fogMix;
-        a = min(1.0, r + f);
+        /* Curtain fills from the top: streaks appear where the reveal
+           front has passed (uv.y near 1 = top), soft leading edge. */
+        float rmask = smoothstep(u_reveal + 0.12, u_reveal - 0.04, 1.0 - uv.y);
+        a = min(1.0, r + f) * u_master * rmask;
         col = u_rainColor;
     } else {
-        a = fogAmt(st, uv);
+        /* Rolls in from both sides: the lit band grows inward from the
+           left and right edges until it meets in the middle. */
+        float e = u_reveal * 0.5;
+        float smask = min(smoothstep(0.0, e + 0.001, uv.x),
+                          smoothstep(0.0, e + 0.001, 1.0 - uv.x));
+        a = fogAmt(st, uv) * u_master * smask;
         col = u_fogColor;
     }
     gl_FragColor = vec4(col * a, a);               /* premultiplied */
@@ -236,7 +246,8 @@ function mount(mode, coarse, dbg, onDegrade) {
         gl.disable(gl.BLEND);
         loc = {};
         for (const u of ["u_res", "u_time", "u_mode", "u_rainColor",
-            "u_fogColor", "u_wind", "u_alpha", "u_fogMix", "u_far"]) {
+            "u_fogColor", "u_wind", "u_alpha", "u_fogMix", "u_far",
+            "u_master", "u_reveal"]) {
             loc[u] = gl.getUniformLocation(prog, u);
         }
         gl.uniform1f(loc.u_mode, isRain ? 1 : 0);
@@ -288,10 +299,51 @@ function mount(mode, coarse, dbg, onDegrade) {
     let wdStart = 0;
     let wdDone = false;
     const t0 = performance.now();
+
+    /* Graceful ramp: one smoothstep envelope over ~1s. `in` fills the
+       layer (opacity + directional reveal front both 0 -> 1); `out`
+       fades opacity back to 0 while the front holds, so rain tapers
+       rather than un-revealing from the bottom. u_master/u_reveal are
+       written every frame so a context-restore repaints correctly. */
+    let master = 0, reveal = 0;
+    let ramping = false, rampDir = "in", rampDur = 1000, rampT0 = 0, rampCb = null;
+    let rampFromMaster = 0, rampFromReveal = 0;
+    function startRamp(dir, dur, cb) {
+        rampDir = dir;
+        rampDur = dur;
+        rampT0 = performance.now();
+        rampFromMaster = master;
+        rampFromReveal = reveal;
+        rampCb = cb || null;
+        ramping = true;
+    }
+    startRamp("in", 1000, null);          // every fresh mount eases in
+
     function frame(t) {
         raf = requestAnimationFrame(frame);
         if (t - last < frameMs - 1) return;
         last = t - ((t - last) % frameMs);
+        if (ramping) {
+            const p = Math.min(1, (t - rampT0) / rampDur);
+            const e = p * p * (3 - 2 * p);   /* smoothstep */
+            if (rampDir === "in") {
+                master = rampFromMaster + (1 - rampFromMaster) * e;
+                reveal = rampFromReveal + (1 - rampFromReveal) * e;
+            } else {
+                master = rampFromMaster * (1 - e);
+            }
+            if (p >= 1) {
+                ramping = false;
+                if (rampDir === "out" && rampCb) {
+                    const cb = rampCb;
+                    rampCb = null;
+                    cb();                    /* -> dispose; skip this frame's draw */
+                    return;
+                }
+            }
+        }
+        gl.uniform1f(loc.u_master, master);
+        gl.uniform1f(loc.u_reveal, reveal);
         gl.uniform1f(loc.u_time, ((t - t0) / 1000) % 3600);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
         if (!wdDone) {
@@ -370,5 +422,10 @@ function mount(mode, coarse, dbg, onDegrade) {
         if (ext) ext.loseContext();
         host.remove();
     }
-    return dispose;
+    /* rampOut plays the ~1s fade, then runs cb (dispose) on completion.
+       The watchdog / context-loss paths still call dispose() directly. */
+    return {
+        dispose,
+        rampOut(cb) { startRamp("out", 1000, cb || null); },
+    };
 }

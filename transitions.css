@@ -123,3 +123,19 @@
         animation-delay: 0s !important;
     }
 }
+
+/* ------------------------------------------------------------
+   SAME-DOCUMENT theme sweep (light <-> dark). site.js sets
+   [data-vt-theme] on <html> for the duration of the transition and
+   drives the clip reveal + golden-hour bloom via element.animate() on
+   the pseudos. Here we only neutralize the default cross-document root
+   cross-fade for this case (JS owns the reveal) and stack the bloom.
+   Scoped to [data-vt-theme] so the navigation transitions above are
+   untouched.
+   ------------------------------------------------------------ */
+:root[data-vt-theme]::view-transition-old(root),
+:root[data-vt-theme]::view-transition-new(root) {
+    animation: none;               /* hold the old page beneath; JS clips the new in */
+}
+/* Golden-hour bloom rides above content, below the persistent shell. */
+::view-transition-group(vt-dusk) { z-index: 25; }
