@@ -122,6 +122,9 @@
     --danger: #a83a32;
     --danger-tint: color-mix(in srgb, var(--danger) 6%, var(--raised));
 
+    /* Timeline lanterns: unlit by day */
+    --marker-glow: none;
+
     /* Spacing scale (8px base) + airy-editorial section rhythm */
     --space-2: 0.5rem;  --space-3: 0.75rem; --space-4: 1rem;
     --space-6: 1.5rem;  --space-8: 2rem;    --space-12: 3rem;
@@ -202,6 +205,8 @@
     --ok: #7fc08f;
     --danger: #e2766c;   /* ~5.5:1 on the night card */
     --danger-tint: color-mix(in srgb, var(--danger) 12%, var(--raised));
+    /* Timeline lanterns glow after dark */
+    --marker-glow: 0 0 12px color-mix(in srgb, var(--amber) 45%, transparent);
 }
 /* Night-forest per-biome sky. Theme lives on <html>, biome on <body>,
    so match the biome as a DESCENDANT of the dark root (a compound
@@ -254,6 +259,7 @@
         --ok: #7fc08f;
         --danger: #e2766c;
         --danger-tint: color-mix(in srgb, var(--danger) 12%, var(--raised));
+        --marker-glow: 0 0 12px color-mix(in srgb, var(--amber) 45%, transparent);
     }
     /* Biome skies at night on the OS-auto path (mirrors the explicit-dark set) */
     :root:not([data-theme="light"]) [data-biome="projects"] { --sky-1: #0f1a15; --sky-2: #16211b; }
@@ -1175,6 +1181,8 @@ main {
     font-size: 1.05rem;
 }
 
+/* Stepping stones, not copy-paste dots: each pebble sits a little
+   differently on the path (static scatter, no animation) */
 .cs-list li::before {
     content: '';
     position: absolute;
@@ -1182,9 +1190,11 @@ main {
     top: 0.6rem;
     width: 7px;
     height: 7px;
-    border-radius: 50%;
+    border-radius: 55% 45% 52% 48% / 48% 55% 45% 52%;
     background-color: var(--amber);
 }
+.cs-list li:nth-child(2n)::before { transform: rotate(40deg) scale(0.92); }
+.cs-list li:nth-child(3n)::before { transform: rotate(-25deg) scale(1.06); }
 
 .cs-list li strong {
     color: var(--text-color);
@@ -1274,9 +1284,12 @@ main {
     top: 0.6rem;
     width: 7px;
     height: 7px;
-    border-radius: 50%;
+    /* same stepping-stone scatter as .cs-list */
+    border-radius: 55% 45% 52% 48% / 48% 55% 45% 52%;
     background-color: var(--amber);
 }
+.exp-list li:nth-child(2n)::before { transform: rotate(40deg) scale(0.92); }
+.exp-list li:nth-child(3n)::before { transform: rotate(-25deg) scale(1.06); }
 
 /* Skill discipline groups */
 .skill-group {
@@ -1459,6 +1472,18 @@ main {
     opacity: 0.45;
     transition: opacity 0.3s var(--ease-settle);
 }
+/* Rain on the glass: while the dial is on rain, a static speckle of
+   droplets clings to the top edge of the hero panes. One tiled
+   background image, zero animation, fine pointers only. */
+@media (pointer: fine) {
+    [data-intensity="rain"] .hero .btn {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='28'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='12' cy='6' r='1.6' fill-opacity='.28'/%3E%3Ccircle cx='34' cy='3' r='1.1' fill-opacity='.2'/%3E%3Ccircle cx='55' cy='9' r='2' fill-opacity='.3'/%3E%3Ccircle cx='78' cy='4' r='1.3' fill-opacity='.22'/%3E%3Cellipse cx='96' cy='11' rx='1.4' ry='2' fill-opacity='.26'/%3E%3Ccircle cx='117' cy='5' r='1' fill-opacity='.18'/%3E%3Cellipse cx='139' cy='8' rx='1.7' ry='2.4' fill-opacity='.3'/%3E%3Ccircle cx='160' cy='3' r='1.2' fill-opacity='.2'/%3E%3Ccircle cx='181' cy='10' r='1.5' fill-opacity='.24'/%3E%3Cellipse cx='203' cy='6' rx='1.5' ry='2.1' fill-opacity='.28'/%3E%3Ccircle cx='25' cy='16' r='1' fill-opacity='.18'/%3E%3Ccircle cx='70' cy='18' r='1.3' fill-opacity='.2'/%3E%3Ccircle cx='130' cy='20' r='1.1' fill-opacity='.18'/%3E%3Ccircle cx='190' cy='17' r='1' fill-opacity='.16'/%3E%3Ccircle cx='150' cy='14' r='.9' fill-opacity='.16'/%3E%3Ccircle cx='8' cy='23' r='.8' fill-opacity='.14'/%3E%3C/g%3E%3C/svg%3E");
+        background-repeat: repeat-x;
+        background-position: top;
+        background-size: 220px 28px;
+    }
+}
+
 /* Pointer specular: a small light source inside the pane follows the
    cursor. The span is injected by site.js on fine hover pointers only,
    so touch devices and no-JS never carry the layer. Updates repaint
@@ -1673,6 +1698,8 @@ main {
     border: 3px solid var(--paper);
     transform: translateX(-50%);
     z-index: 1;
+    /* lanterns along the trail: unlit by day, glowing at night */
+    box-shadow: var(--marker-glow);
 }
 .tl-edu .tl-marker { background: var(--moss-gold); }
 .tl-edu-note {
@@ -2264,6 +2291,7 @@ body::after {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     box-shadow: var(--shadow-soft);
+    background-image: none;   /* no rain speckle on the solid fills */
 }
 [data-gpu="soft"] .hero .primary-btn { background-color: var(--accent-color); }
 [data-gpu="soft"] .hero .secondary-btn { background-color: color-mix(in srgb, var(--paper) 82%, transparent); }
@@ -2305,6 +2333,7 @@ body::after {
     .hero .primary-btn { background-color: var(--accent-color); }
     .hero .secondary-btn { background-color: color-mix(in srgb, var(--paper) 82%, transparent); }
     .hero .btn { box-shadow: var(--shadow-soft); }
+    [data-intensity="rain"] .hero .btn { background-image: none; }
     /* No blur means no glass optics */
     .veil::before, .veil::after,
     .veil-column::before, .veil-column::after,
@@ -2335,6 +2364,7 @@ body::after {
     .hero .primary-btn { background-color: var(--accent-color); }
     .hero .secondary-btn { background-color: var(--raised); }
     .hero .btn { box-shadow: var(--shadow-soft); }
+    [data-intensity="rain"] .hero .btn { background-image: none; }
     /* Card lantern under-glow leans on color-mix; plain amber hairline */
     .project-card:hover, .peek-card:hover {
         box-shadow: var(--shadow-lift);

@@ -38,6 +38,10 @@
    of the track texture and pinned fog to 72Hz). Previous round for
    reference: no precip 145/7.5, loud rain 143/8.6, fog 143/8.3,
    old 2-sheet tiled immersive 143/9.5.
+   Glass v3 round (graded backdrop, rims, bevels on the same glass
+   surfaces; no new backdrop-filter elements): no precip 145 / 7.5,
+   WebGL rain 143 / 8.1, WebGL fog 145 / 7.5. The longer filter list
+   rides the existing per-element readback for free.
    ============================================================ */
 
 const VERT = "attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0.0,1.0);}";
