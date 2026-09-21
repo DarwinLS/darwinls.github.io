@@ -296,13 +296,10 @@ function mountCursor() {
    are needed. Nothing is hidden unless motion is allowed.
    ============================================================ */
 const REVEAL = [
-    ".what .section-inner > *", ".featured-inner", ".work-peek .peek-head",
-    ".peek-card", ".about-teaser .teaser-inner > *", ".pull-quote",
-    ".section-block > .block-heading", ".tl-node", ".skill-group",
-    ".cs-section", ".cs-demo", ".project-card", ".foliage-divider",
-    ".contact-layout > *",
+    ".band > .panel", ".page > .glass", ".page > .glass-paper",
+    ".page > figure", ".nav-cards", ".tl-node",
 ];
-const STAGGER = [".pillars", ".tech-stack", ".feature-points", ".peek-grid"];
+const STAGGER = [".grid-3", ".grid-2", ".stats"];
 
 function mountReveals() {
     /* Coarse pointers never hide-for-reveal: on Android fling scrolls

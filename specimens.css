@@ -1,0 +1,238 @@
+/* ============================================================
+   SPECIMENS for the design case studies.
+   A specimen rebuilds a piece of the Veraflux product (a badge, a
+   sentence, a list row) from the exact values in its commits, so a
+   before and an after can sit side by side. Product surfaces use
+   fixed colors on purpose: they show the product, not this site,
+   so they do not follow the portfolio's theme tokens. The stage they
+   sit on (.spec, .spec-pair, .spec-tag) is site UI, in styles.css.
+   ============================================================ */
+
+/* block, not swap: a type specimen shown in a fallback face would
+   demonstrate the wrong letterforms while it loads */
+@font-face {
+    font-family: 'Spec Source Sans 3';
+    font-style: normal;
+    font-weight: 200 900;
+    font-display: block;
+    src: url('/assets/fonts/specimens/source-sans-3-var.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Spec Albert Sans';
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: block;
+    src: url('/assets/fonts/specimens/albert-sans-var.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Spec Onest';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: block;
+    src: url('/assets/fonts/specimens/onest-var.woff2') format('woff2');
+}
+
+/* Rebuilt UI is never interactive */
+.spec-plate, .phone { pointer-events: none; }
+
+/* The product surface */
+.spec-plate {
+    font-family: 'Spec Source Sans 3', system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    background: #ffffff;
+    color: #1f1f1c;
+    border: 1px solid #e3e3de;
+    border-radius: 10px;
+    padding: 1rem 1.15rem;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+}
+.spec-plate p { margin: 0; color: inherit; font-size: inherit; line-height: inherit; }
+.spec-plate p + p { margin-top: 0.6rem; }
+
+/* --- Evidence quality badges --- */
+.q-rows { display: grid; gap: 0.55rem; }
+.q-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.q-badge {
+    display: inline-block;
+    font-family: 'Spec Source Sans 3', system-ui, sans-serif;
+    font-size: 12.6px;
+    line-height: 1.4;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) var(--p, 12%), transparent);
+}
+.ratio {
+    font-family: 'Spec Source Sans 3', system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+    color: #5b5b55;
+    white-space: nowrap;
+}
+.ratio-verdict { color: #a83a32; font-weight: 600; }
+
+/* --- Statistic emphasis iterations --- */
+.st-box { font-weight: 600; background: rgba(22, 150, 130, 0.06); padding: 1px 4px; border-radius: 3px; }
+.st-semi { font-weight: 600; font-variant-numeric: tabular-nums; }
+.st-final { font-weight: 500; font-variant-numeric: tabular-nums; }
+.st-phrase { white-space: nowrap; }
+/* Statistic rounds are read for a half-bold detail, so set them large */
+.spec-plate.is-large { font-size: clamp(18px, 2.6vw, 26px); line-height: 1.4; }
+
+/* --- Buttons: brand teal vs brand ink --- */
+.spec-btn {
+    display: inline-block;
+    font-family: 'Spec Source Sans 3', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: #ffffff;
+    background: var(--c);
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+}
+
+/* --- Copy before and after --- */
+.copy-gap { margin-top: 0.6rem; }
+.spec-plate strong { font-weight: 600; color: inherit; }
+.spec-link { color: #077867; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+/* --- Notices at 375px --- */
+.notice-set {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 375px));
+    gap: var(--space-5) var(--space-4);
+    justify-content: center;
+    align-items: start;
+}
+.phone {
+    width: 100%;
+    max-width: 375px;
+    background: #f7f7f4;
+    border: 1px solid #e3e3de;
+    border-radius: 14px;
+    padding: 24px;
+    font-family: 'Spec Source Sans 3', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #1f1f1c;
+}
+.notice {
+    border-radius: 8px;
+    padding: 12px 14px;
+    border: 1px solid;
+}
+.notice + .notice { margin-top: 12px; }
+.notice-title { font-weight: 600; display: block; }
+.notice p { margin: 2px 0 0; }
+.notice-actions { margin-top: 10px; display: flex; gap: 14px; align-items: center; }
+.notice-btn {
+    display: inline-block;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid currentColor;
+}
+.notice.is-error { background: #fdf0ef; border-color: #f0c4bf; color: #8f2c24; }
+.notice.is-warn  { background: #fdf6e7; border-color: #edd9a8; color: #6b4a07; }
+.notice.is-info  { background: #eef5fb; border-color: #c8dcee; color: #1f4f78; }
+.notice p, .notice-title { color: #1f1f1c; }
+.notice.is-squeezed { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; }
+.notice.is-squeezed .notice-actions { margin-top: 0; flex-direction: column; align-items: flex-end; gap: 6px; }
+.notice-support { font-size: 13px; color: #6b6b64; text-decoration: underline; }
+
+/* --- Type specimens --- */
+.type-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    padding: 0.5rem 0;
+}
+.type-row + .type-row { border-top: 1px solid #ecece7; }
+.type-sample { font-size: clamp(24px, 4.2vw, 44px); line-height: 1.2; white-space: nowrap; }
+.type-note { font-family: var(--font-body); font-size: 0.875rem; color: #5b5b55; }
+.ff-albert { font-family: 'Spec Albert Sans', sans-serif; }
+.ff-source { font-family: 'Spec Source Sans 3', sans-serif; }
+.ff-onest { font-family: 'Spec Onest', sans-serif; }
+.tnum { font-variant-numeric: tabular-nums; }
+.pnum { font-variant-numeric: proportional-nums; }
+
+/* --- Scan list states --- */
+.scan-states {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+@media (max-width: 900px) {
+    .scan-states { grid-template-columns: 1fr; }
+}
+.scan-states .spec-plate { font-size: 13px; padding: 0.75rem 0.7rem; }
+.scan-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b6b64;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #ecece7;
+}
+.scan-status { font-size: 13px; line-height: 1.4; color: #3d3d38; margin-bottom: 10px; min-height: 2.8em; }
+.scan-row {
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid #f0f0eb;
+    font-size: 13px;
+}
+.scan-row.is-member { padding-left: 14px; box-shadow: inset 2px 0 0 #dcdcd5; }
+.scan-row.is-blend { grid-template-columns: 18px 1fr; }
+.scan-name { line-height: 1.3; }
+.scan-name small { display: block; font-size: 11.5px; color: #6b6b64; }
+.scan-check {
+    width: 14px; height: 14px;
+    border: 1.5px solid #9a9a93;
+    border-radius: 3px;
+    position: relative;
+}
+.scan-check.is-on::after {
+    content: "";
+    position: absolute;
+    left: 3.5px; top: 0.5px;
+    width: 4px; height: 8px;
+    border: solid #3d3d38;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+}
+.scan-cell { font-size: 13px; color: #3d3d38; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.scan-pending {
+    display: inline-block;
+    width: 56px; height: 12px;
+    border-radius: 4px;
+    background: #efefea;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+    vertical-align: middle;
+}
+.clock { font-variant-numeric: tabular-nums; }
+
+/* --- Section heading row (in-context badge) --- */
+.section-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 0.35rem 0.8rem;
+}
+.tone-num { font-family: Georgia, 'Times New Roman', serif; font-size: 32px; font-weight: 600; line-height: 1; color: var(--c); grid-row: span 2; }
+.spec-section-title { grid-column: 2 / 4; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; font-weight: 600; line-height: 1.2; }
+.spec-section-meta { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5b5b55; }
+.section-row .q-badge { justify-self: start; }

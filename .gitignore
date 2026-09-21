@@ -3,3 +3,6 @@ _perf_results.jsonl
 RESUME_PORTFOLIO_HIGHLIGHTS.md
 LINKEDIN_PROFILE.md
 resume.tex
+_private/
+Darwin_Smith_Infrastructure_Engineer.pdf
+tools/__pycache__/

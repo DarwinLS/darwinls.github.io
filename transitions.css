@@ -25,7 +25,10 @@
 
 /* The frame you carry while walking: header (logo + toggle + links)
    and the valley-floor footer persist across every navigation. */
-.site-header { view-transition-name: vt-nav; }
+/* Named only while a transition runs: a view-transition-name makes the
+   element a backdrop root, which would stop the glass nav (and the phone
+   menu inside it) from frosting the page behind. */
+:root:active-view-transition .site-header { view-transition-name: vt-nav; }
 .site-footer { view-transition-name: vt-footer; }
 
 /* The weather. One shared sky element cross-fades between biomes. */
@@ -38,16 +41,14 @@
 }
 
 /* Signature morph - the Veraflux story grows from a card into a page.
-   Source on Home (feature band) and Projects (flagship card); target
-   is the case-study hero. Same name on different documents = a morph. */
-[data-biome="home"]     .featured-inner { view-transition-name: vt-veraflux-hero; }
-[data-biome="projects"] .flagship-card  { view-transition-name: vt-veraflux-hero; }
-[data-biome="veraflux"] .cs-intro       { view-transition-name: vt-veraflux-hero; }
+   Source on Home (feature band); target is the engineering page intro. Same name on different documents = a morph. */
+[data-biome="home"]     .featured > .panel { view-transition-name: vt-veraflux-hero; }
+[data-biome="veraflux"]:has(.toc a[href="#stack-heading"]) .intro { view-transition-name: vt-veraflux-hero; }
 
 /* Signature morph - the portrait travels from the Home teaser into
    the About lede (circle → rounded square along the way). */
-[data-biome="home"]  .teaser-portrait img { view-transition-name: vt-about-portrait; }
-[data-biome="about"] .about-portrait img  { view-transition-name: vt-about-portrait; }
+[data-biome="home"]  .teaser .portrait img     { view-transition-name: vt-about-portrait; }
+[data-biome="about"] .about-head .portrait img { view-transition-name: vt-about-portrait; }
 
 /* ------------------------------------------------------------
    Snapshot stacking. By default named groups paint above the page
@@ -148,11 +149,9 @@
 :root[data-vt-theme] .sky-backdrop,
 :root[data-vt-theme] .scene-descent,
 :root[data-vt-theme] .vista,
-:root[data-vt-theme] .featured-inner,
-:root[data-vt-theme] .flagship-card,
-:root[data-vt-theme] .cs-intro,
-:root[data-vt-theme] .teaser-portrait img,
-:root[data-vt-theme] .about-portrait img {
+:root[data-vt-theme] .featured > .panel,
+:root[data-vt-theme] .intro,
+:root[data-vt-theme] .portrait img {
     view-transition-name: none;
 }
 /* The bloom envelope is JS-driven; silence the UA default fade on its

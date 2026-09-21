@@ -210,8 +210,16 @@
         }
     }
 }
-/* whole-scene scroll drift (the mountain itself moves with you) */
-@keyframes track-drift-home { to { transform: translateY(-6vh); } }
+/* whole-scene scroll drift (the mountain itself moves with you).
+   Home travels 46vh, not 6vh: at 6vh the backdrop was a still image
+   (measured 54px of travel over 4300px of scroll), so every gap between
+   sections showed the same patch of green and widening them bought
+   nothing. Starting at +22vh also puts sky and high mist behind the hero
+   instead of the near canopy, which is what lets the hero copy sit on the
+   scene without a plate. The start offset is a plain transform in
+   styles.css so it still applies where scroll timelines and animation do
+   not run. */
+@keyframes track-drift-home { from { transform: translateY(22vh); } to { transform: translateY(-24vh); } }
 @keyframes track-drift-vista { to { transform: translateY(-10vh); } }
 
 /* ---------------- FOG BANK DRIFT (fog mode only) ----------------
@@ -229,31 +237,17 @@
 /* Only the NEAREST bank drifts. Measured (144Hz box): animating a bank
    in the MIDDLE of the scene stack forces every layer painted above it
    out of the track's flattened texture, and fog mode pinned to 72Hz
-   regardless of whether one or three banks drifted. sd-f3 sits second
-   from the top, so its drift splits only sd-7 - and the near bank is
-   where sideways motion reads strongest anyway. Same reasoning for the
-   vista banks (one bank each, near the top of their stacks). */
+   regardless of whether one or three banks drifted. So the drift belongs
+   to whichever bank is TOPMOST, and it moved when the stack did: sd-f3
+   was folded in behind the near forest (it was lying over the near canopy
+   and the shrine), which puts sd-f4, the bank pooling on the valley
+   floor, at the top. Sideways motion reads strongest on the near bank
+   anyway. Same reasoning for the vista banks (one bank each, near the top
+   of their stacks). */
 @media (prefers-reduced-motion: no-preference) {
-    [data-intensity="fog"] .sd-f3 { --fb-drift: 38px; animation: fogbank-drift 120s steps(240) infinite alternate; }
+    [data-intensity="fog"] .sd-f4 { --fb-drift: 38px; animation: fogbank-drift 120s steps(240) infinite alternate; }
     [data-intensity="fog"] .vl-f1 { --fb-drift: 28px; animation: fogbank-drift 110s steps(220) infinite alternate; }
 }
-
-/* ---------------- FOLIAGE DRAW-ON-SCROLL ---------------- */
-/* Line-art dividers draw themselves as they enter view. Paths carry
-   pathLength="1" so a single normalized dash animation fits every stroke.
-   Calm / reduced-motion / no view-timeline = fully drawn (static). */
-@supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-        :is([data-intensity="fog"], [data-intensity="rain"]) .foliage-divider path {
-            stroke-dasharray: 1;
-            stroke-dashoffset: 1;
-            animation: foliage-draw linear both;
-            animation-timeline: view();
-            animation-range: entry 5% cover 45%;
-        }
-    }
-}
-@keyframes foliage-draw { to { stroke-dashoffset: 0; } }
 
 /* ---------------- CONTENT REVEALS ---------------- */
 /* ambient.js adds .fx-hidden to below-the-fold .reveal elements, then swaps
@@ -297,28 +291,12 @@
 }
 @keyframes firefly-blink { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.7; } }
 
-/* ---------------- FOCUS BLOOM (contact form) ---------------- */
-.form-group { position: relative; }
-.form-group label {
-    transition: color 0.25s var(--ease-bloom);
-}
-.form-group:focus-within label { color: var(--amber-deep); }
-[data-theme="dark"] .form-group:focus-within label { color: var(--amber); }
-/* The amber focus ring already lives in styles.css; warm it on bloom */
-@media (prefers-reduced-motion: no-preference) {
-    .form-group input,
-    .form-group textarea,
-    .form-group select { transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.35s var(--ease-bloom); }
-}
-
 /* ---------------- REDUCED MOTION HARD STOP ---------------- */
 @media (prefers-reduced-motion: reduce) {
     .fx-haze,
     .fx-rain-move,
     .sd, .vl, .scene-track,
     .fogbank,
-    .firefly,
-    .foliage-divider path { animation: none !important; }
-    .foliage-divider path { stroke-dashoffset: 0 !important; }
+    .firefly { animation: none !important; }
     .reveal.fx-hidden { opacity: 1 !important; transform: none !important; }
 }

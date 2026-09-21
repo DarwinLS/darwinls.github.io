@@ -6,49 +6,58 @@
     var root = document.documentElement;
 
     /* --- Theme toggle (light <-> dark, persisted) ---
-       A same-document View Transition softly dissolves the whole page
-       between light and dark while a faint golden-hour bloom (.fx-dusk)
-       rises and fades, like the sun crossing the horizon. Reduced-motion,
-       soft-GPU, and browsers without the API fall through to the correct
-       instant swap. */
+       First visits follow the OS (no data-theme, CSS light-dark()). A
+       click pins the opposite of what is showing and remembers it.
+       A same-document View Transition softly dissolves the page while
+       a faint golden-hour bloom (.fx-dusk) rises and fades. Reduced
+       motion, soft GPU, and browsers without the API swap instantly. */
     var toggle = document.getElementById("theme-toggle");
     if (toggle) {
         var dusk = document.querySelector(".fx-dusk");
+        var osDark = matchMedia("(prefers-color-scheme: dark)");
+        var isDark = function () {
+            var t = root.dataset.theme;
+            return t ? t === "dark" : osDark.matches;
+        };
+        /* The browser-chrome tint follows the theme actually showing: pin
+           both media variants of theme-color once a choice is stored. */
+        var chrome = document.querySelectorAll('meta[name="theme-color"]');
+        var label = function () {
+            var dark = isDark();
+            toggle.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+            /* the icon shows the current theme, so the tip names the switch */
+            toggle.dataset.tip = dark ? "Switch to light" : "Switch to dark";
+            if (root.dataset.theme) {
+                chrome.forEach(function (m) { m.setAttribute("content", dark ? "#0e1512" : "#edf0ec"); });
+            }
+        };
+        label();
+        if (osDark.addEventListener) osDark.addEventListener("change", label);
 
         var swapTheme = function (next) {
             root.dataset.theme = next;
             try { localStorage.setItem("theme", next); } catch (e) {}
-            toggle.setAttribute(
-                "aria-label",
-                next === "dark" ? "Switch to light theme" : "Switch to dark theme"
-            );
+            label();
         };
 
         toggle.addEventListener("click", function () {
-            var next = root.dataset.theme === "dark" ? "light" : "dark";
+            var next = isDark() ? "light" : "dark";
             var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
             var soft = root.dataset.gpu === "soft";
 
-            /* Instant where a full-page snapshot is unsupported or unwanted
-               (a CPU-composited full-page crossfade would stutter). */
             if (!document.startViewTransition || reduce || soft) {
                 swapTheme(next);
                 return;
             }
 
-            /* Presence flag: names .fx-dusk into the transition (styles.css)
-               and scopes the bloom rules (transitions.css). The page dissolve
-               itself is the API's default root cross-fade. */
             root.dataset.vtTheme = "1";
             var vt = document.startViewTransition(function () {
                 swapTheme(next);
-                /* Lights the bloom only in the NEW snapshot: the pseudo
-                   keeps this warm texture even after we clear live opacity. */
                 if (dusk) dusk.style.opacity = "1";
             });
             vt.ready.then(function () {
-                if (dusk) dusk.style.opacity = "";   /* restore live DOM; pseudo already captured */
                 if (dusk) {
+                    dusk.style.opacity = "";
                     root.animate(
                         { opacity: [0, 0.9, 0] },
                         { duration: 600, easing: "ease-in-out",
@@ -68,7 +77,7 @@
        Pairs with the no-FOUC inline script that sets both before paint. */
     (function () {
         var LEVELS = ["calm", "fog", "rain"];
-        var LABELS = { calm: "Calm", fog: "Fog", rain: "Rain" };
+        var LABELS = { calm: "Calm, off", fog: "Fog", rain: "Rain" };
 
         // Highest level this device should ever run (independent of choice).
         function ceiling() {
@@ -95,16 +104,24 @@
         }
 
         var btn = document.getElementById("intensity-toggle");
+        var said = null;
+        if (btn) {
+            said = document.createElement("span");
+            said.className = "visually-hidden";
+            said.setAttribute("aria-live", "polite");
+            btn.after(said);
+        }
 
-        function apply(pref) {
+        function apply(pref, announce) {
             var eff = clamp(pref);
             root.dataset.pref = pref;
             root.dataset.intensity = eff;
             if (btn) {
-                var msg = "Ambience: " + LABELS[pref];
+                var msg = "Weather effects: " + LABELS[pref];
                 if (eff !== pref) msg += " (limited to " + LABELS[eff] + " on this device)";
-                btn.setAttribute("aria-label", msg + ". Click to change.");
-                btn.setAttribute("title", msg);
+                btn.setAttribute("aria-label", msg);
+                btn.dataset.tip = msg;
+                if (announce && said) said.textContent = msg;
             }
         }
 
@@ -114,7 +131,7 @@
             btn.addEventListener("click", function () {
                 var next = LEVELS[(LEVELS.indexOf(readPref()) + 1) % LEVELS.length];
                 try { localStorage.setItem("intensity", next); } catch (e) {}
-                apply(next);
+                apply(next, true);
             });
         }
 
@@ -171,7 +188,7 @@
             var target = document.querySelector(cue.getAttribute("href"));
             if (!target) return;
             e.preventDefault();
-            var navH = parseFloat(getComputedStyle(root).getPropertyValue("--nav-height")) || 0;
+            var navH = parseFloat(getComputedStyle(document.body).scrollPaddingTop) || parseFloat(getComputedStyle(root).scrollPaddingTop) || 0;
             var from = window.scrollY;
             var to = target.getBoundingClientRect().top + from - navH;
             var dur = 900, t0 = performance.now();
@@ -185,48 +202,73 @@
         });
     }
 
-    /* --- Hero pane specular ---
-       A pointer-lit highlight inside the glass CTAs. Fine hover
-       pointers only, and never under reduced motion; the span is
-       injected here so touch devices and no-JS never carry it. The
-       pointermove writes two custom props consumed by one gradient,
-       so each move is paint-only damage on a small isolated layer. */
-    if (matchMedia("(hover: hover) and (pointer: fine)").matches &&
-        !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        document.querySelectorAll(".hero .btn").forEach(function (btn) {
-            var spec = document.createElement("span");
-            spec.className = "btn-spec";
-            spec.setAttribute("aria-hidden", "true");
-            btn.appendChild(spec);
-            var rect = null;
-            btn.addEventListener("pointerenter", function () {
-                rect = btn.getBoundingClientRect();
-            });
-            btn.addEventListener("pointermove", function (e) {
-                if (!rect) rect = btn.getBoundingClientRect();
-                btn.style.setProperty("--mx", (e.clientX - rect.left).toFixed(1) + "px");
-                btn.style.setProperty("--my", (e.clientY - rect.top).toFixed(1) + "px");
-            }, { passive: true });
+    /* --- Copy-to-clipboard buttons ([data-copy]) ---
+       The mailto link beside each button stays the no-JS path. The
+       button's label span confirms, and a polite live region says it. */
+    document.querySelectorAll("[data-copy]").forEach(function (btn) {
+        var text = btn.querySelector(".copy-label") || btn;
+        var label = text.textContent;
+        var timer = 0;
+        var live = document.createElement("span");
+        live.className = "visually-hidden";
+        live.setAttribute("aria-live", "polite");
+        btn.after(live);
+        btn.addEventListener("click", function () {
+            var done = function (ok) {
+                text.textContent = ok ? "Copied" : "Copy failed";
+                live.textContent = ok ? "Email address copied" : "Could not copy the email address";
+                btn.dataset.state = ok ? "copied" : "failed";
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    text.textContent = label;
+                    live.textContent = "";
+                    delete btn.dataset.state;
+                }, 2000);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(btn.getAttribute("data-copy")).then(function () { done(true); }, function () { done(false); });
+            } else {
+                done(false);
+            }
         });
-    }
+    });
 
     /* --- Mobile hamburger drawer --- */
     var burger = document.getElementById("nav-burger");
     if (burger) {
-        var setMenu = function (open) {
+        /* The closed sheet is visibility:hidden (styles.css), so its links
+           leave the tab order. Opening moves focus to the first link;
+           tabbing out of the sheet, Escape, or a tap outside closes it. */
+        var menu = document.getElementById("nav-links");
+        var setMenu = function (open, focusFirst) {
             root.dataset.menu = open ? "open" : "";
             burger.setAttribute("aria-expanded", String(open));
-            burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+            if (open && focusFirst && menu) {
+                var first = menu.querySelector("a");
+                if (first) setTimeout(function () { first.focus(); }, 30);
+            }
         };
-        burger.addEventListener("click", function () {
-            setMenu(root.dataset.menu !== "open");
+        burger.setAttribute("aria-label", "Menu");
+        burger.addEventListener("click", function (e) {
+            setMenu(root.dataset.menu !== "open", true);
         });
+        if (menu) {
+            menu.addEventListener("focusout", function (e) {
+                if (root.dataset.menu !== "open") return;
+                var to = e.relatedTarget;
+                if (to && (menu.contains(to) || to === burger)) return;
+                setMenu(false);
+            });
+        }
         // Close on link tap or Escape
         document.querySelectorAll("#nav-links a").forEach(function (a) {
             a.addEventListener("click", function () { setMenu(false); });
         });
         document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape" && root.dataset.menu === "open") setMenu(false);
+            if (e.key === "Escape" && root.dataset.menu === "open") {
+                setMenu(false);
+                burger.focus();
+            }
         });
         // Close on any tap outside the panel (the dim scrim is a header
         // pseudo-element, so scrim taps land here too).
@@ -236,9 +278,36 @@
             setMenu(false);
         });
         // Auto-close when the viewport grows past the drawer breakpoint.
-        var wide = matchMedia("(min-width: 821px)");
+        var wide = matchMedia("(min-width: 721px)");
         var onWide = function () { if (wide.matches) setMenu(false); };
         if (wide.addEventListener) wide.addEventListener("change", onWide);
         else if (wide.addListener) wide.addListener(onWide);
+    }
+
+    /* --- Resume menu --- */
+    /* The markup is a <details>, so opening, closing, the keyboard and the
+       no-script case are already handled. This adds only what a menu is
+       expected to do beyond a disclosure: Escape, a click outside, focus
+       leaving, and closing with the drawer that contains it. */
+    var resumeMenu = document.querySelector(".nav-menu > details");
+    if (resumeMenu) {
+        var closeResume = function (refocus) {
+            if (!resumeMenu.open) return;
+            resumeMenu.open = false;
+            if (refocus) {
+                var s = resumeMenu.querySelector("summary");
+                if (s) s.focus();
+            }
+        };
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") closeResume(true);
+        });
+        document.addEventListener("click", function (e) {
+            if (!resumeMenu.contains(e.target)) closeResume(false);
+        });
+        resumeMenu.addEventListener("focusout", function (e) {
+            if (!resumeMenu.contains(e.relatedTarget)) closeResume(false);
+        });
+        if (burger) burger.addEventListener("click", function () { closeResume(false); });
     }
 })();
