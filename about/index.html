@@ -146,10 +146,10 @@
                             <ul class="list">
                                 <li>Designed and built a pre-launch product that turns PubMed studies into cited supplement reports for a given age group, sex, and goal, with React and TypeScript, Node and Express, Python and FastAPI, PostgreSQL, and Stripe.</li>
                                 <li>Built a retrieval-augmented pipeline with 13 LLM stages across Gemini and Claude, where a server check drops any citation outside the studies the model was given.</li>
-                                <li>Run it as two Railway services with staging copies. Added request deadlines and load shedding, traced a deploy crash loop to an exhausted Postgres pooler, and made the production schema rebuildable from its migrations.</li>
+                                <li>Run it as two Railway services, each with a staging twin: the server owns the one Postgres database, and the pipeline is given no database credentials at all. Added request deadlines and load shedding, traced a deploy crash loop to an exhausted Postgres pooler, and made the production schema rebuildable from its migrations.</li>
                                 <li>Wrote quota claims as single atomic SQL statements with refunds, and made Stripe's 9 webhook event types idempotent.</li>
                                 <li>Designed the report reading experience, the label scan flow, and error states that say what happened. Fixed 209 light-mode contrast failures and wrote a content guide for 8 contexts, from sales pages to legal copy.</li>
-                                <li>Turned type, spacing, radius, color, and motion rules into 13 CI checks, part of 25 check scripts that gate every change.</li>
+                                <li>Turned type, spacing, radius, color, motion, border, stacking, and icon-source rules into 13 CI checks, part of 25 check scripts that gate every change.</li>
                             </ul>
                             <div class="actions tl-foot">
                                 <a class="link-arrow" href="/veraflux/">Engineering</a>

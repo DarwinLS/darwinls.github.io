@@ -136,7 +136,7 @@ CASE_STUDIES = [
         "title": "A scan flow built around the wait",
         "blurb": "Photograph a supplement label and wait minutes for research on every ingredient, with the list staying on screen and a clock instead of a fake progress bar.",
         "img": "thumb-scan", "w": 1200, "h": 750,
-        "alt": "Three versions of the same ingredient list: review, analyzing with an elapsed clock, and results with study counts",
+        "alt": "Three versions of the same ingredient list: review, analyzing with an elapsed clock, and results with a brief per ingredient",
     },
     {
         "url": "/design/writing/", "tag": "Content design",

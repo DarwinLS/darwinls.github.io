@@ -1,0 +1,30 @@
+name: design guard
+
+# The visual system is documented in DESIGN_SYSTEM.md and enforced by
+# tools/design_guard.py. The guard reads only committed files, so this
+# job needs no secrets, no browser and no network.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # the publish-boundary check asks git what is tracked
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run the design guard
+        run: python tools/design_guard.py --verbose

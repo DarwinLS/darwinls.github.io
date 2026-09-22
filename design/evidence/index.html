@@ -150,7 +150,7 @@
                         <figcaption>An illustrative section heading, rebuilt with the product's badge colors before and after.</figcaption>
                     </figure>
                     <p>
-                        I replaced the four colors with one teal hue that runs from muted to saturated, so the badge shows how much is known without signaling good or bad news. Opening the file also turned up an accessibility failure: in light mode, all four old badges were below WCAG AA contrast. Each new step was tuned against its own tinted background until it cleared 4.5:1. Of three ramps rendered, a narrow teal range made Limited hard to tell from Moderate, and plum sat too close to the dosage section's violet. I picked the wide teal ramp.
+                        I replaced the four colors with one teal that runs from neutral gray up to fully saturated, so the badge shows how much is known without signaling good or bad news. Opening the file also turned up an accessibility failure: in light mode, all four old badges were below WCAG AA contrast. Each new step was tuned against its own tinted background until it cleared 4.5:1. Of three ramps rendered, a narrow teal range made Limited hard to tell from Moderate, and plum sat too close to the dosage section's violet. I picked the wide teal ramp.
                     </p>
                     <figure class="spec">
                         <div class="spec-pair">
@@ -173,7 +173,7 @@
                                 </div>
                             </div>
                         </div>
-                        <figcaption>Badges rebuilt from the product's CSS at the shipped size, in light mode. Contrast was measured on the rendered badges. In dark mode the new badges measure 5.21:1 to 8.50:1.</figcaption>
+                        <figcaption>Badges rebuilt from the product's CSS at the shipped size, in light mode. Contrast was measured on the rendered badges. In dark mode the new badges measure 4.80:1 to 7.74:1.</figcaption>
                     </figure>
                 </div>
             </section>
@@ -240,13 +240,13 @@
                             <div class="spec-item">
                                 <span class="spec-tag is-shipped">Shipped: brand ink, light mode</span>
                                 <div class="spec-plate is-fit"><span class="spec-btn" style="--c:#077867">Try free<span class="visually-hidden"> (on the darker brand ink)</span></span></div>
-                                <p class="spec-note"><span class="ratio-pill is-pass">5.38:1</span> passes AA</p>
+                                <p class="spec-note"><span class="ratio-pill is-pass">5.40:1</span> passes AA</p>
                             </div>
                         </div>
                         <figcaption>White labels on the primary button, rebuilt from the shipped color tokens.</figcaption>
                     </figure>
                     <p>
-                        Darkening the brand color itself was rendered and rejected, since the teal was copied into six files and eleven hard-coded color values. Near-black button labels were rejected too, because dark type fought the teal fill. The fix is a separate text color that is darker in light mode and identical to the brand in dark mode, so dark mode didn't change at all. It moved 93 text declarations, and a lint rule now keeps the brand fill off text.
+                        Darkening the brand color itself was rendered and rejected, since the teal was copied into six files and eleven hard-coded color values. Near-black button labels were rejected too, because dark type fought the teal fill. The fix is a separate text color that is darker in light mode and identical to the brand in dark mode, so nothing dark mode already rendered correctly had to move. It moved 93 text declarations, and a lint rule now keeps the brand fill off text. The one thing dark mode did change was the hover, which had been getting brighter instead of darker.
                     </p>
                 </div>
             </section>
@@ -298,7 +298,7 @@
                     <ul class="list">
                         <li>Anchoring citations to individual sentences was planned, but the pipeline cites per paragraph, so the front end would have had to guess which sentence came from which study. On a health product that risks crediting the wrong study, so it went back to the pipeline as an open question, and only sorting citation numbers shipped.</li>
                         <li>Long sections collapse to a one-sentence preview, which I chose over showing everything expanded. On a demo report that took the page from 14,524px to 5,149px tall. The preview stays readable by screen readers, since it's the only content they get while a section is collapsed.</li>
-                        <li>On the Safety row, "Strong" could mean strong evidence of safety or strong evidence of risk. It now reads "Strong Data", at four places including both PDF versions.</li>
+                        <li>On the Safety row, "Strong" could mean strong evidence of safety or strong evidence of risk. It now reads "Strong Data", at five places: both report headers, the home page's example report, and the PDF's safety chip and table of contents.</li>
                     </ul>
                 </div>
             </section>

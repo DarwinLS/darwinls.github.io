@@ -140,8 +140,8 @@
                                 <p class="scan-status">Confirm what we read, then we pull the research on each one.</p>
                                 <div class="scan-head"><span>On this label</span><span>2 ingredients</span></div>
                                 <div class="scan-row is-blend"><span></span><span class="scan-name">Cellular Longevity Blend<small>1,150 mg total, individual amounts not printed</small></span></div>
-                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">Resveratrol<small>Dose not disclosed</small></span><span class="scan-cell"></span></div>
-                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">BPC-157<small>Dose not disclosed</small></span><span class="scan-cell"></span></div>
+                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">Resveratrol<small>In blend - 1,150 mg total</small></span><span class="scan-cell"></span></div>
+                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">BPC-157<small>In blend - 1,150 mg total</small></span><span class="scan-cell"></span></div>
                             </div>
                         </div>
                         <div class="spec-item">
@@ -150,8 +150,8 @@
                                 <p class="scan-status">Analyzing 2 ingredients &middot; <span class="clock">0:07</span> elapsed</p>
                                 <div class="scan-head"><span>On this label</span><span>2 ingredients</span></div>
                                 <div class="scan-row is-blend"><span></span><span class="scan-name">Cellular Longevity Blend<small>1,150 mg total, individual amounts not printed</small></span></div>
-                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">Resveratrol<small>Dose not disclosed</small></span><span class="scan-cell"><span class="scan-pending" role="img" aria-label="Waiting for results"></span></span></div>
-                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">BPC-157<small>Dose not disclosed</small></span><span class="scan-cell"><span class="scan-pending" role="img" aria-label="Waiting for results"></span></span></div>
+                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">Resveratrol<small>In blend - 1,150 mg total</small></span><span class="scan-cell"><span class="scan-pending" role="img" aria-label="Waiting for results"></span></span></div>
+                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">BPC-157<small>In blend - 1,150 mg total</small></span><span class="scan-cell"><span class="scan-pending" role="img" aria-label="Waiting for results"></span></span></div>
                             </div>
                         </div>
                         <div class="spec-item">
@@ -160,12 +160,12 @@
                                 <p class="scan-status">Saved to your shelf. Open any ingredient for its brief.</p>
                                 <div class="scan-head"><span>On this label</span><span>2 ingredients</span></div>
                                 <div class="scan-row is-blend"><span></span><span class="scan-name">Cellular Longevity Blend<small>1,150 mg total, individual amounts not printed</small></span></div>
-                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">Resveratrol<small>Dose not disclosed</small></span><span class="scan-cell">2,436 studies &rsaquo;</span></div>
-                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">BPC-157<small>Dose not disclosed</small></span><span class="scan-cell">6 studies &rsaquo;</span></div>
+                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">Resveratrol<small>No studies yet</small></span><span class="scan-cell"></span></div>
+                                <div class="scan-row is-member"><span class="scan-check is-on"><span class="visually-hidden">Checked</span></span><span class="scan-name">BPC-157<small>No studies yet</small></span><span class="scan-cell"></span></div>
                             </div>
                         </div>
                     </div>
-                    <figcaption>One list in its three states, rebuilt from the list's row components. The label and study counts are the sample label shown on veraflux.org.</figcaption>
+                    <figcaption>One list in its three states, rebuilt from the list's row components. The blend name, total, and ingredient names are from the sample label on veraflux.org; the specimen shows two of its five blend members, in the state the product uses when an ingredient has too little research to brief.</figcaption>
                 </figure>
             </section>
 
@@ -177,10 +177,10 @@
                 </div>
                 <div class="rail-body">
                     <p>
-                        The briefs come back from one long request, so there's no real percentage to show. The old loader was an animated braid with rotating messages, and after about a minute and a half it held on "Finalizing your briefs..." for as long as the request took. The braid looked the same at five seconds and at four and a half minutes, so it couldn't tell anyone the one thing they want to know after ninety seconds: whether it's stuck.
+                        The briefs come back from one long request, so there's no real percentage to show. The old loader was an animated braid with rotating messages, and after about a minute and a half it held on "Finalizing your briefs..." for as long as the request took. The braid looked the same at five seconds and at four minutes forty, so it couldn't tell anyone the one thing they want to know after ninety seconds: whether it's stuck.
                     </p>
                     <p>
-                        I replaced it with an elapsed clock in the list header, "Analyzing 8 ingredients &middot; 0:07 elapsed", and a line saying the page can be closed because each brief is saved as it finishes. A clock that keeps counting shows the page is still working. The pending cells are plain recessed shapes with no shimmer, since shimmering rows would suggest each brief is loading separately when all of them come from one request.
+                        I replaced it with an elapsed clock in the list header, "Analyzing 2 ingredients &middot; 0:07 elapsed". The line about closing the page, which the old loader already carried, moved onto the list with it: each brief is saved as it finishes. A clock that keeps counting shows the page is still working. The pending cells are plain recessed shapes with no shimmer, since shimmering rows would suggest each brief is loading separately when all of them come from one request.
                     </p>
                 </div>
             </section>
