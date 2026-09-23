@@ -56,7 +56,8 @@ uniform vec3 u_fogColor;
 uniform float u_wind;
 uniform float u_alpha;     /* fog master opacity */
 uniform float u_fogMix;    /* fog showing through in rain mode */
-uniform float u_far;       /* far rain layer on/off (phones drop it) */
+uniform float u_far;       /* far rain layer weight */
+uniform float u_gain;      /* rain presence; >1 on coarse pointers, see mount() */
 uniform float u_master;    /* ramp: overall opacity 0..1 (fade in/out) */
 uniform float u_reveal;    /* ramp: directional front 0..1 (rain fills top-down, fog rolls in from the sides) */
 
@@ -115,6 +116,7 @@ void main() {
         float r = streaks(st, 90.0, 5.0, 0.8, 0.24, 0.10, 0.30, 11.0) * u_far * 0.10
                 + streaks(st, 55.0, 3.4, 1.3, 0.27, 0.12, 0.28, 23.0) * 0.16
                 + streaks(st, 30.0, 2.2, 2.0, 0.32, 0.14, 0.25, 37.0) * 0.24;
+        r *= u_gain;
         float f = 0.0;
         if (u_fogMix > 0.0) f = fogAmt(st, uv) * u_fogMix;
         /* Curtain fills from the top: streaks appear where the reveal
@@ -247,17 +249,53 @@ function mount(mode, coarse, dbg, onDegrade) {
         loc = {};
         for (const u of ["u_res", "u_time", "u_mode", "u_rainColor",
             "u_fogColor", "u_wind", "u_alpha", "u_fogMix", "u_far",
-            "u_master", "u_reveal"]) {
+            "u_master", "u_reveal", "u_gain"]) {
             loc[u] = gl.getUniformLocation(prog, u);
         }
         gl.uniform1f(loc.u_mode, isRain ? 1 : 0);
         gl.uniform1f(loc.u_wind, 0.12);
         gl.uniform1f(loc.u_alpha, 0.28);
         gl.uniform1f(loc.u_fogMix, 0);
-        /* Phones keep the far layer at reduced weight: it carries most
-           of the spatial coverage, and dropping it outright left rain
-           visibly patchy on narrow portrait viewports. */
-        gl.uniform1f(loc.u_far, coarse ? 0.7 : 1);
+        /* The far layer carries most of the spatial coverage, and it is
+           the cheapest of the three: the same streaks() call runs in the
+           same fragment whatever this weight is, so scaling it down buys
+           no frame time at all - the multiply happens either way. It was
+           0.7 on coarse pointers as a phone budget saving that saved
+           nothing, so it is now one weight for every device. On its own
+           this is worth about 3% of the rain's mean contribution; it is
+           tidiness, not the fix. The fix is u_gain below. */
+        gl.uniform1f(loc.u_far, 1);
+        /* Rain presence. Phones do not lose rain, they lose everywhere
+           rain could be seen. Measured at 390x844 coarse against 1440x900
+           fine, diffing the real page with the dial at calm and at rain
+           (so the film grain, which is in both frames, cancels):
+
+               1440 fine     2.71% of pixels changed, mean delta 1.03
+                390 coarse   1.64%                    mean delta 0.23
+
+           The rain layer itself is near identical at the two sizes -
+           isolated over a flat backdrop it measures 0.235 against 0.334,
+           and the streak pitch is h/cols, which barely moves. What moves
+           is the backdrop. A coarse pointer also gets, all from the
+           stylesheet and all deliberate:
+
+             body::after  film grain        display: none
+             .fx-haze     atmospheric haze  display: none
+             tier 3       the large glass panels drop backdrop-filter and
+                          become an ~84% opaque paper tint
+
+           so the rain is left with no companion layers and, behind a
+           full-bleed column with 16px gutters, almost no visible canvas.
+           It is still drawn; there is just nowhere left to see it.
+
+           Raising the gain on coarse buys back the contrast that the
+           smaller canvas took away. 1.9 lands the phone at a mean delta
+           of 0.41 (1.64% -> 2.09% of pixels changed) against a desktop
+           that does not move at all, so the phone still sits at under
+           half the desktop figure and rain stays what the shader comment
+           above asks for - atmosphere behind the content, not something
+           you watch. */
+        gl.uniform1f(loc.u_gain, coarse ? 1.9 : 1);
         tint();
         return true;
     }

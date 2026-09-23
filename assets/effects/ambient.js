@@ -191,8 +191,18 @@ function mountRainCSS() {
     let sheets = [SHEETS[1]];
     if (dbg && dbg.sheets) sheets = SHEETS.slice(0, dbg.sheets);
     const tileH = (dbg && dbg.tileH) || 512;
-    /* quiet-ambience diet, matching the WebGL tuning */
-    const densityMul = coarse ? 0.5 : 0.7;
+    /* Quiet-ambience diet, matching the WebGL tuning. The streaks are
+       drawn ONCE into a 512-wide tile and from then on the compositor
+       only scrolls that image, so density costs tile-generation time
+       (single-digit ms, once) and nothing per frame.
+
+       Coarse pointers get MORE, not less, for the same reason precip.js
+       raises u_gain there: a phone keeps the rain but loses the film
+       grain, the haze and the translucency of the large panels, so the
+       same rain has far less visible canvas to land on. The old 0.5 cut
+       it on exactly the screens that could least afford it, and bought
+       no frame budget back. */
+    const densityMul = coarse ? 1.3 : 0.7;
 
     const host = document.createElement("div");
     host.className = "fx-rain is-fixed is-ramp";

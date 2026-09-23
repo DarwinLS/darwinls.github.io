@@ -3132,6 +3132,100 @@ main, .page, .toc, .toc ol { min-width: 0; }
     }
 }
 /* ==========================================================================
+   REFINEMENTS from the handset audit (round 6)
+
+   Three faults that appear on a phone and at no desktop width, found by
+   reading the computed styles off a 390x844 coarse-pointer context rather
+   than by looking at a screenshot. Every number below is a measurement;
+   they are written down so the next person can re-derive them instead of
+   trusting the prose. (The fourth fault in that round, rain that does not
+   read on a small screen, is not a stylesheet problem: it lives in
+   assets/effects/precip.js and assets/effects/ambient.js.)
+   ========================================================================== */
+
+/* ---------- 1. the nav island drew a second, squarer pane ----------
+   .navbar-glass pins itself to --r-pill, but the phone block
+
+       @media (max-width: 600px) { .glass, .glass-paper { --r: var(--r-md); } }
+
+   is later in the sheet and carries the same specificity (0,1,0), so below
+   600px --r resolved to 16px on the nav bar. The pane's own corner is
+   written literally and stayed a pill, but the back-face rim is derived:
+
+       .glass::after { border-radius: calc(var(--r) - var(--g-back-inset)); }
+
+   so it became a 13px-radius, 3px-inset rounded rectangle drawn inside a
+   60px-tall pill. Measured at 390px before this rule, against 1440px:
+
+       390px    .navbar-glass 999px   ::after  13px   <- the ghost
+      1440px    .navbar-glass 999px   ::after 996px
+
+   Restating the token after the phone block puts both arcs back on one
+   curve. This sets a token, not a radius, so no other width moves. */
+.navbar-glass { --r: var(--r-pill); }
+
+
+/* ---------- 2. the platform tap flash ----------
+   Every control answered a touch with the platform default
+   -webkit-tap-highlight-color, measured rgba(51, 181, 229, 0.4) on the
+   coarse-pointer context and inherited from the root down. It paints the
+   element's bounding box and ignores border-radius, so a pill button and a
+   round icon button both flashed as blue squares. Nothing in the sheet had
+   ever set the property.
+
+   The site already draws its own press states nearly everywhere: .btn sinks
+   onto its wall, .icon-btn scales to 0.92, nav links, index links and cards
+   take a fill. The exception was the text-link family, which had :hover but
+   no :active at all, so on a touch screen the platform flash was its only
+   feedback. Those get a press state here in the language they already use
+   (the underline they reveal on hover), and then the flash goes. */
+:root { -webkit-tap-highlight-color: transparent; }
+
+/* underline links: the hover signal, brought forward to the press */
+.link:active {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+}
+.link-arrow:active { text-decoration-color: currentColor; }
+.footer-email:active,
+.footer-links a:active { text-decoration-color: currentColor; }
+/* the resume menu is a nav link wearing a disclosure triangle, so it
+   presses like one (.nav-links a:active, .toc a:active) */
+.nav-menu > details > summary:active { background: var(--well-fill); }
+
+
+/* ---------- 3. the footer copyright sat on the shoreline ----------
+   padding-top was a flat 0.60 of --footer-scene-h, and --footer-scene-h is
+   clamp(130px, 18vw, 260px), which is pinned to its 130px floor for every
+   viewport narrower than 722px. Water in the frame starts at 0.485 of the
+   frame height (the svg's water gradient runs y 118 -> 150 of a 260-unit
+   viewBox), so the open water between the waterline and the top of the
+   first line of text (padding-top plus the copyright's own 8px margin) was:
+
+      1440px   frame 259   waterline 126   text at 164   ->  38px
+       390px   frame 130   waterline  63   text at  86   ->  23px
+
+   and even those are flattering to the phone, because
+   preserveAspectRatio="slice" scales by the larger ratio, which is the
+   height one on a narrow box: the art is drawn at half scale into a 390px
+   box against full scale into a 1440px box, so every rock and reed is close
+   to twice as large relative to the frame. 23px put the copyright in among
+   the reeds.
+
+   Replacing the ratio with a line through (130 -> 102) and (260 -> 156),
+   which is 0.42h + 47:
+
+      1440px   padding 155.9   text at 164   ->  38px   (was 38, unmoved)
+       390px   padding 101.6   text at 110   ->  47px   (was 23)
+
+   The phone deliberately ends up with more open water than the desktop
+   rather than the same amount, because of that 2x difference in how large
+   the shoreline is drawn: equal pixel clearance still reads as crowded when
+   the reeds beside it are twice the size. No breakpoint is added; the
+   ratchet in tools/design_guard.py counts distinct width thresholds and
+   this is a calc, not a query. */
+.site-footer { padding-top: calc(var(--footer-scene-h) * 0.42 + 47px); }
+/* ==========================================================================
    FALLBACK TIERS
    1. refraction (Chromium, glass.js sets --refract)  - above
    2. optics with blur (other browsers)               - above
